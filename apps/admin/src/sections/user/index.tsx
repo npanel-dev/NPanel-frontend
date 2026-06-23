@@ -1,0 +1,573 @@
+import { useQuery } from "@tanstack/react-query";
+import { Link, useSearch } from "@tanstack/react-router";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@workspace/ui/components/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
+import { ScrollArea } from "@workspace/ui/components/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@workspace/ui/components/sheet";
+import { Switch } from "@workspace/ui/components/switch";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@workspace/ui/components/tabs";
+import { ConfirmButton } from "@workspace/ui/composed/confirm-button";
+import { Icon } from "@workspace/ui/composed/icon";
+import {
+  ProTable,
+  type ProTableActions,
+} from "@workspace/ui/composed/pro-table/pro-table";
+import {
+  // getUserGroupList,
+  previewUserNodes,
+} from "@workspace/ui/services/admin/group";
+import {
+  createUser,
+  deleteUser,
+  getUserDetail,
+  getUserList,
+  updateUserBasicInfo,
+} from "@workspace/ui/services/admin/user";
+import { copyText } from "@workspace/ui/utils/clipboard";
+import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import { Display } from "@/components/display";
+import { useSubscribe } from "@/stores/subscribe";
+import { formatDate } from "@/utils/common";
+import { UserDetail } from "./user-detail";
+import UserForm from "./user-form";
+import { AuthMethodsForm } from "./user-profile/auth-methods-form";
+import { BasicInfoForm } from "./user-profile/basic-info-form";
+import { NotifySettingsForm } from "./user-profile/notify-settings-form";
+import UserSubscription from "./user-subscription";
+
+// import EditUserGroupDialog from "./edit-user-group-dialog";
+
+function toNumber(value: number | string | null | undefined) {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+export default function User() {
+  const { t } = useTranslation("user");
+  const [loading, setLoading] = useState(false);
+  const ref = useRef<ProTableActions>(null);
+  const sp = useSearch({ strict: false }) as Record<string, string | undefined>;
+
+  const { subscribes } = useSubscribe();
+
+  // const { data: userGroupsData } = useQuery({
+  //   queryKey: ["userGroups"],
+  //   queryFn: async () => {
+  //     const { data } = await getUserGroupList({ page: 1, size: 1000 });
+  //     return data.data?.list || [];
+  //   },
+  // });
+
+  const initialFilters = {
+    search: sp.search || undefined,
+    user_id: sp.user_id || undefined,
+    subscribe_id: sp.subscribe_id || undefined,
+    user_subscribe_id: sp.user_subscribe_id || undefined,
+    short_code: sp.short_code || undefined,
+    // user_group_id: sp.user_group_id || undefined,
+  };
+
+  return (
+    <ProTable<API.User, API.GetUserListParams>
+      action={ref}
+      actions={{
+        render: (row) => [
+          <ProfileSheet
+            key="profile"
+            onUpdated={() => ref.current?.refresh()}
+            userId={row.id}
+          />,
+          <SubscriptionSheet key="subscription" userId={row.id} />,
+          <PreviewNodesDialog key="preview-nodes" userId={row.id} />,
+          <ConfirmButton
+            cancelText={t("cancel", "Cancel")}
+            confirmText={t("confirm", "Confirm")}
+            description={t(
+              "deleteDescription",
+              "This action cannot be undone."
+            )}
+            key="edit"
+            onConfirm={async () => {
+              await deleteUser({ id: row.id });
+              toast.success(t("deleteSuccess", "Deleted successfully"));
+              ref.current?.refresh();
+            }}
+            title={t("confirmDelete", "Confirm Delete")}
+            trigger={
+              <Button variant="destructive">{t("delete", "Delete")}</Button>
+            }
+          />,
+          <DropdownMenu key="more" modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">{t("more", "More")}</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link
+                  search={{ user_id: String(row.id) }}
+                  to="/dashboard/order"
+                >
+                  {t("orderList", "Order List")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  search={{ user_id: String(row.id) }}
+                  to="/dashboard/log/login"
+                >
+                  {t("loginLogs", "Login Logs")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  search={{ user_id: String(row.id) }}
+                  to="/dashboard/log/balance"
+                >
+                  {t("balanceLogs", "Balance Logs")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  search={{ user_id: String(row.id) }}
+                  to="/dashboard/log/commission"
+                >
+                  {t("commissionLogs", "Commission Logs")}
+                </Link>
+              </DropdownMenuItem>
+              {/* TODO: Uncomment this when gift_amount is implemented */}
+              {/* <DropdownMenuItem asChild>
+                <Link
+                  search={{ user_id: String(row.id) }}
+                  to="/dashboard/log/gift"
+                >
+                  {t("giftLogs", "Gift Logs")}
+                </Link>
+              </DropdownMenuItem> */}
+            </DropdownMenuContent>
+          </DropdownMenu>,
+        ],
+      }}
+      columns={[
+        {
+          id: "enable",
+          accessorKey: "enable",
+          header: t("enable", "Enable"),
+          cell: ({ row }) => (
+            <Switch
+              defaultChecked={row.getValue("enable")}
+              onCheckedChange={async (checked) => {
+                const {
+                  auth_methods: _auth_methods,
+                  user_devices: _user_devices,
+                  enable_balance_notify: _enable_balance_notify,
+                  enable_login_notify: _enable_login_notify,
+                  enable_subscribe_notify: _enable_subscribe_notify,
+                  enable_trade_notify: _enable_trade_notify,
+                  updated_at: _updated_at,
+                  created_at: _created_at,
+                  id,
+                  ...rest
+                } = row.original;
+                await updateUserBasicInfo({
+                  user_id: id,
+                  ...rest,
+                  enable: checked,
+                } as unknown as API.UpdateUserBasiceInfoRequest);
+                toast.success(t("updateSuccess", "Updated successfully"));
+                ref.current?.refresh();
+              }}
+            />
+          ),
+        },
+        {
+          id: "id",
+          accessorKey: "id",
+          header: "ID",
+        },
+        /* {
+          id: "deleted_at",
+          accessorKey: "deleted_at",
+          header: t("isDeleted", "Deleted"),
+          cell: ({ row }) => {
+            const deletedAt = toNumber(
+              row.getValue("deleted_at") as number | string | undefined
+            );
+            return deletedAt ? (
+              <Badge variant="destructive">{t("deleted", "Deleted")}</Badge>
+            ) : (
+              <Badge variant="outline">{t("normal", "Normal")}</Badge>
+            );
+          },
+        }, */
+        {
+          id: "auth_methods",
+          accessorKey: "auth_methods",
+          header: t("userName", "Username"),
+          cell: ({ row }) => {
+            const method = row.original.auth_methods?.[0];
+            const identifier = method?.auth_identifier ?? "";
+            return (
+              <div className="flex min-w-0 max-w-[260px] items-center gap-0.5">
+                <Badge
+                  className="mr-0.5 shrink-0 uppercase"
+                  title={method?.verified ? t("verified", "Verified") : ""}
+                >
+                  {method?.auth_type}
+                </Badge>
+                <div className="flex min-w-0 flex-1 items-center gap-px">
+                  <span className="min-w-0 truncate">{identifier}</span>
+                  {identifier ? (
+                    <button
+                      className="inline-flex size-6 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          await copyText(identifier);
+                          toast.success(
+                            t("copySuccess", "Copied successfully")
+                          );
+                        } catch {
+                          toast.error(t("copyFailed", "Copy failed"));
+                        }
+                      }}
+                      title={t("copyUsername", "Copy username")}
+                      type="button"
+                    >
+                      <Icon className="size-3.5" icon="mdi:content-paste" />
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            );
+          },
+        },
+        {
+          id: "balance",
+          accessorKey: "balance",
+          header: t("balance", "Balance"),
+          cell: ({ row }) => (
+            <Display
+              type="currency"
+              value={toNumber(row.getValue("balance") as number | string)}
+            />
+          ),
+        },
+        /*{
+          id: "gift_amount",
+          accessorKey: "gift_amount",
+          header: t("giftAmount", "Gift Amount"),
+          cell: ({ row }) => (
+            <Display
+              type="currency"
+              value={toNumber(row.getValue("gift_amount") as number | string)}
+            />
+          ),
+        },*/
+        {
+          id: "commission",
+          accessorKey: "commission",
+          header: t("commission", "Commission"),
+          cell: ({ row }) => (
+            <Display
+              type="currency"
+              value={toNumber(row.getValue("commission") as number | string)}
+            />
+          ),
+        },
+        {
+          id: "refer_code",
+          accessorKey: "refer_code",
+          header: t("inviteCode", "Invite Code"),
+          cell: ({ row }) => row.getValue("refer_code") || "--",
+        },
+        {
+          id: "referer_id",
+          accessorKey: "referer_id",
+          header: t("referer", "Referer"),
+          cell: ({ row }) => <UserDetail id={row.original.referer_id} />,
+        },
+        {
+          id: "created_at",
+          accessorKey: "created_at",
+          header: t("createdAt", "Created At"),
+          cell: ({ row }) =>
+            formatDate(toNumber(row.getValue("created_at") as number | string)),
+        },
+      ]}
+      header={{
+        title: t("userList", "User List"),
+        toolbar: (
+          <UserForm<API.CreateUserRequest>
+            key="create"
+            loading={loading}
+            onSubmit={async (values) => {
+              setLoading(true);
+              try {
+                await createUser(values);
+                toast.success(t("createSuccess", "Created successfully"));
+                ref.current?.refresh();
+                setLoading(false);
+
+                return true;
+              } catch {
+                setLoading(false);
+
+                return false;
+              }
+            }}
+            title={t("createUser", "Create User")}
+            trigger={t("create", "Create")}
+          />
+        ),
+      }}
+      initialFilters={initialFilters}
+      key={initialFilters.user_id}
+      params={[
+        {
+          key: "subscribe_id",
+          placeholder: t("subscription", "Subscription"),
+          options: [
+            { label: t("all", "All"), value: "" },
+            ...(subscribes?.map((item) => ({
+              label: item.name!,
+              value: String(item.id!),
+            })) || []),
+          ],
+        },
+        {
+          key: "search",
+          placeholder: "Search",
+        },
+        {
+          key: "user_id",
+          placeholder: t("userId", "User ID"),
+        },
+        {
+          key: "user_subscribe_id",
+          placeholder: t("subscriptionId", "Subscription ID"),
+        },
+        {
+          key: "short_code",
+          placeholder: t("shortCode", "Short Code"),
+        },
+      ]}
+      request={async (pagination, filter) => {
+        const { data } = await getUserList({
+          ...pagination,
+          ...filter,
+        });
+        return {
+          list: data.data?.list || [],
+          total: data.data?.total || 0,
+        };
+      }}
+    />
+  );
+}
+
+function ProfileSheet({
+  userId,
+  onUpdated,
+}: {
+  userId: string | number;
+  onUpdated?: () => void;
+}) {
+  const { t } = useTranslation("user");
+  const [open, setOpen] = useState(false);
+  const { data: user, refetch } = useQuery({
+    enabled: open,
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      const { data } = await getUserDetail({ id: String(userId) });
+      return data.data as API.User;
+    },
+  });
+
+  const refetchAll = async () => {
+    await refetch();
+    onUpdated?.();
+    return Promise.resolve();
+  };
+  return (
+    <Sheet onOpenChange={setOpen} open={open}>
+      <SheetTrigger asChild>
+        <Button variant="default">{t("edit", "Edit")}</Button>
+      </SheetTrigger>
+      <SheetContent
+        className="w-[700px] max-w-full md:max-w-screen-lg"
+        side="right"
+      >
+        <SheetHeader>
+          <SheetTitle>
+            {t("userProfile", "User Profile")} · ID: {userId}
+          </SheetTitle>
+        </SheetHeader>
+        {user && (
+          <ScrollArea className="h-[calc(100dvh-140px)] p-2">
+            <Tabs defaultValue="basic">
+              <TabsList className="mb-3">
+                <TabsTrigger value="basic">
+                  {t("basicInfoTitle", "Basic Info")}
+                </TabsTrigger>
+                <TabsTrigger value="notify">
+                  {t("notifySettingsTitle", "Notify Settings")}
+                </TabsTrigger>
+                <TabsTrigger value="auth">
+                  {t("authMethodsTitle", "Auth Methods")}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent className="mt-0" value="basic">
+                <BasicInfoForm refetch={refetchAll} user={user} />
+              </TabsContent>
+              <TabsContent className="mt-0" value="notify">
+                <NotifySettingsForm refetch={refetchAll} user={user} />
+              </TabsContent>
+              <TabsContent className="mt-0" value="auth">
+                <AuthMethodsForm refetch={refetchAll} user={user} />
+              </TabsContent>
+            </Tabs>
+          </ScrollArea>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function SubscriptionSheet({ userId }: { userId: string | number }) {
+  const { t } = useTranslation("user");
+  const [open, setOpen] = useState(false);
+  return (
+    <Sheet onOpenChange={setOpen} open={open}>
+      <SheetTrigger asChild>
+        <Button variant="secondary">{t("subscription", "Subscription")}</Button>
+      </SheetTrigger>
+      <SheetContent className="w-[1000px] max-w-full md:max-w-7xl" side="right">
+        <SheetHeader>
+          <SheetTitle>
+            {t("subscriptionList", "Subscription List")} · ID: {userId}
+          </SheetTitle>
+        </SheetHeader>
+        <div className="mt-2 px-4">
+          <UserSubscription userId={userId} />
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function PreviewNodesDialog({ userId }: { userId: string | number }) {
+  const { t } = useTranslation("user");
+  const [open, setOpen] = useState(false);
+  const { data: previewData, isLoading } = useQuery({
+    enabled: open,
+    queryKey: ["previewUserNodes", userId],
+    queryFn: async () => {
+      const { data } = await previewUserNodes({ user_id: String(userId) });
+      return data.data;
+    },
+  });
+
+  return (
+    <Dialog onOpenChange={setOpen} open={open}>
+      <DialogTrigger asChild>
+        <Button variant="outline">{t("previewNodes", "Preview Nodes")}</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>
+            {t("previewNodes", "Preview Nodes")} · ID: {userId}
+          </DialogTitle>
+        </DialogHeader>
+        {isLoading ? (
+          <div className="py-8 text-center text-muted-foreground">
+            {t("loading", "Loading...")}
+          </div>
+        ) : previewData ? (
+          <div className="space-y-4">
+            <div>
+              <span className="font-medium text-muted-foreground text-sm">
+                {t("availableNodes", "Available Nodes")}:
+              </span>{" "}
+              {previewData.node_groups?.reduce(
+                (sum, group) => sum + (group.nodes?.length || 0),
+                0
+              ) || 0}
+            </div>
+            {previewData.node_groups && previewData.node_groups.length > 0 ? (
+              <div className="max-h-[400px] space-y-4 overflow-y-auto">
+                {previewData.node_groups.map((group) => (
+                  <div key={group.id}>
+                    <h4 className="mb-2 font-semibold text-sm">
+                      {group.name ||
+                        (group.id === "-1"
+                          ? t("subscriptionNodes", "Subscription Nodes")
+                          : group.id === "0"
+                            ? t("publicNodes", "Public Nodes")
+                            : `${t("nodeGroup", "Node Group")} ${group.id}`)}
+                    </h4>
+                    {group.nodes && group.nodes.length > 0 ? (
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="p-2 text-left font-medium">ID</th>
+                            <th className="p-2 text-left font-medium">
+                              {t("name", "Name")}
+                            </th>
+                            <th className="p-2 text-left font-medium">
+                              {t("address", "Address")}
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {group.nodes.map((node) => (
+                            <tr className="border-b" key={node.id}>
+                              <td className="p-2">{node.id}</td>
+                              <td className="p-2">{node.name}</td>
+                              <td className="p-2">
+                                {node.address}:{node.port}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-4 text-center text-muted-foreground">
+                {t("noNodesAvailable", "No nodes available")}
+              </div>
+            )}
+          </div>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -1,0 +1,28 @@
+{
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "confirmDelete": "Confirm Delete",
+  "create": "Create",
+  "createDocument": "Create Document",
+  "createSuccess": "Created successfully",
+  "delete": "Delete",
+  "deleteDescription": "Are you sure you want to delete this document? This action cannot be undone.",
+  "deleteSuccess": "Deleted successfully",
+  "DocumentList": "Document List",
+  "edit": "Edit",
+  "editDocument": "Edit Document",
+  "form": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "content": "Content",
+    "tags": "Tags",
+    "tagsPlaceholder": "Enter tags",
+    "title": "Title",
+    "titlePlaceholder": "Enter document title"
+  },
+  "show": "Show",
+  "tags": "Tags",
+  "title": "Title",
+  "updatedAt": "Updated At",
+  "updateSuccess": "Updated successfully"
+}

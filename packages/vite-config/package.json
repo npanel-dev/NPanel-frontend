@@ -1,0 +1,19 @@
+{
+  "name": "@workspace/vite-config",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./index.ts"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.0.6",
+    "@tanstack/devtools-vite": "^0.3.11",
+    "@tanstack/router-plugin": "^1.132.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "vite": "^7.1.7"
+  },
+  "devDependencies": {
+    "@workspace/typescript-config": "workspace:*"
+  }
+}
