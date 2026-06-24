@@ -37,8 +37,8 @@ import type { FieldConfig } from "./types";
 export function useProtocolFields() {
   const { t } = useTranslation("servers");
 
-  return useMemo<Record<string, FieldConfig[]>>(
-    () => ({
+  return useMemo<Record<string, FieldConfig[]>>(() => {
+    return {
       simnet: [
         {
           name: "ratio",
@@ -345,6 +345,191 @@ export function useProtocolFields() {
           ),
           group: "simnet",
           condition: (p) => !!p.simnet_fallback_enabled,
+        },
+        {
+          name: "simnet_inbound_max_streams_per_session",
+          type: "number",
+          label: t(
+            "simnet_inbound_max_streams_per_session",
+            "Inbound Streams / Session"
+          ),
+          min: 1,
+          defaultValue: 128,
+          group: "simnet",
+        },
+        {
+          name: "simnet_inbound_max_udp_streams_per_session",
+          type: "number",
+          label: t(
+            "simnet_inbound_max_udp_streams_per_session",
+            "Inbound UDP Streams / Session"
+          ),
+          min: 1,
+          defaultValue: 64,
+          group: "simnet",
+        },
+        {
+          name: "simnet_inbound_max_handler_tasks_per_session",
+          type: "number",
+          label: t(
+            "simnet_inbound_max_handler_tasks_per_session",
+            "Handler Tasks / Session"
+          ),
+          min: 1,
+          defaultValue: 128,
+          group: "simnet",
+        },
+        {
+          name: "simnet_stream_event_channel_capacity",
+          type: "number",
+          label: t(
+            "simnet_stream_event_channel_capacity",
+            "Stream Event Channel"
+          ),
+          min: 1,
+          defaultValue: 256,
+          group: "simnet",
+        },
+        {
+          name: "simnet_stream_data_channel_capacity",
+          type: "number",
+          label: t(
+            "simnet_stream_data_channel_capacity",
+            "Stream Data Channel"
+          ),
+          min: 1,
+          defaultValue: 128,
+          group: "simnet",
+        },
+        {
+          name: "simnet_target_dial_timeout_ms",
+          type: "number",
+          label: t("simnet_target_dial_timeout_ms", "Target Dial Timeout"),
+          min: 1,
+          suffix: "ms",
+          defaultValue: 12_000,
+          group: "simnet",
+        },
+        {
+          name: "simnet_target_max_concurrent_dials",
+          type: "number",
+          label: t(
+            "simnet_target_max_concurrent_dials",
+            "Concurrent Target Dials"
+          ),
+          min: 1,
+          defaultValue: 256,
+          group: "simnet",
+        },
+        {
+          name: "simnet_send_window",
+          type: "number",
+          label: t("simnet_send_window", "Send Window"),
+          min: 1,
+          suffix: "bytes",
+          defaultValue: 4_194_304,
+          group: "simnet",
+        },
+        {
+          name: "simnet_recv_window",
+          type: "number",
+          label: t("simnet_recv_window", "Receive Window"),
+          min: 1,
+          suffix: "bytes",
+          defaultValue: 4_194_304,
+          group: "simnet",
+        },
+        {
+          name: "simnet_max_concurrent_streams",
+          type: "number",
+          label: t("simnet_max_concurrent_streams", "H2 Concurrent Streams"),
+          min: 1,
+          defaultValue: 100,
+          group: "simnet",
+        },
+        {
+          name: "simnet_initial_window_size",
+          type: "number",
+          label: t("simnet_initial_window_size", "H2 Initial Window"),
+          min: 1,
+          suffix: "bytes",
+          defaultValue: 65_535,
+          group: "simnet",
+        },
+        {
+          name: "simnet_max_frame_size",
+          type: "number",
+          label: t("simnet_max_frame_size", "H2 Max Frame Size"),
+          min: 1,
+          suffix: "bytes",
+          defaultValue: 16_384,
+          group: "simnet",
+        },
+        {
+          name: "simnet_client_max_concurrent_streams",
+          type: "number",
+          label: t(
+            "simnet_client_max_concurrent_streams",
+            "Client Concurrent Streams"
+          ),
+          min: 1,
+          defaultValue: 32,
+          group: "simnet",
+        },
+        {
+          name: "simnet_client_max_streams_per_session",
+          type: "number",
+          label: t(
+            "simnet_client_max_streams_per_session",
+            "Client Streams / Session"
+          ),
+          min: 1,
+          defaultValue: 512,
+          group: "simnet",
+        },
+        {
+          name: "simnet_client_session_idle_timeout_secs",
+          type: "number",
+          label: t(
+            "simnet_client_session_idle_timeout_secs",
+            "Client Session Idle Timeout"
+          ),
+          min: 1,
+          suffix: "s",
+          defaultValue: 90,
+          group: "simnet",
+        },
+        {
+          name: "simnet_client_max_udp_sessions",
+          type: "number",
+          label: t("simnet_client_max_udp_sessions", "Client UDP Sessions"),
+          min: 1,
+          defaultValue: 64,
+          group: "simnet",
+        },
+        {
+          name: "simnet_egress_block_loopback",
+          type: "switch",
+          label: t("simnet_egress_block_loopback", "Block Loopback Egress"),
+          group: "simnet",
+        },
+        {
+          name: "simnet_egress_block_private",
+          type: "switch",
+          label: t("simnet_egress_block_private", "Block Private Egress"),
+          group: "simnet",
+        },
+        {
+          name: "simnet_egress_block_link_local",
+          type: "switch",
+          label: t("simnet_egress_block_link_local", "Block Link-Local Egress"),
+          group: "simnet",
+        },
+        {
+          name: "simnet_egress_block_metadata",
+          type: "switch",
+          label: t("simnet_egress_block_metadata", "Block Metadata Egress"),
+          group: "simnet",
         },
       ],
       omniflow: [
@@ -791,7 +976,7 @@ export function useProtocolFields() {
           label: t("port", "Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "basic",
         },
         {
@@ -922,7 +1107,7 @@ export function useProtocolFields() {
           label: t("port", "Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "basic",
         },
         {
@@ -1056,7 +1241,7 @@ export function useProtocolFields() {
           label: t("port", "Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "basic",
         },
         {
@@ -1190,7 +1375,7 @@ export function useProtocolFields() {
           label: t("security_server_port", "Reality Server Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "reality",
           condition: (p) => p.security === "reality",
         },
@@ -1369,7 +1554,7 @@ export function useProtocolFields() {
           label: t("port", "Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "basic",
         },
         {
@@ -1487,6 +1672,262 @@ export function useProtocolFields() {
           condition: (p) => p.security === "tls" && p.cert_mode === "dns",
         },
       ],
+      mx: [
+        {
+          name: "ratio",
+          type: "number",
+          label: t("traffic_ratio", "Ratio"),
+          min: 0,
+          step: 0.01,
+          defaultValue: 1,
+          group: "basic",
+        },
+        {
+          name: "port",
+          type: "number",
+          label: t("port", "Port"),
+          min: 1,
+          max: 65_535,
+          placeholder: "443",
+          group: "basic",
+        },
+        {
+          name: "up_mbps",
+          type: "number",
+          label: t("up_mbps", "Upload Bandwidth"),
+          min: 1,
+          placeholder: t(
+            "bandwidth_placeholder",
+            "Enter bandwidth, leave empty for BBR"
+          ),
+          suffix: "Mbps",
+          group: "basic",
+        },
+        {
+          name: "down_mbps",
+          type: "number",
+          label: t("down_mbps", "Download Bandwidth"),
+          min: 1,
+          placeholder: t(
+            "bandwidth_placeholder",
+            "Enter bandwidth, leave empty for BBR"
+          ),
+          suffix: "Mbps",
+          group: "basic",
+        },
+        {
+          name: "transport",
+          type: "select",
+          label: t("transport", "Transport"),
+          options: TRANSPORTS.mx,
+          defaultValue: "tcp",
+          group: "transport",
+        },
+        {
+          name: "security",
+          type: "select",
+          label: t("security", "Security"),
+          options: SECURITY.mx,
+          defaultValue: "tls",
+          group: "security",
+        },
+        {
+          name: "host",
+          type: "input",
+          label: t("host", "Host"),
+          placeholder: "e.g. front.example.com",
+          group: "transport",
+          condition: (p) =>
+            ["websocket", "httpupgrade", "mc1"].includes(p.transport),
+        },
+        {
+          name: "path",
+          type: "input",
+          label: t("path", "Path"),
+          placeholder: "e.g. /mundo",
+          group: "transport",
+          condition: (p) =>
+            ["websocket", "httpupgrade", "mc1"].includes(p.transport),
+        },
+        {
+          name: "service_name",
+          type: "input",
+          label: t("service_name", "Service Name"),
+          group: "transport",
+          condition: (p) => p.transport === "grpc",
+        },
+        {
+          name: "mc1_mode",
+          type: "select",
+          label: t("mc1_mode", "MC1 Mode"),
+          options: ["auto"],
+          defaultValue: "auto",
+          group: "transport",
+          condition: (p) => p.transport === "mc1",
+        },
+        {
+          name: "mc1_cidr_segments",
+          type: "input",
+          label: t("mc1_cidr_segments", "MC1 CIDR Segments"),
+          placeholder: "e.g. 127.0.0.0/24, 10.0.0.0/8",
+          group: "transport",
+          condition: (p) => p.transport === "mc1",
+          gridSpan: 2,
+        },
+        {
+          name: "mundo_username",
+          type: "input",
+          label: t("mundo_username", "Mundo Username"),
+          placeholder: "MundoUser",
+          defaultValue: "MundoUser",
+          group: "transport",
+          condition: (p) => ["mundordp", "mundosql"].includes(p.transport),
+        },
+        {
+          name: "mundo_certificate_fingerprint",
+          type: "input",
+          label: t("mundo_certificate_fingerprint", "Certificate Fingerprint"),
+          placeholder: "sha256:...",
+          group: "transport",
+          condition: (p) => ["mundordp", "mundosql"].includes(p.transport),
+        },
+        {
+          name: "mundo_fake_title",
+          type: "input",
+          label: t("mundo_fake_title", "Fake Title"),
+          placeholder: "Remote Desktop",
+          group: "transport",
+          condition: (p) => ["mundordp", "mundosql"].includes(p.transport),
+        },
+        {
+          name: "mundo_fake_message",
+          type: "textarea",
+          label: t("mundo_fake_message", "Fake Message"),
+          placeholder: "Access denied",
+          group: "transport",
+          condition: (p) => ["mundordp", "mundosql"].includes(p.transport),
+        },
+        {
+          name: "mundo_accept_proxy_protocol",
+          type: "switch",
+          label: t("mundo_accept_proxy_protocol", "Accept Proxy Protocol"),
+          group: "transport",
+          condition: (p) => ["mundordp", "mundosql"].includes(p.transport),
+        },
+        {
+          name: "mundo_use_tls_certificate",
+          type: "switch",
+          label: t("mundo_use_tls_certificate", "Use TLS Certificate"),
+          group: "transport",
+          condition: (p) => ["mundordp", "mundosql"].includes(p.transport),
+        },
+        {
+          name: "sni",
+          type: "input",
+          label: t("security_sni", "SNI"),
+          group: "security",
+          condition: (p) => p.security !== "none",
+        },
+        {
+          name: "allow_insecure",
+          type: "switch",
+          label: t("security_allow_insecure", "Allow Insecure"),
+          group: "security",
+          condition: (p) => p.security !== "none",
+        },
+        {
+          name: "fingerprint",
+          type: "select",
+          label: t("security_fingerprint", "Fingerprint"),
+          options: FINGERPRINTS,
+          defaultValue: "chrome",
+          group: "security",
+          condition: (p) => p.security !== "none",
+        },
+        {
+          name: "reality_server_addr",
+          type: "input",
+          label: t("security_server_address", "Reality Server Address"),
+          placeholder: t(
+            "security_server_address_placeholder",
+            "e.g. 1.2.3.4 or domain"
+          ),
+          group: "reality",
+          condition: (p) => p.security === "reality",
+        },
+        {
+          name: "reality_server_port",
+          type: "number",
+          label: t("security_server_port", "Reality Server Port"),
+          min: 1,
+          max: 65_535,
+          placeholder: "1-65_535",
+          group: "reality",
+          condition: (p) => p.security === "reality",
+        },
+        {
+          name: "reality_private_key",
+          type: "input",
+          label: t("security_private_key", "Reality Private Key"),
+          placeholder: t(
+            "security_private_key_placeholder",
+            "Enter private key"
+          ),
+          group: "reality",
+          generate: {
+            function: generateRealityKeyPair,
+            updateFields: {
+              reality_private_key: "privateKey",
+              reality_public_key: "publicKey",
+            } as Record<string, string>,
+          },
+          condition: (p) => p.security === "reality",
+        },
+        {
+          name: "reality_public_key",
+          type: "input",
+          label: t("security_public_key", "Reality Public Key"),
+          placeholder: t("security_public_key_placeholder", "Enter public key"),
+          group: "reality",
+          condition: (p) => p.security === "reality",
+        },
+        {
+          name: "reality_short_id",
+          type: "input",
+          label: t("security_short_id", "Reality Short ID"),
+          group: "reality",
+          generate: {
+            function: generateRealityShortId,
+          },
+          condition: (p) => p.security === "reality",
+        },
+        {
+          name: "cert_mode",
+          type: "select",
+          label: t("cert_mode", "Certificate Mode"),
+          options: CERT_MODES,
+          defaultValue: "none",
+          group: "security",
+          condition: (p) => p.security === "tls",
+        },
+        {
+          name: "cert_dns_provider",
+          type: "input",
+          label: t("cert_dns_provider", "DNS Provider"),
+          placeholder: "e.g. cloudflare, aliyun",
+          group: "security",
+          condition: (p) => p.security === "tls" && p.cert_mode === "dns",
+        },
+        {
+          name: "cert_dns_env",
+          type: "textarea",
+          label: t("cert_dns_env", "DNS Environment Variables"),
+          placeholder:
+            "CF_DNS_API_TOKEN=1234567890abcdefghijklmnopqrstuvwxyz\nALI_ACCESS_KEY_ID=your_access_key_id\nALI_ACCESS_KEY_SECRET=your_access_key_secret",
+          group: "security",
+          condition: (p) => p.security === "tls" && p.cert_mode === "dns",
+        },
+      ],
       hysteria: [
         {
           name: "ratio",
@@ -1503,14 +1944,14 @@ export function useProtocolFields() {
           label: t("port", "Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "basic",
         },
         {
           name: "hop_ports",
           type: "input",
           label: t("hop_ports", "Hop Ports"),
-          placeholder: t("hop_ports_placeholder", "e.g. 1-65535"),
+          placeholder: t("hop_ports_placeholder", "e.g. 1-65_535"),
           group: "basic",
         },
         {
@@ -1630,7 +2071,7 @@ export function useProtocolFields() {
           label: t("port", "Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "basic",
         },
         {
@@ -1747,7 +2188,7 @@ export function useProtocolFields() {
           label: t("port", "Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "basic",
         },
         {
@@ -1791,7 +2232,7 @@ export function useProtocolFields() {
           label: t("port", "Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "basic",
         },
         {
@@ -1892,7 +2333,7 @@ export function useProtocolFields() {
           label: t("port", "Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "basic",
         },
         {
@@ -1993,7 +2434,7 @@ export function useProtocolFields() {
           label: t("port", "Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "basic",
         },
         {
@@ -2053,7 +2494,7 @@ export function useProtocolFields() {
           label: t("port", "Port"),
           min: 1,
           max: 65_535,
-          placeholder: "1-65535",
+          placeholder: "1-65_535",
           group: "basic",
         },
         {
@@ -2136,7 +2577,6 @@ export function useProtocolFields() {
           condition: (p) => p.cert_mode === "dns",
         },
       ],
-    }),
-    [t]
-  );
+    };
+  }, [t]);
 }

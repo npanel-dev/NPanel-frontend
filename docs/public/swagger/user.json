@@ -6888,6 +6888,33 @@
           },
           "omniflowFallbackWssEnabled": {
             "type": "boolean"
+          },
+          "mc1Mode": {
+            "type": "string"
+          },
+          "mc1CidrSegments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mundoUsername": {
+            "type": "string"
+          },
+          "mundoCertificateFingerprint": {
+            "type": "string"
+          },
+          "mundoFakeTitle": {
+            "type": "string"
+          },
+          "mundoFakeMessage": {
+            "type": "string"
+          },
+          "mundoAcceptProxyProtocol": {
+            "type": "boolean"
+          },
+          "mundoUseTlsCertificate": {
+            "type": "boolean"
           }
         },
         "description": "Protocol represents a server protocol configuration with all fields"
@@ -14923,6 +14950,33 @@
             "type": "boolean"
           },
           "omniflowFallbackWssEnabled": {
+            "type": "boolean"
+          },
+          "mc1Mode": {
+            "type": "string"
+          },
+          "mc1CidrSegments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mundoUsername": {
+            "type": "string"
+          },
+          "mundoCertificateFingerprint": {
+            "type": "string"
+          },
+          "mundoFakeTitle": {
+            "type": "string"
+          },
+          "mundoFakeMessage": {
+            "type": "string"
+          },
+          "mundoAcceptProxyProtocol": {
+            "type": "boolean"
+          },
+          "mundoUseTlsCertificate": {
             "type": "boolean"
           }
         },

@@ -94,6 +94,11 @@ function DynamicField({
                   {...fieldProps}
                   onValueChange={(v) => fieldProps.onChange(v)}
                   placeholder={field.placeholder}
+                  value={
+                    Array.isArray(fieldProps.value)
+                      ? fieldProps.value.join(", ")
+                      : (fieldProps.value ?? "")
+                  }
                   suffix={
                     field.generate ? (
                       field.generate.functions &&
@@ -359,8 +364,37 @@ function isLikelyDomainAddress(address?: string) {
 
 function normalizeProtocolForSubmit(protocol: any, serverAddress?: string) {
   if (!protocol) return protocol;
-  if (protocol.type === "omniflow") {
-    const next = { ...protocol };
+  const nextProtocol = { ...protocol };
+  if (nextProtocol.type === "mx") {
+    if (!Number(nextProtocol.port)) nextProtocol.port = 443;
+    if (!nextProtocol.transport) nextProtocol.transport = "tcp";
+    if (!nextProtocol.security) nextProtocol.security = "tls";
+    if (nextProtocol.transport === "mc1") {
+      if (!nextProtocol.path) nextProtocol.path = "/mc1";
+      if (!nextProtocol.host && serverAddress) {
+        nextProtocol.host = serverAddress;
+      }
+      if (!nextProtocol.mc1_mode) nextProtocol.mc1_mode = "auto";
+      if (typeof nextProtocol.mc1_cidr_segments === "string") {
+        nextProtocol.mc1_cidr_segments = nextProtocol.mc1_cidr_segments
+          .split(",")
+          .map((item: string) => item.trim())
+          .filter(Boolean);
+      }
+    } else {
+      nextProtocol.mc1_mode = null;
+      nextProtocol.mc1_cidr_segments = [];
+    }
+    if (
+      ["mundordp", "mundosql"].includes(nextProtocol.transport) &&
+      !nextProtocol.mundo_username
+    ) {
+      nextProtocol.mundo_username = "MundoUser";
+    }
+    return nextProtocol;
+  }
+  if (nextProtocol.type === "omniflow") {
+    const next = nextProtocol;
     if (!Number(next.port)) next.port = 443;
     if (!next.omniflow_carrier) next.omniflow_carrier = "h2";
     if (!next.omniflow_af_path_mode) next.omniflow_af_path_mode = "random";
@@ -388,8 +422,11 @@ function normalizeProtocolForSubmit(protocol: any, serverAddress?: string) {
     }
     return next;
   }
-  if (protocol.type !== "simnet") return protocol;
-  const next = { ...protocol };
+  if (nextProtocol.type !== "simnet") return nextProtocol;
+  const next = nextProtocol;
+  const defaultPositiveNumber = (key: string, value: number) => {
+    if (!Number(next[key])) next[key] = value;
+  };
   if (!Number(next.port)) next.port = 443;
   if (!next.simnet_carrier || next.simnet_carrier === "grpc")
     next.simnet_carrier = "h2";
@@ -416,6 +453,26 @@ function normalizeProtocolForSubmit(protocol: any, serverAddress?: string) {
     next.simnet_fallback_host_header = null;
     next.simnet_fallback_tls_sni = null;
   }
+  defaultPositiveNumber("simnet_inbound_max_streams_per_session", 128);
+  defaultPositiveNumber("simnet_inbound_max_udp_streams_per_session", 64);
+  defaultPositiveNumber("simnet_inbound_max_handler_tasks_per_session", 128);
+  defaultPositiveNumber("simnet_stream_event_channel_capacity", 256);
+  defaultPositiveNumber("simnet_stream_data_channel_capacity", 128);
+  defaultPositiveNumber("simnet_target_dial_timeout_ms", 12_000);
+  defaultPositiveNumber("simnet_target_max_concurrent_dials", 256);
+  defaultPositiveNumber("simnet_send_window", 4_194_304);
+  defaultPositiveNumber("simnet_recv_window", 4_194_304);
+  defaultPositiveNumber("simnet_max_concurrent_streams", 100);
+  defaultPositiveNumber("simnet_initial_window_size", 65_535);
+  defaultPositiveNumber("simnet_max_frame_size", 16_384);
+  defaultPositiveNumber("simnet_client_max_concurrent_streams", 32);
+  defaultPositiveNumber("simnet_client_max_streams_per_session", 512);
+  defaultPositiveNumber("simnet_client_session_idle_timeout_secs", 90);
+  defaultPositiveNumber("simnet_client_max_udp_sessions", 64);
+  next.simnet_egress_block_loopback = !!next.simnet_egress_block_loopback;
+  next.simnet_egress_block_private = !!next.simnet_egress_block_private;
+  next.simnet_egress_block_link_local = !!next.simnet_egress_block_link_local;
+  next.simnet_egress_block_metadata = !!next.simnet_egress_block_metadata;
   if (
     (next.cert_mode === "http" || next.cert_mode === "dns") &&
     !next.sni &&
@@ -644,7 +701,7 @@ export default function ServerForm(props: {
                           <div className="flex flex-col items-start gap-1">
                             <div className="flex items-center gap-1">
                               <span className="font-medium capitalize">
-                                {type}
+                                {getLabel(type)}
                               </span>
                               {current.transport && (
                                 <Badge className="text-xs" variant="secondary">
