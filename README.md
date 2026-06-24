@@ -36,7 +36,7 @@ NPanel Frontend is the official web workspace for [NPanel][profile-link]. It bri
 
 The project is built for real operators: fast setup, multilingual interfaces, responsive dashboards, clear subscription flows, and maintainable UI packages shared across apps.
 
-Current default version: **1.0.5**.
+Current default version: **1.0.6**.
 
 ---
 
@@ -137,7 +137,7 @@ This project is licensed under the [GNU General Public License](./LICENSE).
 [profile-link]: https://github.com/npanel-dev
 [repo-link]: https://github.com/npanel-dev/NPanel-frontend
 [split]: https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png
-[version-shield]: https://img.shields.io/badge/version-1.0.5-blue?labelColor=black&style=flat-square
+[version-shield]: https://img.shields.io/badge/version-1.0.6-blue?labelColor=black&style=flat-square
 [NPanel-user-web-github]: https://github.com/npanel-dev/NPanel-frontend/tree/main/apps/user
 [NPanel-user-web-cover]: https://urlscan.io/liveshot/?width=1920&height=1080&url=https://user.npanel.dev
 [NPanel-user-web-preview]: https://user.npanel.dev
