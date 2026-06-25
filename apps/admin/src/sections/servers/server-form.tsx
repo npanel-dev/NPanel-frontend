@@ -501,13 +501,32 @@ function enabledPortKey(protocol: any) {
   return Number.isFinite(port) && port > 0 ? String(port) : "";
 }
 
+function buildDefaultProtocolFormValues() {
+  return PROTOCOLS.map((type) => getProtocolDefaultConfig(type));
+}
+
 function buildProtocolFormValues(protocols?: API.Protocol[]) {
-  return (protocols || [])
-    .filter((protocol) => protocol?.type)
-    .map((protocol) => ({
-      ...getProtocolDefaultConfig(protocol.type as any),
-      ...protocol,
-    }));
+  const remainingProtocols = [...(protocols || [])].filter(
+    (protocol) => protocol?.type
+  );
+  const defaultProtocolItems = PROTOCOLS.map((type) => {
+    const existingIndex = remainingProtocols.findIndex(
+      (protocol) => protocol.type === type
+    );
+    const existingProtocol =
+      existingIndex >= 0
+        ? remainingProtocols.splice(existingIndex, 1)[0]
+        : null;
+    return {
+      ...getProtocolDefaultConfig(type as any),
+      ...(existingProtocol || {}),
+    };
+  });
+  const extraProtocolItems = remainingProtocols.map((protocol) => ({
+    ...getProtocolDefaultConfig(protocol.type as any),
+    ...protocol,
+  }));
+  return [...defaultProtocolItems, ...extraProtocolItems];
 }
 
 function buildNewProtocolInstance(type: string, currentProtocols: any[]) {
@@ -586,9 +605,11 @@ export default function ServerForm(props: {
   }, [initialValues]);
 
   async function handleSubmit(values: Record<string, any>) {
-    const normalizedProtocols = (values?.protocols || []).map((protocol: any) =>
-      normalizeProtocolForSubmit(protocol, values.address)
-    );
+    const normalizedProtocols = (values?.protocols || [])
+      .filter((protocol: any) => protocol?.enable)
+      .map((protocol: any) =>
+        normalizeProtocolForSubmit(protocol, values.address)
+      );
     const hasInvalidPort = normalizedProtocols.some((protocol: any) => {
       const port = Number(protocol?.port);
       return !(protocol && Number.isFinite(port) && port > 0 && port <= 65_535);
@@ -672,7 +693,7 @@ export default function ServerForm(props: {
                 address: "",
                 country: "",
                 city: "",
-                protocols: [],
+                protocols: buildDefaultProtocolFormValues(),
               });
               setAccordionValue(undefined);
             }
