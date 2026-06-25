@@ -45,6 +45,7 @@ export type ProtocolName =
   | "vmess"
   | "vless"
   | "trojan"
+  | "mx"
   | "hysteria"
   | "tuic"
   | "anytls"
@@ -153,6 +154,8 @@ export default function NodeForm(props: {
 
   const serverId = form.watch("server_id");
   const nodeType = form.watch("node_type");
+  const selectedProtocol = form.watch("protocol");
+  const selectedPort = form.watch("port");
   const isFrontNode = nodeType === "front";
 
   const { servers, getAvailableProtocols } = useServer();
@@ -161,6 +164,13 @@ export default function NodeForm(props: {
   const existingTags: string[] = tags || [];
 
   const availableProtocols = getAvailableProtocols(serverId);
+  const selectedProtocolKey =
+    selectedProtocol && selectedPort
+      ? `${selectedProtocol}:${Number(selectedPort)}`
+      : "";
+  const hasSelectedProtocolInstance = availableProtocols.some(
+    (p) => p.key === selectedProtocolKey
+  );
 
   // Fetch node groups
   const { data: nodeGroupsData } = useQuery({
@@ -269,10 +279,17 @@ export default function NodeForm(props: {
 
     const protocols = getAvailableProtocols(id);
     const firstProtocol = protocols[0];
+    const currentInstanceExists = protocols.some(
+      (p) =>
+        p.protocol === currentValues.protocol &&
+        Number(p.port) === Number(currentValues.port)
+    );
 
     if (
       firstProtocol &&
-      (!currentValues.protocol || autoFilledFields.has("protocol"))
+      (!currentValues.protocol ||
+        autoFilledFields.has("protocol") ||
+        !currentInstanceExists)
     ) {
       form.setValue("protocol", firstProtocol.protocol, { shouldDirty: false });
       fieldsToFill.push("protocol");
@@ -280,7 +297,8 @@ export default function NodeForm(props: {
       if (
         !currentValues.port ||
         currentValues.port === 0 ||
-        autoFilledFields.has("port")
+        autoFilledFields.has("port") ||
+        !currentInstanceExists
       ) {
         const port = firstProtocol.port || 0;
         form.setValue("port", port, { shouldDirty: false });
@@ -299,31 +317,20 @@ export default function NodeForm(props: {
     removeAutoFilledField(fieldName);
   };
 
-  function handleProtocolChange(nextProto?: ProtocolName | null) {
-    const protocol = (nextProto || "") as ProtocolName | "";
+  function handleProtocolChange(nextKey?: string | null) {
+    const protocolData = availableProtocols.find((p) => p.key === nextKey);
+    const protocol = (protocolData?.protocol || "") as ProtocolName | "";
     form.setValue("protocol", protocol);
 
-    if (!(protocol && serverId)) {
+    if (!(protocol && serverId && protocolData)) {
+      form.setValue("port", 0);
       removeAutoFilledField("protocol");
       return;
     }
 
-    const currentValues = form.getValues();
-    const isPortAutoFilled = autoFilledFields.has("port");
-
     removeAutoFilledField("protocol");
-
-    if (!currentValues.port || currentValues.port === 0 || isPortAutoFilled) {
-      const protocolData = availableProtocols.find(
-        (p) => p.protocol === protocol
-      );
-
-      if (protocolData) {
-        const port = protocolData.port || 0;
-        form.setValue("port", port, { shouldDirty: false });
-        addAutoFilledField("port");
-      }
-    }
+    form.setValue("port", protocolData.port || 0, { shouldDirty: false });
+    addAutoFilledField("port");
   }
 
   async function handleSubmit(values: NodeFormValues) {
@@ -431,17 +438,21 @@ export default function NodeForm(props: {
                       <FormLabel>{t("protocol", "Protocol")}</FormLabel>
                       <FormControl>
                         <Combobox<string, false>
-                          onChange={(v) =>
-                            handleProtocolChange((v as ProtocolName) || null)
-                          }
+                          onChange={(v) => handleProtocolChange(v)}
                           options={availableProtocols.map((p) => ({
-                            value: p.protocol,
+                            value: p.key,
                             label: `${p.protocol}${p.port ? ` (${p.port})` : ""}`,
                           }))}
                           placeholder={t("select_protocol", "Select protocol…")}
-                          value={field.value}
+                          value={selectedProtocolKey || field.value}
                         />
                       </FormControl>
+                      <FormDescription>
+                        {t(
+                          "protocol_instance_description",
+                          "Select a concrete enabled protocol instance on this server. Same protocol on different ports is delivered as different nodes."
+                        )}
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -494,6 +505,9 @@ export default function NodeForm(props: {
                     <FormControl>
                       <EnhancedInput
                         {...field}
+                        disabled={
+                          !isFrontNode && Boolean(hasSelectedProtocolInstance)
+                        }
                         max={65_535}
                         min={1}
                         onValueChange={(v) =>
@@ -503,6 +517,14 @@ export default function NodeForm(props: {
                         type="number"
                       />
                     </FormControl>
+                    {!isFrontNode && hasSelectedProtocolInstance && (
+                      <FormDescription>
+                        {t(
+                          "port_from_protocol_instance_description",
+                          "The port is inherited from the selected protocol instance and cannot be changed here."
+                        )}
+                      </FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

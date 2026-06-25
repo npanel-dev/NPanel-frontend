@@ -34,7 +34,7 @@ export default function Nodes() {
   const [loading, setLoading] = useState(false);
 
   // Use our zustand store for server data
-  const { getServerName, getServerAddress, getProtocolPort } = useServer();
+  const { getServerName, getServerAddress } = useServer();
   const { fetchNodes, fetchTags } = useNode();
 
   // Fetch node groups for display
@@ -139,8 +139,11 @@ export default function Nodes() {
       {
         id: "protocol",
         header: ` ${t("protocol", "Protocol")}:${t("port", "Port")}`,
-        cell: ({ row }: { row: any }) =>
-          `${row.original.protocol}:${getProtocolPort(row.original.server_id, row.original.protocol)}`,
+        cell: ({ row }: { row: any }) => {
+          const protocol = row.original.protocol || "—";
+          const port = row.original.port || "—";
+          return `${protocol}:${port}`;
+        },
       },
       {
         id: "tags",
@@ -197,14 +200,7 @@ export default function Nodes() {
     }
 
     return baseColumns;
-  }, [
-    isGroupEnabled,
-    nodeGroupsData,
-    t,
-    getServerName,
-    getServerAddress,
-    getProtocolPort,
-  ]);
+  }, [isGroupEnabled, nodeGroupsData, t, getServerName, getServerAddress]);
 
   return (
     <ProTable<API.Node, { search: string; node_group_id?: string }>

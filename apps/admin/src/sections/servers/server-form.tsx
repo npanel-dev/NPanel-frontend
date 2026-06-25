@@ -44,7 +44,7 @@ import { EnhancedInput } from "@workspace/ui/composed/enhanced-input";
 import { Icon } from "@workspace/ui/composed/icon";
 import { cn } from "@workspace/ui/lib/utils";
 import { useEffect, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useNode } from "@/stores/node";
@@ -489,6 +489,49 @@ function normalizeProtocolForSubmit(protocol: any, serverAddress?: string) {
   return next;
 }
 
+function protocolInstanceKey(protocol: any) {
+  return `${String(protocol?.type || "")
+    .trim()
+    .toLowerCase()}:${Number(protocol?.port) || 0}`;
+}
+
+function enabledPortKey(protocol: any) {
+  if (!protocol?.enable) return "";
+  const port = Number(protocol?.port);
+  return Number.isFinite(port) && port > 0 ? String(port) : "";
+}
+
+function buildProtocolFormValues(protocols?: API.Protocol[]) {
+  return (protocols || [])
+    .filter((protocol) => protocol?.type)
+    .map((protocol) => ({
+      ...getProtocolDefaultConfig(protocol.type as any),
+      ...protocol,
+    }));
+}
+
+function buildNewProtocolInstance(type: string, currentProtocols: any[]) {
+  const next = {
+    ...getProtocolDefaultConfig(type as any),
+    enable: true,
+  };
+  const defaultPort = Number(next.port);
+  const usedPorts = new Set(
+    (currentProtocols || [])
+      .map((protocol) => Number(protocol?.port))
+      .filter((port) => Number.isFinite(port) && port > 0)
+  );
+
+  if (
+    !(Number.isFinite(defaultPort) && defaultPort > 0) ||
+    usedPorts.has(defaultPort)
+  ) {
+    next.port = null;
+  }
+
+  return next;
+}
+
 export default function ServerForm(props: {
   trigger: string;
   title: string;
@@ -500,6 +543,7 @@ export default function ServerForm(props: {
   const { t } = useTranslation("servers");
   const [open, setOpen] = useState(false);
   const [accordionValue, setAccordionValue] = useState<string>();
+  const [protocolToAdd, setProtocolToAdd] = useState<string>(PROTOCOLS[0]);
 
   const { isProtocolUsedInNodes } = useNode();
   const PROTOCOL_FIELDS = useProtocolFields();
@@ -516,6 +560,14 @@ export default function ServerForm(props: {
     },
   });
   const { control } = form;
+  const {
+    fields: protocolItems,
+    append: appendProtocol,
+    remove: removeProtocol,
+  } = useFieldArray({
+    control,
+    name: "protocols",
+  });
 
   const protocolsValues = useWatch({ control, name: "protocols" });
 
@@ -527,15 +579,7 @@ export default function ServerForm(props: {
         country: "",
         city: "",
         ...initialValues,
-        protocols: PROTOCOLS.map((type) => {
-          const existingProtocol = initialValues.protocols?.find(
-            (p) => p.type === type
-          );
-          const defaultConfig = getProtocolDefaultConfig(type);
-          return existingProtocol
-            ? { ...defaultConfig, ...existingProtocol }
-            : defaultConfig;
-        }),
+        protocols: buildProtocolFormValues(initialValues.protocols),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -545,10 +589,56 @@ export default function ServerForm(props: {
     const normalizedProtocols = (values?.protocols || []).map((protocol: any) =>
       normalizeProtocolForSubmit(protocol, values.address)
     );
-    const filteredProtocols = normalizedProtocols.filter((protocol: any) => {
+    const hasInvalidPort = normalizedProtocols.some((protocol: any) => {
       const port = Number(protocol?.port);
-      return protocol && Number.isFinite(port) && port > 0 && port <= 65_535;
+      return !(protocol && Number.isFinite(port) && port > 0 && port <= 65_535);
     });
+    if (hasInvalidPort) {
+      toast.error(
+        t(
+          "invalid_protocol_port",
+          "Each protocol instance must have a valid port from 1 to 65535"
+        )
+      );
+      return;
+    }
+    if (normalizedProtocols.length === 0) {
+      toast.error(
+        t("empty_protocol_instances", "Add at least one protocol instance")
+      );
+      return;
+    }
+
+    const filteredProtocols = normalizedProtocols;
+    const protocolInstanceKeys = new Set<string>();
+    const enabledPorts = new Set<string>();
+    for (const protocol of filteredProtocols) {
+      const instanceKey = protocolInstanceKey(protocol);
+      if (protocolInstanceKeys.has(instanceKey)) {
+        toast.error(
+          t(
+            "duplicate_protocol_instance",
+            "Protocol instances cannot use the same protocol and port"
+          )
+        );
+        return;
+      }
+      protocolInstanceKeys.add(instanceKey);
+
+      const portKey = enabledPortKey(protocol);
+      if (portKey) {
+        if (enabledPorts.has(portKey)) {
+          toast.error(
+            t(
+              "duplicate_enabled_protocol_port",
+              "Enabled protocol instances cannot share the same port"
+            )
+          );
+          return;
+        }
+        enabledPorts.add(portKey);
+      }
+    }
 
     const result = {
       name: values.name,
@@ -565,20 +655,26 @@ export default function ServerForm(props: {
     }
   }
 
+  function handleAddProtocol() {
+    const currentProtocols = form.getValues("protocols") || [];
+    appendProtocol(buildNewProtocolInstance(protocolToAdd, currentProtocols));
+    setAccordionValue(`protocol-${currentProtocols.length}`);
+  }
+
   return (
     <Sheet onOpenChange={setOpen} open={open}>
       <SheetTrigger asChild>
         <Button
           onClick={() => {
             if (!initialValues) {
-              const full = PROTOCOLS.map((t) => getProtocolDefaultConfig(t));
               form.reset({
                 name: "",
                 address: "",
                 country: "",
                 city: "",
-                protocols: full,
+                protocols: [],
               });
+              setAccordionValue(undefined);
             }
             setOpen(true);
           }}
@@ -674,6 +770,32 @@ export default function ServerForm(props: {
                   )}
                 </p>
               </div>
+              <div className="flex items-end gap-2 rounded-lg border bg-muted/20 p-3">
+                <div className="min-w-0 flex-1">
+                  <FormLabel>
+                    {t("add_protocol_type", "Protocol Type")}
+                  </FormLabel>
+                  <Select
+                    onValueChange={setProtocolToAdd}
+                    value={protocolToAdd}
+                  >
+                    <SelectTrigger className="mt-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PROTOCOLS.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {getLabel(type)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button onClick={handleAddProtocol} type="button">
+                  <Icon className="mr-2 h-4 w-4" icon="mdi:plus" />
+                  {t("add_protocol", "Add Protocol")}
+                </Button>
+              </div>
 
               <Accordion
                 className="w-full space-y-3"
@@ -682,19 +804,28 @@ export default function ServerForm(props: {
                 type="single"
                 value={accordionValue}
               >
-                {PROTOCOLS.map((type) => {
-                  const i = Math.max(0, PROTOCOLS.indexOf(type));
+                {protocolItems.map((item, i) => {
                   const current = (protocolsValues[i] || {}) as Record<
                     string,
                     any
                   >;
+                  const type = String(current.type || (item as any).type || "");
                   const isEnabled = current?.enable;
                   const fields = PROTOCOL_FIELDS[type] || [];
+                  const isUsed = Boolean(
+                    initialValues?.id &&
+                      current.port &&
+                      isProtocolUsedInNodes(
+                        initialValues.id,
+                        type,
+                        current.port
+                      )
+                  );
                   return (
                     <AccordionItem
                       className="mb-2 rounded-lg border"
-                      key={type}
-                      value={type}
+                      key={item.id}
+                      value={`protocol-${i}`}
                     >
                       <AccordionTrigger className="px-4 py-3 hover:no-underline">
                         <div className="flex w-full items-center justify-between">
@@ -735,22 +866,34 @@ export default function ServerForm(props: {
                               </span>
                             </div>
                           </div>
-                          <Switch
-                            checked={!!isEnabled}
-                            className="mr-2"
-                            disabled={Boolean(
-                              initialValues?.id &&
-                                isProtocolUsedInNodes(
-                                  initialValues?.id || 0,
-                                  type
-                                ) &&
-                                isEnabled
-                            )}
-                            onCheckedChange={(checked) => {
-                              form.setValue(`protocols.${i}.enable`, checked);
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                          />
+                          <div className="mr-2 flex items-center gap-2">
+                            <Switch
+                              checked={!!isEnabled}
+                              disabled={isUsed && isEnabled}
+                              onCheckedChange={(checked) => {
+                                form.setValue(`protocols.${i}.enable`, checked);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <Button
+                              disabled={isUsed}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeProtocol(i);
+                                if (accordionValue === `protocol-${i}`) {
+                                  setAccordionValue(undefined);
+                                }
+                              }}
+                              size="icon"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Icon
+                                className="h-4 w-4 text-destructive"
+                                icon="mdi:trash-can-outline"
+                              />
+                            </Button>
+                          </div>
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="px-4 pt-0 pb-4">
