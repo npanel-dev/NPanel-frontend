@@ -4,6 +4,28 @@ export type SubscribeCategorySection = {
   subscriptions: API.Subscribe[];
 };
 
+type SubscribeCatalog =
+  | API.QuerySubscribeCatalogReply
+  | API.GetSubscriptionCatalogReply;
+
+type SubscribeCatalogInput =
+  | SubscribeCatalog
+  | {
+      data?: SubscribeCatalog | null;
+    };
+
+function unwrapSubscribeCatalog(catalog?: SubscribeCatalogInput | null) {
+  if (!catalog) {
+    return;
+  }
+
+  if ("data" in catalog) {
+    return catalog.data || undefined;
+  }
+
+  return catalog;
+}
+
 function walkCategory(
   category: API.SubscribeCategory,
   sections: SubscribeCategorySection[]
@@ -25,15 +47,16 @@ function walkCategory(
 }
 
 export function buildSubscribeSections(
-  catalog?: API.QuerySubscribeCatalogReply | API.GetSubscriptionCatalogReply,
+  catalog?: SubscribeCatalogInput | null,
   uncategorizedLabel = "Uncategorized"
 ) {
+  const subscribeCatalog = unwrapSubscribeCatalog(catalog);
   const sections: SubscribeCategorySection[] = [];
-  for (const category of catalog?.categories || []) {
+  for (const category of subscribeCatalog?.categories || []) {
     walkCategory(category, sections);
   }
 
-  const uncategorized = (catalog?.uncategorized || []).filter(
+  const uncategorized = (subscribeCatalog?.uncategorized || []).filter(
     (item: API.Subscribe) => item.show !== false
   );
   if (uncategorized.length > 0) {
@@ -48,7 +71,7 @@ export function buildSubscribeSections(
 }
 
 export function flattenSubscribeCatalog(
-  catalog?: API.QuerySubscribeCatalogReply | API.GetSubscriptionCatalogReply
+  catalog?: SubscribeCatalogInput | null
 ) {
   return buildSubscribeSections(catalog).flatMap(
     (section) => section.subscriptions
