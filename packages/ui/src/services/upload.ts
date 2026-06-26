@@ -21,9 +21,23 @@ export async function uploadImage(file: File | Blob) {
     }
   );
 
-  const url = data.data?.url || data.data?.path;
+  const url = resolveUploadURL(data.data);
   if (!url) {
     throw new Error(data.message || "Image upload failed");
   }
   return url;
+}
+
+function resolveUploadURL(data?: UploadImageResponse["data"]) {
+  const path = data?.path;
+  const apiPrefix = normalizeURLPrefix(import.meta.env.VITE_API_PREFIX || "");
+  if (path && apiPrefix) {
+    return `${apiPrefix}${path.startsWith("/") ? path : `/${path}`}`;
+  }
+  return data?.url || path;
+}
+
+function normalizeURLPrefix(prefix: string) {
+  const normalized = prefix.trim().replace(/\/+$/, "");
+  return normalized === "/" ? "" : normalized;
 }
