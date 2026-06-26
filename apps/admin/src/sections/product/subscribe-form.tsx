@@ -24,6 +24,13 @@ import {
 import { Label } from "@workspace/ui/components/label";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import {
   Sheet,
   SheetContent,
   SheetFooter,
@@ -826,13 +833,32 @@ export default function SubscribeForm<T extends Record<string, any>>({
                               </span>
                             </FormLabel>
                             <FormControl>
-                              <EnhancedInput
-                                {...field}
-                                onValueChange={(v) =>
-                                  form.setValue(field.name, v as string)
+                              <Select
+                                onValueChange={(value) =>
+                                  form.setValue(
+                                    field.name,
+                                    value === "__default__" ? "" : value,
+                                    { shouldDirty: true }
+                                  )
                                 }
-                                placeholder={t("form.languagePlaceholder")}
-                              />
+                                value={field.value || "__default__"}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue
+                                    placeholder={t("form.languagePlaceholder")}
+                                  />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="__default__">
+                                    {t(
+                                      "form.languageDefault",
+                                      "Default / no restriction"
+                                    )}
+                                  </SelectItem>
+                                  <SelectItem value="en-US">en-US</SelectItem>
+                                  <SelectItem value="zh-CN">zh-CN</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
