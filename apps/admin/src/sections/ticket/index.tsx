@@ -23,6 +23,7 @@ import {
   getTicketList,
   updateTicketStatus,
 } from "@workspace/ui/services/admin/ticket";
+import { uploadImage } from "@workspace/ui/services/upload";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -306,18 +307,20 @@ export default function Page() {
                             ctx?.drawImage(img, 0, 0, width, height);
 
                             canvas.toBlob(
-                              (blob) => {
-                                const reader = new FileReader();
-                                reader.readAsDataURL(blob!);
-                                reader.onloadend = async () => {
+                              async (blob) => {
+                                if (!blob) return;
+                                try {
+                                  const imageUrl = await uploadImage(blob);
                                   await createTicketFollow({
                                     ticket_id: ticketId,
                                     from: "System",
                                     type: 2,
-                                    content: reader.result as string,
+                                    content: imageUrl,
                                   });
                                   refetchTicket();
-                                };
+                                } catch (error) {
+                                  console.error(error);
+                                }
                               },
                               "image/webp",
                               0.8
