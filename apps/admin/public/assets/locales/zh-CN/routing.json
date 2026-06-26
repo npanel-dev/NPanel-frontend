@@ -28,6 +28,7 @@
   "invalidJson": "JSON 格式错误",
   "matched": "已命中",
   "missingId": "缺少数据 ID",
+  "missingProfileCode": "缺少 Profile 编码",
   "matcherJson": "匹配器 JSON",
   "mode": "模式",
   "name": "名称",
@@ -39,6 +40,7 @@
   "preview": "预览",
   "priority": "优先级",
   "profile": "Profile 策略",
+  "profileNotFound": "未找到当前 Profile",
   "profileId": "Profile ID",
   "profileJson": "Profile JSON 配置",
   "profiles": "Profile 策略",
@@ -49,6 +51,7 @@
   "rollback": "回滚",
   "routing": "分流管理",
   "routingHash": "Routing Hash",
+  "routeEvents": "路由事件",
   "rule": "规则",
   "rules": "规则",
   "save": "保存",
@@ -72,6 +75,12 @@
   "yes": "是",
   "no": "否",
   "noHealthReports": "暂无健康上报",
+  "noRouteEvents": "暂无路由事件",
+  "rollbackAlreadyObserve": "当前 Profile 已经是 observe",
+  "rollbackObserve": "回滚到 observe",
+  "rollbackObserveDescription": "将当前 Profile 模式切回 observe，保留配置但停止 enforce。",
+  "rollbackObserveFailed": "回滚失败",
+  "rollbackObserveSuccess": "已回滚到 observe",
   "defaults": {
     "profileName": "P1 默认智能分流",
     "userProfileName": "用户 {{userId}} 分流策略",
@@ -108,6 +117,7 @@
     "off": "关闭",
     "dry-run only": "仅 dry-run",
     "healthy": "健康",
+    "fallback": "Fallback",
     "unknown": "未知",
     "failed": "失败",
     "degraded": "降级",
@@ -120,6 +130,12 @@
     "outbound": "出口",
     "dns_resolver": "DNS 解析器",
     "service": "服务"
+  },
+  "routeEventTypes": {
+    "route_decision": "路由决策",
+    "route_fallback": "路由回退",
+    "outbound_health_changed": "出口健康变化",
+    "dns_resolver_health_changed": "DNS 健康变化"
   },
   "sources": {
     "admin_config": "Admin 配置",

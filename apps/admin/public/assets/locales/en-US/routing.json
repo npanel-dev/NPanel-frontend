@@ -28,6 +28,7 @@
   "invalidJson": "Invalid JSON",
   "matched": "Matched",
   "missingId": "Missing item ID",
+  "missingProfileCode": "Missing profile code",
   "matcherJson": "Matcher JSON",
   "mode": "Mode",
   "name": "Name",
@@ -39,6 +40,7 @@
   "preview": "Preview",
   "priority": "Priority",
   "profile": "Profile",
+  "profileNotFound": "Profile not found",
   "profileId": "Profile ID",
   "profileJson": "Profile JSON",
   "profiles": "Profiles",
@@ -49,6 +51,7 @@
   "rollback": "Rollback",
   "routing": "Routing",
   "routingHash": "Routing Hash",
+  "routeEvents": "Route Events",
   "rule": "Rule",
   "rules": "Rules",
   "save": "Save",
@@ -72,6 +75,12 @@
   "yes": "Yes",
   "no": "No",
   "noHealthReports": "No health reports",
+  "noRouteEvents": "No route events",
+  "rollbackAlreadyObserve": "Profile is already observe",
+  "rollbackObserve": "Rollback to observe",
+  "rollbackObserveDescription": "Switch the current profile mode back to observe while keeping configuration.",
+  "rollbackObserveFailed": "Rollback failed",
+  "rollbackObserveSuccess": "Rolled back to observe",
   "defaults": {
     "profileName": "P1 Default Smart",
     "userProfileName": "User {{userId}} Routing",
@@ -108,6 +117,7 @@
     "off": "off",
     "dry-run only": "dry-run only",
     "healthy": "healthy",
+    "fallback": "fallback",
     "unknown": "unknown",
     "failed": "failed",
     "degraded": "degraded",
@@ -120,6 +130,12 @@
     "outbound": "outbound",
     "dns_resolver": "DNS resolver",
     "service": "service"
+  },
+  "routeEventTypes": {
+    "route_decision": "route decision",
+    "route_fallback": "route fallback",
+    "outbound_health_changed": "outbound health changed",
+    "dns_resolver_health_changed": "DNS health changed"
   },
   "sources": {
     "admin_config": "admin config",

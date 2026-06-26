@@ -2778,11 +2778,53 @@ declare namespace API {
     data?: RoutingHealthReportListData;
   };
 
+  type RoutingRouteEvent = {
+    id?: string;
+    reporterType?: string;
+    reporterId?: string;
+    profileCode?: string;
+    routingHash?: string;
+    eventType?: string;
+    subject?: string;
+    ruleId?: string;
+    ruleName?: string;
+    actionType?: string;
+    outboundTag?: string;
+    dnsResolverTag?: string;
+    fallbackTarget?: string;
+    status?: string;
+    latencyMs?: number;
+    error?: string;
+    eventAt?: string;
+    eventJson?: string;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+
+  type RoutingRouteEventListData = {
+    list?: RoutingRouteEvent[];
+    total?: number;
+  };
+
+  type ListRoutingRouteEventsReply = {
+    code?: number;
+    message?: string;
+    data?: RoutingRouteEventListData;
+  };
+
   type RoutingServiceListRoutingHealthReportsParams = {
     page?: string;
     size?: string;
     subjectType?: string;
     subjectKey?: string;
+    reporterType?: string;
+  };
+
+  type RoutingServiceListRoutingRouteEventsParams = {
+    page?: string;
+    size?: string;
+    eventType?: string;
+    profileCode?: string;
     reporterType?: string;
   };
 

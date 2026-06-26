@@ -40,6 +40,7 @@ import {
   routingServiceListRouteProfiles,
   routingServiceListRouteRules,
   routingServiceListRoutingHealthReports,
+  routingServiceListRoutingRouteEvents,
   routingServiceListUnlockServices,
   routingServicePreviewRouteConfig,
   routingServiceUpdateDnsResolver,
@@ -168,6 +169,16 @@ const serviceJSON = JSON.stringify(
 function dateCell(value: unknown) {
   const parsed = Number(value ?? 0);
   return Number.isFinite(parsed) && parsed > 0 ? formatDate(parsed) : "-";
+}
+
+function dateTimeCell(value: unknown) {
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    if (Number.isFinite(parsed)) {
+      return new Date(parsed).toLocaleString();
+    }
+  }
+  return dateCell(value);
 }
 
 function toRequestParams(pagination: { page?: number; size?: number }) {
@@ -565,18 +576,22 @@ function PreviewPanel() {
 function RoutingOverviewPanel() {
   const { t } = useTranslation("routing");
   const [loading, setLoading] = useState(false);
+  const [rollbacking, setRollbacking] = useState(false);
   const [overview, setOverview] = useState<API.RoutingOverview | null>(null);
   const [reports, setReports] = useState<API.RoutingHealthReport[]>([]);
+  const [routeEvents, setRouteEvents] = useState<API.RoutingRouteEvent[]>([]);
 
   const loadOverview = async () => {
     setLoading(true);
     try {
-      const [{ data }, reportsResp] = await Promise.all([
+      const [{ data }, reportsResp, routeEventsResp] = await Promise.all([
         routingServiceGetRoutingOverview(),
         routingServiceListRoutingHealthReports({ page: "1", size: "6" }),
+        routingServiceListRoutingRouteEvents({ page: "1", size: "6" }),
       ]);
       setOverview(data.data || null);
       setReports(reportsResp.data.data?.list || []);
+      setRouteEvents(routeEventsResp.data.data?.list || []);
     } finally {
       setLoading(false);
     }
@@ -589,6 +604,45 @@ function RoutingOverviewPanel() {
   const guards = overview?.guards || [];
   const health = overview?.health || [];
   const auditEvents = overview?.auditEvents || [];
+  const rollbackToObserve = async () => {
+    const profileCode = overview?.profileCode;
+    if (!profileCode) {
+      toast.error(t("missingProfileCode", "Missing profile code"));
+      return;
+    }
+    if (overview?.mode === "observe") {
+      toast.info(t("rollbackAlreadyObserve", "Profile is already observe"));
+      return;
+    }
+    setRollbacking(true);
+    try {
+      const { data } = await routingServiceListRouteProfiles({
+        page: "1",
+        size: "20",
+        search: profileCode,
+      });
+      const profile = (data.data?.list || []).find(
+        (item) => item.code === profileCode
+      );
+      if (!profile?.id) {
+        toast.error(t("profileNotFound", "Profile not found"));
+        return;
+      }
+      await routingServiceUpdateRouteProfile({
+        profile: { ...profile, mode: "observe" },
+      });
+      toast.success(t("rollbackObserveSuccess", "Rolled back to observe"));
+      await loadOverview();
+    } catch (e) {
+      toast.error(
+        e instanceof Error
+          ? e.message
+          : t("rollbackObserveFailed", "Rollback failed")
+      );
+    } finally {
+      setRollbacking(false);
+    }
+  };
 
   return (
     <div className="rounded-md border bg-background p-4">
@@ -603,10 +657,32 @@ function RoutingOverviewPanel() {
             {overview?.routingHash || "-"}
           </p>
         </div>
-        <Button disabled={loading} onClick={loadOverview} variant="outline">
-          <RefreshCw className="size-4" />
-          {t("refresh", "Refresh")}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <ConfirmButton
+            cancelText={t("cancel", "Cancel")}
+            confirmText={t("confirm", "Confirm")}
+            description={t(
+              "rollbackObserveDescription",
+              "Switch the current profile mode back to observe."
+            )}
+            onConfirm={rollbackToObserve}
+            title={t("rollbackObserve", "Rollback to observe")}
+            trigger={
+              <Button
+                disabled={rollbacking || loading || !overview?.profileCode}
+                size="sm"
+                variant="outline"
+              >
+                <ShieldCheck className="size-4" />
+                {t("rollbackObserve", "Rollback to observe")}
+              </Button>
+            }
+          />
+          <Button disabled={loading} onClick={loadOverview} variant="outline">
+            <RefreshCw className="size-4" />
+            {t("refresh", "Refresh")}
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -764,6 +840,49 @@ function RoutingOverviewPanel() {
           ) : (
             <div className="rounded-md border px-3 py-2 text-muted-foreground text-sm">
               {t("noHealthReports", "No health reports")}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <div className="mb-2 font-medium text-sm">
+          {t("routeEvents", "Route Events")}
+        </div>
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          {routeEvents.length > 0 ? (
+            routeEvents.map((event) => (
+              <div
+                className="min-w-0 rounded-md border px-3 py-2"
+                key={String(event.id)}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate font-medium text-sm">
+                    {translatedValue(t, "routeEventTypes", event.eventType)} ·{" "}
+                    {event.subject || "-"}
+                  </span>
+                  <Badge variant={statusBadgeVariant(event.status)}>
+                    {translatedValue(t, "statuses", event.status)}
+                  </Badge>
+                </div>
+                <div className="mt-1 truncate text-muted-foreground text-xs">
+                  {translatedValue(t, "reporterTypes", event.reporterType)} ·{" "}
+                  {event.reporterId || "-"} · {dateTimeCell(event.eventAt)}
+                </div>
+                <div className="mt-1 truncate text-muted-foreground text-xs">
+                  {event.ruleName || event.ruleId || "-"} ·{" "}
+                  {event.outboundTag || "-"} · {event.dnsResolverTag || "-"}
+                </div>
+                {event.error ? (
+                  <div className="mt-1 truncate text-muted-foreground text-xs">
+                    {event.error}
+                  </div>
+                ) : null}
+              </div>
+            ))
+          ) : (
+            <div className="rounded-md border px-3 py-2 text-muted-foreground text-sm">
+              {t("noRouteEvents", "No route events")}
             </div>
           )}
         </div>
