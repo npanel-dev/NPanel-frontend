@@ -60,8 +60,10 @@ export default function Content({
   });
   const priceOptions = getSubscribePriceOptions(subscription);
   const selectedOption =
-    priceOptions.find((item) => String(getOptionId(item)) === String((params as any).price_option_id)) ||
-    getDefaultPriceOption(subscription);
+    priceOptions.find(
+      (item) =>
+        String(getOptionId(item)) === String((params as any).price_option_id)
+    ) || getDefaultPriceOption(subscription);
 
   const { data: order } = useQuery({
     enabled:
@@ -83,6 +85,7 @@ export default function Content({
       } as API.PrePurchaseOrderRequest);
       return data.data || null;
     },
+    retry: false,
   });
 
   useEffect(() => {
@@ -305,7 +308,7 @@ export default function Content({
                 quantity: String(
                   selectedOption
                     ? getOptionDurationValue(selectedOption)
-                    : params.quantity ?? 1
+                    : (params.quantity ?? 1)
                 ),
                 unit_price: selectedOption
                   ? getOptionPrice(selectedOption)
@@ -346,7 +349,7 @@ export default function Content({
               />
               <CouponInput
                 coupon={params.coupon}
-                onChange={(value: string) => handleChange("coupon", value)}
+                onCommit={(value: string) => handleChange("coupon", value)}
               />
               <PaymentMethods
                 balance={false}

@@ -52,8 +52,10 @@ export default function Purchase({
   const lastSuccessOrderRef = useRef<any>(null);
   const priceOptions = getSubscribePriceOptions(subscribe);
   const selectedOption =
-    priceOptions.find((item) => String(getOptionId(item)) === String((params as any).price_option_id)) ||
-    getDefaultPriceOption(subscribe);
+    priceOptions.find(
+      (item) =>
+        String(getOptionId(item)) === String((params as any).price_option_id)
+    ) || getDefaultPriceOption(subscribe);
 
   const { data: order } = useQuery({
     enabled:
@@ -88,17 +90,17 @@ export default function Purchase({
         throw error;
       }
     },
+    retry: false,
   });
 
   useEffect(() => {
     if (subscribe) {
       const defaultOption = getDefaultPriceOption(subscribe);
-      const defaultQuantity =
-        defaultOption
-          ? getOptionDurationValue(defaultOption)
-          : subscribe.show_original_price === false && subscribe.discount?.[0]
-            ? Number(subscribe.discount[0].quantity)
-            : 1;
+      const defaultQuantity = defaultOption
+        ? getOptionDurationValue(defaultOption)
+        : subscribe.show_original_price === false && subscribe.discount?.[0]
+          ? Number(subscribe.discount[0].quantity)
+          : 1;
       setParams((prev) => ({
         ...prev,
         quantity: defaultQuantity,
@@ -162,7 +164,7 @@ export default function Purchase({
                   quantity: String(
                     selectedOption
                       ? getOptionDurationValue(selectedOption)
-                      : params.quantity ?? 1
+                      : (params.quantity ?? 1)
                   ),
                   unit_price: selectedOption
                     ? getOptionPrice(selectedOption)
@@ -200,7 +202,7 @@ export default function Purchase({
               />
               <CouponInput
                 coupon={params.coupon}
-                onChange={(value) => handleChange("coupon", value)}
+                onCommit={(value) => handleChange("coupon", value)}
               />
               <PaymentMethods
                 onChange={(value) => {

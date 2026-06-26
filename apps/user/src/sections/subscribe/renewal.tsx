@@ -53,8 +53,10 @@ export default function Renewal({ id, subscribe }: Readonly<RenewalProps>) {
   const lastSuccessOrderRef = useRef<any>(null);
   const priceOptions = getSubscribePriceOptions(subscribe);
   const selectedOption =
-    priceOptions.find((item) => String(getOptionId(item)) === String((params as any).price_option_id)) ||
-    getDefaultPriceOption(subscribe);
+    priceOptions.find(
+      (item) =>
+        String(getOptionId(item)) === String((params as any).price_option_id)
+    ) || getDefaultPriceOption(subscribe);
 
   const { data: order } = useQuery({
     enabled:
@@ -90,15 +92,15 @@ export default function Renewal({ id, subscribe }: Readonly<RenewalProps>) {
         return null;
       }
     },
+    retry: false,
   });
 
   useEffect(() => {
     if (subscribe.id && id) {
       const defaultOption = getDefaultPriceOption(subscribe);
-      const defaultQuantity =
-        defaultOption
-          ? getOptionDurationValue(defaultOption)
-          : subscribe.show_original_price === false && subscribe.discount?.[0]
+      const defaultQuantity = defaultOption
+        ? getOptionDurationValue(defaultOption)
+        : subscribe.show_original_price === false && subscribe.discount?.[0]
           ? Number(subscribe.discount[0].quantity)
           : 1;
       setParams((prev) => ({
@@ -165,7 +167,7 @@ export default function Renewal({ id, subscribe }: Readonly<RenewalProps>) {
                   quantity: String(
                     selectedOption
                       ? getOptionDurationValue(selectedOption)
-                      : params.quantity ?? 1
+                      : (params.quantity ?? 1)
                   ),
                   unit_price: selectedOption
                     ? getOptionPrice(selectedOption)
@@ -203,7 +205,7 @@ export default function Renewal({ id, subscribe }: Readonly<RenewalProps>) {
               />
               <CouponInput
                 coupon={params.coupon}
-                onChange={(value) => handleChange("coupon", value)}
+                onCommit={(value) => handleChange("coupon", value)}
               />
               <PaymentMethods
                 onChange={(value) => {
