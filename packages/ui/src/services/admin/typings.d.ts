@@ -2661,6 +2661,12 @@ declare namespace API {
     data?: PreviewRouteResult;
   };
 
+  type GetRoutingOverviewReply = {
+    code?: number;
+    message?: string;
+    data?: RoutingOverview;
+  };
+
   type PreviewRouteConfigRequest = {
     domain?: string;
     ip?: string;
@@ -2684,6 +2690,54 @@ declare namespace API {
     unsupportedFeatures?: string[];
     effectiveMode?: string;
     executionEnabled?: boolean;
+  };
+
+  type RoutingAuditEvent = {
+    id?: string;
+    resourceType?: string;
+    resourceId?: string;
+    resourceName?: string;
+    action?: string;
+    summary?: string;
+    createdAt?: string;
+  };
+
+  type RoutingEnforceGuard = {
+    key?: string;
+    label?: string;
+    passed?: boolean;
+    status?: string;
+    reason?: string;
+  };
+
+  type RoutingHealthItem = {
+    kind?: string;
+    key?: string;
+    name?: string;
+    status?: string;
+    source?: string;
+    checkedAt?: string;
+    rttMs?: number;
+    consecutiveFailures?: number;
+    lastError?: string;
+    outboundTag?: string;
+    dnsResolverTag?: string;
+  };
+
+  type RoutingOverview = {
+    routingHash?: string;
+    generatedAt?: string;
+    profileCode?: string;
+    profileName?: string;
+    mode?: string;
+    profileEnabled?: boolean;
+    enforceReady?: boolean;
+    executionEnabled?: boolean;
+    rollbackAction?: string;
+    compileError?: string;
+    health?: RoutingHealthItem[];
+    guards?: RoutingEnforceGuard[];
+    auditEvents?: RoutingAuditEvent[];
   };
 
   type PreviewSubscribeTemplateData = {

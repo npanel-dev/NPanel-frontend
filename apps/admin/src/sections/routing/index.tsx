@@ -34,6 +34,7 @@ import {
   routingServiceDeleteRouteProfile,
   routingServiceDeleteRouteRule,
   routingServiceDeleteUnlockService,
+  routingServiceGetRoutingOverview,
   routingServiceListDnsResolvers,
   routingServiceListRouteOutbounds,
   routingServiceListRouteProfiles,
@@ -46,8 +47,17 @@ import {
   routingServiceUpdateRouteRule,
   routingServiceUpdateUnlockService,
 } from "@workspace/ui/services/admin/routingService";
-import { Check, Eye, Pencil, Plus, Trash2 } from "lucide-react";
-import { useRef, useState } from "react";
+import {
+  Activity,
+  Check,
+  Eye,
+  Pencil,
+  Plus,
+  RefreshCw,
+  ShieldCheck,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { formatDate } from "@/utils/common";
@@ -237,13 +247,13 @@ function RoutingForm({
                   <Label>{field.label}</Label>
                   <Textarea
                     className="mt-2 min-h-44 font-mono text-xs"
-                    value={String(value ?? "")}
                     onChange={(event) =>
                       setValues({
                         ...values,
                         [field.key]: event.target.value,
                       })
                     }
+                    value={String(value ?? "")}
                   />
                 </div>
               );
@@ -253,8 +263,6 @@ function RoutingForm({
                 <Label>{field.label}</Label>
                 <Input
                   className="mt-2"
-                  type={field.type === "number" ? "number" : "text"}
-                  value={String(value ?? "")}
                   onChange={(event) =>
                     setValues({
                       ...values,
@@ -264,6 +272,8 @@ function RoutingForm({
                           : event.target.value,
                     })
                   }
+                  type={field.type === "number" ? "number" : "text"}
+                  value={String(value ?? "")}
                 />
               </div>
             );
@@ -429,8 +439,8 @@ function PreviewPanel() {
           <Label>{t("domain", "Domain")}</Label>
           <div className="flex gap-2">
             <Input
-              value={domain}
               onChange={(event) => setDomain(event.target.value)}
+              value={domain}
             />
             <Button disabled={loading} onClick={preview}>
               <Eye className="size-4" />
@@ -474,6 +484,158 @@ function PreviewPanel() {
   );
 }
 
+function RoutingOverviewPanel() {
+  const { t } = useTranslation("routing");
+  const [loading, setLoading] = useState(false);
+  const [overview, setOverview] = useState<API.RoutingOverview | null>(null);
+
+  const loadOverview = async () => {
+    setLoading(true);
+    try {
+      const { data } = await routingServiceGetRoutingOverview();
+      setOverview(data.data || null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOverview();
+  }, []);
+
+  const guards = overview?.guards || [];
+  const health = overview?.health || [];
+  const auditEvents = overview?.auditEvents || [];
+
+  return (
+    <div className="rounded-md border bg-background p-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-medium text-lg">
+            {t("p4Overview", "P4 Health / Guard")}
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            {overview?.profileCode || "-"} · {overview?.mode || "-"} ·{" "}
+            {overview?.routingHash || "-"}
+          </p>
+        </div>
+        <Button disabled={loading} onClick={loadOverview} variant="outline">
+          <RefreshCw className="size-4" />
+          {t("refresh", "Refresh")}
+        </Button>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <Metric
+          label={t("profile", "Profile")}
+          value={overview?.profileName || overview?.profileCode || "-"}
+        />
+        <Metric label={t("mode", "Mode")} value={overview?.mode || "-"} />
+        <Metric
+          label={t("enforceReady", "Enforce Ready")}
+          value={overview ? String(Boolean(overview.enforceReady)) : "-"}
+        />
+        <Metric
+          label={t("rollback", "Rollback")}
+          value={overview?.rollbackAction || "-"}
+        />
+      </div>
+
+      {overview?.compileError ? (
+        <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-destructive text-sm">
+          {overview.compileError}
+        </div>
+      ) : null}
+
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        <div>
+          <div className="mb-2 flex items-center gap-2 font-medium text-sm">
+            <ShieldCheck className="size-4" />
+            {t("enforceGuard", "Enforce Guard")}
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {guards.map((guard) => (
+              <div
+                className="min-w-0 rounded-md border px-3 py-2"
+                key={guard.key}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate font-medium text-sm">
+                    {guard.label || guard.key}
+                  </span>
+                  <Badge variant={guard.passed ? "default" : "outline"}>
+                    {guard.status || "-"}
+                  </Badge>
+                </div>
+                <div className="mt-1 truncate text-muted-foreground text-xs">
+                  {guard.reason || "-"}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-2 flex items-center gap-2 font-medium text-sm">
+            <Activity className="size-4" />
+            {t("healthSnapshot", "Health Snapshot")}
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {health.map((item) => (
+              <div
+                className="min-w-0 rounded-md border px-3 py-2"
+                key={`${item.kind}:${item.key}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate font-medium text-sm">
+                    {item.name || item.key}
+                  </span>
+                  <Badge variant={statusBadgeVariant(item.status)}>
+                    {item.status || "-"}
+                  </Badge>
+                </div>
+                <div className="mt-1 truncate text-muted-foreground text-xs">
+                  {item.kind} · {item.source || "-"} ·{" "}
+                  {dateCell(item.checkedAt)}
+                </div>
+                {item.lastError ? (
+                  <div className="mt-1 truncate text-muted-foreground text-xs">
+                    {item.lastError}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <div className="mb-2 font-medium text-sm">
+          {t("auditSnapshot", "Audit Snapshot")}
+        </div>
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          {auditEvents.map((event) => (
+            <div className="min-w-0 rounded-md border px-3 py-2" key={event.id}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate font-medium text-sm">
+                  {event.resourceName || event.resourceId}
+                </span>
+                <Badge variant="outline">{event.resourceType || "-"}</Badge>
+              </div>
+              <div className="mt-1 truncate text-muted-foreground text-xs">
+                {event.action || "-"} · {event.summary || "-"}
+              </div>
+              <div className="mt-1 text-muted-foreground text-xs">
+                {dateCell(event.createdAt)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 rounded-md border px-3 py-2">
@@ -481,6 +643,15 @@ function Metric({ label, value }: { label: string; value: string }) {
       <div className="truncate font-medium">{value}</div>
     </div>
   );
+}
+
+function statusBadgeVariant(
+  status?: string
+): "default" | "secondary" | "destructive" | "outline" {
+  if (status === "healthy" || status === "ok") return "default";
+  if (status === "failed" || status === "degraded") return "destructive";
+  if (status === "disabled") return "secondary";
+  return "outline";
 }
 
 export default function RoutingPage() {
@@ -667,6 +838,7 @@ export default function RoutingPage() {
         <Badge variant="secondary">routing_profile.v1</Badge>
       </div>
       <PreviewPanel />
+      <RoutingOverviewPanel />
       <Tabs defaultValue="profiles">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
           {resources.map((resource) => (
