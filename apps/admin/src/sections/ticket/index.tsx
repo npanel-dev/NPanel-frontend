@@ -123,7 +123,11 @@ export default function Page() {
                       status: 4,
                     });
                     toast.success(t("closeSuccess", "Closed successfully"));
-                    ref.current?.refresh();
+                    setMessage("");
+                    if (toNumber(ticketId) === toNumber(row.id)) {
+                      setTicketId(null);
+                    }
+                    await ref.current?.refresh();
                   }}
                   title={t("confirmClose", "Are you sure you want to close?")}
                   trigger={
@@ -205,7 +209,11 @@ export default function Page() {
 
       <Drawer
         onOpenChange={(open) => {
-          if (!open) setTicketId(null);
+          if (!open) {
+            setTicketId(null);
+            setMessage("");
+            ref.current?.refresh();
+          }
         }}
         open={!!ticketId}
       >

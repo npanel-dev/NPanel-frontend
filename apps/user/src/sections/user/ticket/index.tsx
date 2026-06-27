@@ -246,7 +246,11 @@ export default function Ticket() {
                           status: 4,
                         });
                         toast.success(t("closeSuccess", "Close Success"));
-                        ref.current?.refresh();
+                        setMessage("");
+                        if (toNumber(ticketId) === toNumber(item.id)) {
+                          setTicketId(null);
+                        }
+                        await ref.current?.refresh();
                       }}
                       title={t("confirmClose", "Confirm Close")}
                       trigger={
@@ -305,7 +309,11 @@ export default function Ticket() {
       />
       <Drawer
         onOpenChange={(open) => {
-          if (!open) setTicketId(null);
+          if (!open) {
+            setTicketId(null);
+            setMessage("");
+            ref.current?.refresh();
+          }
         }}
         open={!!ticketId}
       >
