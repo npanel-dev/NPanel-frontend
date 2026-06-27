@@ -13,6 +13,14 @@ import { Button } from "@workspace/ui/components/button";
 import { Card } from "@workspace/ui/components/card";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@workspace/ui/components/dialog";
+import {
   Form,
   FormControl,
   FormDescription,
@@ -21,6 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import {
@@ -46,14 +55,21 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { Textarea } from "@workspace/ui/components/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
 import { Combobox } from "@workspace/ui/composed/combobox";
 import { ArrayInput } from "@workspace/ui/composed/dynamic-inputs";
 import {
   HTMLEditor,
   MarkdownEditor,
+  RichTextEditor,
 } from "@workspace/ui/composed/editor/index";
 import { EnhancedInput } from "@workspace/ui/composed/enhanced-input";
 import { Icon } from "@workspace/ui/composed/icon";
+import { cn } from "@workspace/ui/lib/utils";
 import {
   getGroupConfig,
   getNodeGroupList,
@@ -61,8 +77,12 @@ import {
 import { getSubscribeCategoryList } from "@workspace/ui/services/admin/subscribe";
 import { unitConversion } from "@workspace/ui/utils/unit-conversions";
 import {
+  CheckIcon,
   CreditCard,
+  HelpCircleIcon,
+  Loader2Icon,
   PlusIcon,
+  SearchIcon,
   Server,
   Settings,
   Trash2Icon,
@@ -100,7 +120,7 @@ const defaultValues = {
   price_options: [],
   short_description: "",
   features: [],
-  detail_format: "markdown",
+  detail_format: "rich",
   detail_content: "",
   legacy_description_input: "",
   deduction_ratio: 0,
@@ -126,6 +146,7 @@ type SubscribeFeatureEditorItem = {
 };
 
 type SubscribeDetailFormat = "markdown" | "html" | "text";
+type SubscribeDetailEditorMode = SubscribeDetailFormat | "rich";
 
 function parseJSON(value?: unknown) {
   if (typeof value !== "string" || value.trim() === "") return null;
@@ -196,7 +217,14 @@ function parseLegacyDescription(description?: unknown) {
 
 function normalizeDetailFormat(value?: unknown): SubscribeDetailFormat {
   const format = String(value || "").toLowerCase();
-  if (format === "html") return "html";
+  if (format === "html" || format === "rich") return "html";
+  if (format === "text" || format === "plain") return "text";
+  return "markdown";
+}
+
+function normalizeDetailEditorMode(value?: unknown): SubscribeDetailEditorMode {
+  const format = String(value || "").toLowerCase();
+  if (format === "html" || format === "rich") return "rich";
   if (format === "text" || format === "plain") return "text";
   return "markdown";
 }
@@ -314,7 +342,7 @@ function normalizeSubscribeValues<T extends Record<string, any>>(values?: T) {
       processedValues.shortDescription ??
       legacyDescription.shortDescription,
     features,
-    detail_format: normalizeDetailFormat(
+    detail_format: normalizeDetailEditorMode(
       processedValues.detail_format ??
         processedValues.detailFormat ??
         legacyDescription.detailFormat
@@ -669,6 +697,359 @@ function PriceOptionsEditor({
   );
 }
 
+const ICONIFY_PRESET_PAGE_SIZE = 48;
+const ICONIFY_SEARCH_LIMIT = 60;
+const ICONIFY_PRESET_ICONS = [
+  "uil:shield-check",
+  "uil:rocket",
+  "uil:bolt",
+  "uil:globe",
+  "uil:server",
+  "uil:wifi",
+  "uil:lock",
+  "uil:check-circle",
+  "uil:times-circle",
+  "uil:star",
+  "uil:clock",
+  "uil:cloud",
+  "uil:dashboard",
+  "uil:database",
+  "uil:download-alt",
+  "uil:fire",
+  "uil:gift",
+  "uil:heart",
+  "uil:key-skeleton",
+  "uil:layer-group",
+  "uil:map-marker",
+  "uil:mobile-android",
+  "uil:money-bill",
+  "uil:plug",
+  "uil:processor",
+  "uil:setting",
+  "uil:signal",
+  "uil:sync",
+  "uil:upload-alt",
+  "uil:user-check",
+  "mdi:shield-check-outline",
+  "mdi:rocket-launch-outline",
+  "mdi:flash-outline",
+  "mdi:earth",
+  "mdi:server-network",
+  "mdi:wifi",
+  "mdi:lock-outline",
+  "mdi:check-circle-outline",
+  "mdi:close-circle-outline",
+  "mdi:star-outline",
+  "mdi:account-check-outline",
+  "mdi:api",
+  "mdi:bell-outline",
+  "mdi:calendar-clock",
+  "mdi:cellphone",
+  "mdi:chart-line",
+  "mdi:cloud-check-outline",
+  "mdi:cog-outline",
+  "mdi:database-check-outline",
+  "mdi:download-circle-outline",
+  "mdi:fire-circle",
+  "mdi:gift-outline",
+  "mdi:heart-outline",
+  "mdi:key-outline",
+  "mdi:map-marker-outline",
+  "mdi:plug-outline",
+  "mdi:speedometer",
+  "mdi:swap-horizontal",
+  "mdi:upload-circle-outline",
+  "mdi:web",
+  "tabler:shield-check",
+  "tabler:rocket",
+  "tabler:bolt",
+  "tabler:world",
+  "tabler:server",
+  "tabler:wifi",
+  "tabler:lock",
+  "tabler:circle-check",
+  "tabler:circle-x",
+  "tabler:star",
+  "tabler:clock",
+  "tabler:cloud-check",
+  "tabler:database",
+  "tabler:download",
+  "tabler:flame",
+  "tabler:gift",
+  "tabler:heart",
+  "tabler:key",
+  "tabler:map-pin",
+  "tabler:settings",
+  "solar:shield-check-bold",
+  "solar:rocket-bold",
+  "solar:bolt-bold",
+  "solar:global-bold",
+  "solar:server-bold",
+  "solar:wi-fi-router-bold",
+  "solar:lock-keyhole-bold",
+  "solar:check-circle-bold",
+  "solar:close-circle-bold",
+  "solar:star-bold",
+  "ph:shield-check",
+  "ph:rocket-launch",
+  "ph:lightning",
+  "ph:globe",
+  "ph:server",
+  "ph:wifi-high",
+  "ph:lock-key",
+  "ph:check-circle",
+  "ph:x-circle",
+  "ph:star",
+  "lucide:shield-check",
+  "lucide:rocket",
+  "lucide:zap",
+  "lucide:globe",
+  "lucide:server",
+  "lucide:wifi",
+  "lucide:lock-keyhole",
+  "lucide:circle-check",
+  "lucide:circle-x",
+  "lucide:star",
+];
+
+function isImageIconValue(value?: string) {
+  const icon = value?.trim();
+  if (!icon) return false;
+  return /^(https?:\/\/|\/(?!\/)|\.\/|data:image\/)/i.test(icon);
+}
+
+function parseIconifySearchQuery(value: string) {
+  const query = value.trim();
+  const [rawPrefix, ...nameParts] = query.split(":");
+  const prefix = rawPrefix || "";
+  const name = nameParts.join(":").trim();
+  if (/^[a-z0-9-]+$/i.test(prefix) && name) {
+    return { prefix, query: name };
+  }
+  return { prefix: "", query };
+}
+
+function FeatureIconPreview({
+  className,
+  icon,
+}: {
+  className?: string;
+  icon?: string;
+}) {
+  if (!icon) return null;
+  if (isImageIconValue(icon)) {
+    return (
+      <img
+        alt=""
+        className={cn("size-5 shrink-0 object-contain", className)}
+        height={20}
+        src={icon}
+        width={20}
+      />
+    );
+  }
+  return <Icon className={cn("size-5 shrink-0", className)} icon={icon} />;
+}
+
+function IconifyPicker({
+  onChange,
+  value,
+}: {
+  onChange: (value: string) => void;
+  value?: string;
+}) {
+  const { t } = useTranslation("product");
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [icons, setIcons] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [nextStart, setNextStart] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [visiblePresetCount, setVisiblePresetCount] = useState(
+    ICONIFY_PRESET_PAGE_SIZE
+  );
+  const isPresetMode = debouncedQuery.length < 2;
+  const displayedIcons = isPresetMode
+    ? ICONIFY_PRESET_ICONS.slice(0, visiblePresetCount)
+    : icons;
+  const canLoadMore = isPresetMode
+    ? visiblePresetCount < ICONIFY_PRESET_ICONS.length
+    : hasMore;
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedQuery(query.trim());
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  const loadIcons = async (start = 0, append = false) => {
+    const parsed = parseIconifySearchQuery(debouncedQuery);
+    if (parsed.query.length < 2) {
+      setIcons([]);
+      setNextStart(0);
+      setHasMore(false);
+      setError("");
+      setLoading(false);
+      return;
+    }
+
+    const params = new URLSearchParams({
+      limit: String(ICONIFY_SEARCH_LIMIT),
+      query: parsed.query,
+      start: String(start),
+    });
+    if (parsed.prefix) params.set("prefix", parsed.prefix);
+
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch(
+        `https://api.iconify.design/search?${params.toString()}`
+      );
+      if (!response.ok) throw new Error(response.statusText);
+      const data = (await response.json()) as {
+        icons?: string[];
+        total?: number;
+      };
+      const result = Array.isArray(data.icons) ? data.icons : [];
+      setIcons((current) =>
+        append ? Array.from(new Set([...current, ...result])) : result
+      );
+      setNextStart(start + result.length);
+      setHasMore(start + result.length < Number(data.total || 0));
+    } catch {
+      setError(
+        t(
+          "form.featureIconPickerError",
+          "Unable to load icons. Please try again."
+        )
+      );
+      if (!append) setIcons([]);
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (isPresetMode) {
+      setVisiblePresetCount((current) =>
+        Math.min(
+          current + ICONIFY_PRESET_PAGE_SIZE,
+          ICONIFY_PRESET_ICONS.length
+        )
+      );
+      return;
+    }
+    loadIcons(nextStart, true);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    loadIcons(0, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedQuery, open]);
+
+  useEffect(() => {
+    if (open) return;
+    setQuery("");
+    setDebouncedQuery("");
+    setVisiblePresetCount(ICONIFY_PRESET_PAGE_SIZE);
+    setIcons([]);
+    setError("");
+    setHasMore(false);
+    setNextStart(0);
+  }, [open]);
+
+  return (
+    <Dialog onOpenChange={setOpen} open={open}>
+      <DialogTrigger asChild>
+        <Button className="shrink-0" type="button" variant="outline">
+          <FeatureIconPreview icon={value} />
+          {t("form.featureIconPicker", "Choose")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[86vh] gap-3 sm:max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>
+            {t("form.featureIconPickerTitle", "Choose Icon")}
+          </DialogTitle>
+          <DialogDescription>
+            {t(
+              "form.featureIconPickerDescription",
+              "Search Iconify icons, then click one to use it."
+            )}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="relative">
+          <SearchIcon className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={t(
+              "form.featureIconSearchPlaceholder",
+              "Search icon name, for example shield or uil:rocket"
+            )}
+            value={query}
+          />
+        </div>
+        <div className="max-h-[52vh] min-h-72 overflow-y-auto rounded-md border">
+          <div className="grid grid-cols-3 gap-2 p-3 sm:grid-cols-4 md:grid-cols-6">
+            {displayedIcons.map((icon) => (
+              <button
+                className={cn(
+                  "flex min-h-20 flex-col items-center justify-center gap-2 rounded-md border bg-background p-2 text-center text-xs transition-colors hover:bg-accent",
+                  value === icon && "border-primary bg-primary/10 text-primary"
+                )}
+                key={icon}
+                onClick={() => {
+                  onChange(icon);
+                  setOpen(false);
+                }}
+                title={icon}
+                type="button"
+              >
+                <span className="relative flex size-8 items-center justify-center">
+                  <Icon className="size-7" icon={icon} />
+                  {value === icon && (
+                    <CheckIcon className="-top-1 -right-1 absolute size-4 rounded-full bg-primary p-0.5 text-primary-foreground" />
+                  )}
+                </span>
+                <span className="line-clamp-2 break-all">{icon}</span>
+              </button>
+            ))}
+          </div>
+          {!loading && displayedIcons.length === 0 && (
+            <div className="flex h-32 items-center justify-center text-muted-foreground text-sm">
+              {t("form.featureIconPickerEmpty", "No icons found.")}
+            </div>
+          )}
+        </div>
+        {error && <p className="text-destructive text-sm">{error}</p>}
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-muted-foreground text-xs">
+            {debouncedQuery.length < 2
+              ? t("form.featureIconPickerPreset", "Popular icons")
+              : t("form.featureIconPickerSearchAll", "Searching Iconify")}
+          </p>
+          <Button
+            disabled={loading || !canLoadMore}
+            onClick={loadMore}
+            type="button"
+            variant="outline"
+          >
+            {loading && <Loader2Icon className="size-4 animate-spin" />}
+            {t("form.featureIconPickerLoadMore", "Load more")}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function FeatureEditor({
   onChange,
   value = [],
@@ -718,27 +1099,61 @@ function FeatureEditor({
       <div className="space-y-2">
         {safeValue.map((item, index) => (
           <div
-            className="grid gap-3 rounded-lg border bg-card p-3 lg:grid-cols-[minmax(140px,0.7fr)_minmax(240px,1.4fr)_minmax(160px,0.8fr)_44px] lg:items-end"
-            key={`${item.label}-${index}`}
+            className="grid gap-3 rounded-lg border bg-card p-3 lg:grid-cols-[minmax(220px,0.9fr)_minmax(240px,1.4fr)_minmax(120px,0.55fr)_44px]"
+            key={index}
           >
-            <div className="space-y-2">
-              <Label>{t("form.featureIcon", "Icon")}</Label>
-              <EnhancedInput
-                onValueChange={(icon) => updateItem(index, { icon })}
-                placeholder="uil:shield-check"
-                value={item.icon}
-              />
+            <div className="grid grid-rows-[20px_36px] gap-1.5">
+              <div className="flex h-5 items-center gap-1.5">
+                <Label>{t("form.featureIcon", "Icon")}</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      aria-label={t("form.featureIconHelp", "Icon field help")}
+                      className="inline-flex size-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
+                      type="button"
+                    >
+                      <HelpCircleIcon className="size-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-64">
+                    {t(
+                      "form.featureIconDescription",
+                      "Supports Iconify names or image URLs."
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="flex h-9 gap-2">
+                <EnhancedInput
+                  className="font-mono"
+                  onValueChange={(icon) => updateItem(index, { icon })}
+                  placeholder={t(
+                    "form.featureIconPlaceholder",
+                    "uil:shield-check or https://example.com/icon.png"
+                  )}
+                  prefix={<FeatureIconPreview icon={item.icon} />}
+                  value={item.icon}
+                />
+                <IconifyPicker
+                  onChange={(icon) => updateItem(index, { icon })}
+                  value={item.icon}
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>{t("form.featureLabel", "Feature")}</Label>
+            <div className="grid grid-rows-[20px_36px] gap-1.5">
+              <Label className="flex h-5 items-center">
+                {t("form.featureLabel", "Feature")}
+              </Label>
               <EnhancedInput
                 onValueChange={(label) => updateItem(index, { label })}
                 placeholder={t("form.featureLabelPlaceholder", "Feature text")}
                 value={item.label}
               />
             </div>
-            <div className="space-y-2">
-              <Label>{t("form.featureType", "Status")}</Label>
+            <div className="grid grid-rows-[20px_36px] gap-1.5">
+              <Label className="flex h-5 items-center">
+                {t("form.featureType", "Status")}
+              </Label>
               <Select
                 onValueChange={(type) =>
                   updateItem(index, {
@@ -747,7 +1162,7 @@ function FeatureEditor({
                 }
                 value={item.type || "default"}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -759,7 +1174,7 @@ function FeatureEditor({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex h-9 items-center justify-end">
+            <div className="flex h-[57.5px] items-end justify-end">
               <Button
                 aria-label={t("form.deleteFeature", "Delete feature")}
                 className="text-destructive"
@@ -825,7 +1240,7 @@ export default function SubscribeForm<T extends Record<string, any>>({
         })
       )
       .optional(),
-    detail_format: z.enum(["markdown", "html", "text"]).optional(),
+    detail_format: z.enum(["rich", "markdown", "html", "text"]).optional(),
     detail_content: z.string().optional(),
     legacy_description_input: z.string().optional(),
     unit_price: z.number(),
@@ -953,7 +1368,7 @@ export default function SubscribeForm<T extends Record<string, any>>({
     });
     form.setValue(
       "detail_format",
-      normalizeDetailFormat(legacyDescription.detailFormat),
+      normalizeDetailEditorMode(legacyDescription.detailFormat),
       {
         shouldDirty: true,
       }
@@ -1412,29 +1827,34 @@ export default function SubscribeForm<T extends Record<string, any>>({
                               onValueChange={(value) =>
                                 form.setValue(
                                   field.name,
-                                  normalizeDetailFormat(value) as any
+                                  normalizeDetailEditorMode(value) as any
                                 )
                               }
-                              value={field.value || "markdown"}
+                              value={field.value || "rich"}
                             >
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
+                                <SelectItem value="rich">
+                                  {t("form.richText", "Rich Text")}
+                                </SelectItem>
+                                <SelectItem value="html">
+                                  {t("form.advancedHtml", "Advanced HTML")}
+                                </SelectItem>
                                 <SelectItem value="markdown">
                                   Markdown
                                 </SelectItem>
                                 <SelectItem value="text">
                                   {t("form.plainText", "Plain Text")}
                                 </SelectItem>
-                                <SelectItem value="html">HTML</SelectItem>
                               </SelectContent>
                             </Select>
                           </FormControl>
                           <FormDescription>
                             {t(
                               "form.detailFormatDescription",
-                              "Markdown is recommended. HTML is rendered with a safe allowlist on the user side."
+                              "Rich Text is recommended. HTML is rendered with a safe allowlist on the user side."
                             )}
                           </FormDescription>
                           <FormMessage />
@@ -1452,7 +1872,79 @@ export default function SubscribeForm<T extends Record<string, any>>({
                               {t("form.detailContent", "Detailed Description")}
                             </FormLabel>
                             <FormControl>
-                              {detailFormat === "html" ? (
+                              {detailFormat === "rich" ? (
+                                <RichTextEditor
+                                  labels={{
+                                    backgroundColor: t(
+                                      "form.richTextBackgroundColor",
+                                      "Background color"
+                                    ),
+                                    bold: t("form.richTextBold", "Bold"),
+                                    bulletedList: t(
+                                      "form.richTextBulletedList",
+                                      "Bulleted List"
+                                    ),
+                                    clear: t("form.richTextClear", "Clear"),
+                                    code: t("form.richTextCode", "Code"),
+                                    divider: t(
+                                      "form.richTextDivider",
+                                      "Divider"
+                                    ),
+                                    font: t("form.richTextFont", "Font"),
+                                    heading2: t("form.richTextH2", "H2"),
+                                    heading3: t("form.richTextH3", "H3"),
+                                    heading4: t("form.richTextH4", "H4"),
+                                    image: t("form.richTextImage", "Image"),
+                                    imagePrompt: t(
+                                      "form.richTextImagePrompt",
+                                      "Paste image URL"
+                                    ),
+                                    italic: t("form.richTextItalic", "Italic"),
+                                    link: t("form.richTextLink", "Link"),
+                                    linkPrompt: t(
+                                      "form.richTextLinkPrompt",
+                                      "Paste link URL"
+                                    ),
+                                    numberedList: t(
+                                      "form.richTextNumberedList",
+                                      "Numbered List"
+                                    ),
+                                    paragraph: t(
+                                      "form.richTextParagraph",
+                                      "Paragraph"
+                                    ),
+                                    quote: t("form.richTextQuote", "Quote"),
+                                    redo: t("form.richTextRedo", "Redo"),
+                                    size: t("form.richTextSize", "Size"),
+                                    strike: t("form.richTextStrike", "Strike"),
+                                    textAlignCenter: t(
+                                      "form.richTextAlignCenter",
+                                      "Align Center"
+                                    ),
+                                    textAlignLeft: t(
+                                      "form.richTextAlignLeft",
+                                      "Align Left"
+                                    ),
+                                    textAlignRight: t(
+                                      "form.richTextAlignRight",
+                                      "Align Right"
+                                    ),
+                                    textColor: t(
+                                      "form.richTextTextColor",
+                                      "Text color"
+                                    ),
+                                    undo: t("form.richTextUndo", "Undo"),
+                                  }}
+                                  onChange={(value) =>
+                                    form.setValue(field.name, value || "")
+                                  }
+                                  placeholder={t(
+                                    "form.richTextPlaceholder",
+                                    "Write the detailed package description..."
+                                  )}
+                                  value={field.value || ""}
+                                />
+                              ) : detailFormat === "html" ? (
                                 <HTMLEditor
                                   onChange={(value) =>
                                     form.setValue(field.name, value || "")
