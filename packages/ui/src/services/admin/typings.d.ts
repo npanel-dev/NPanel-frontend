@@ -2992,6 +2992,33 @@ declare namespace API {
     createdAt?: string;
   };
 
+  type RoutingReleaseApproval = {
+    id?: string;
+    releaseId?: string;
+    snapshotId?: string;
+    profileCode?: string;
+    routingHash?: string;
+    operator?: string;
+    reason?: string;
+    confirmedAt?: string;
+  };
+
+  type RoutingRollbackAudit = {
+    id?: string;
+    releaseId?: string;
+    profileCode?: string;
+    routingHash?: string;
+    operator?: string;
+    reason?: string;
+    beforeMode?: string;
+    afterMode?: string;
+    beforeReleaseStatus?: string;
+    afterReleaseStatus?: string;
+    summary?: string;
+    alerts?: RoutingReleaseAlert[];
+    createdAt?: string;
+  };
+
   type RoutingReleaseReport = {
     profileCode?: string;
     routingHash?: string;
@@ -3000,6 +3027,8 @@ declare namespace API {
     alerts?: RoutingReleaseAlert[];
     snapshots?: RoutingReleaseAuditSnapshot[];
     generatedAt?: string;
+    approvals?: RoutingReleaseApproval[];
+    rollbackAudits?: RoutingRollbackAudit[];
   };
 
   type GetRoutingReleaseReportReply = {
@@ -3021,6 +3050,36 @@ declare namespace API {
     code?: number;
     message?: string;
     data?: RoutingReleaseAuditSnapshot;
+  };
+
+  type ConfirmRoutingReleaseEnforceRequest = {
+    releaseId?: string;
+    snapshotId?: string;
+    profileCode?: string;
+    routingHash?: string;
+    operator?: string;
+    reason?: string;
+  };
+
+  type ConfirmRoutingReleaseEnforceReply = {
+    code?: number;
+    message?: string;
+    data?: RoutingReleaseApproval;
+  };
+
+  type RollbackRoutingReleaseAuditRequest = {
+    releaseId?: string;
+    profileCode?: string;
+    routingHash?: string;
+    windowMinutes?: string;
+    operator?: string;
+    reason?: string;
+  };
+
+  type RollbackRoutingReleaseAuditReply = {
+    code?: number;
+    message?: string;
+    data?: RoutingRollbackAudit;
   };
 
   type RoutingServiceListRoutingHealthReportsParams = {

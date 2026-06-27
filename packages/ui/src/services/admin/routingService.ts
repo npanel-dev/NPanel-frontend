@@ -404,6 +404,44 @@ export async function routingServiceSnapshotRoutingReleaseAudit(
   );
 }
 
+/** 此处后端没有提供注释 POST /v1/admin/routing/release_confirm */
+export async function routingServiceConfirmRoutingReleaseEnforce(
+  body: API.ConfirmRoutingReleaseEnforceRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.ConfirmRoutingReleaseEnforceReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/routing/release_confirm`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** 此处后端没有提供注释 POST /v1/admin/routing/release_rollback */
+export async function routingServiceRollbackRoutingReleaseAudit(
+  body: API.RollbackRoutingReleaseAuditRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.RollbackRoutingReleaseAuditReply>(
+    `${
+      import.meta.env.VITE_API_PREFIX || ""
+    }/v1/admin/routing/release_rollback`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
 /** 此处后端没有提供注释 PUT /v1/admin/routing/profile */
 export async function routingServiceUpdateRouteProfile(
   body: API.UpdateRouteProfileRequest,

@@ -24,8 +24,9 @@ import {
   type ProTableActions,
 } from "@workspace/ui/composed/pro-table/pro-table";
 import {
-  routingServiceCreateDnsResolver,
   routingServiceActRoutingGrayRelease,
+  routingServiceConfirmRoutingReleaseEnforce,
+  routingServiceCreateDnsResolver,
   routingServiceCreateRouteOutbound,
   routingServiceCreateRouteProfile,
   routingServiceCreateRouteRule,
@@ -51,6 +52,7 @@ import {
   routingServiceListRoutingRouteEvents,
   routingServiceListUnlockServices,
   routingServicePreviewRouteConfig,
+  routingServiceRollbackRoutingReleaseAudit,
   routingServiceSnapshotRoutingReleaseAudit,
   routingServiceUpdateDnsResolver,
   routingServiceUpdateRouteOutbound,
@@ -222,6 +224,10 @@ function latestRunnableGrayRelease(items: API.RoutingGrayRelease[]) {
   return items.find((item) =>
     ["running", "draft", "paused"].includes(String(item.status || ""))
   );
+}
+
+function latestAllowedSnapshot(report?: API.RoutingReleaseReport | null) {
+  return (report?.snapshots || []).find((item) => item.allowed);
 }
 
 function toRequestParams(pagination: { page?: number; size?: number }) {
@@ -768,6 +774,30 @@ function RoutingOverviewPanel() {
     toast.success(t("auditSnapshotSaved", "Audit snapshot saved"));
     await loadOverview();
   };
+  const confirmEnforce = async () => {
+    const release = latestRunnableGrayRelease(grayReleases);
+    const snapshot = latestAllowedSnapshot(releaseReport);
+    if (!release?.id) {
+      toast.error(t("missingGrayRelease", "Missing gray release"));
+      return;
+    }
+    if (!snapshot?.id) {
+      toast.error(
+        t("missingAllowedSnapshot", "Missing allowed audit snapshot")
+      );
+      return;
+    }
+    await routingServiceConfirmRoutingReleaseEnforce({
+      releaseId: release.id,
+      snapshotId: snapshot.id,
+      profileCode: overview?.profileCode,
+      routingHash: overview?.routingHash,
+      operator: "admin",
+      reason: t("confirmEnforceReason", "manual enforce confirmation"),
+    });
+    toast.success(t("confirmEnforceSuccess", "Enforce confirmed"));
+    await loadOverview();
+  };
   const updateThreshold = (
     key: keyof API.RoutingReleaseThresholds,
     value: string
@@ -784,26 +814,24 @@ function RoutingOverviewPanel() {
       toast.error(t("missingProfileCode", "Missing profile code"));
       return;
     }
+    const release = latestRunnableGrayRelease(grayReleases);
+    if (!release?.id) {
+      toast.error(t("missingGrayRelease", "Missing gray release"));
+      return;
+    }
     if (overview?.mode === "observe") {
       toast.info(t("rollbackAlreadyObserve", "Profile is already observe"));
       return;
     }
     setRollbacking(true);
     try {
-      const { data } = await routingServiceListRouteProfiles({
-        page: "1",
-        size: "20",
-        search: profileCode,
-      });
-      const profile = (data.data?.list || []).find(
-        (item) => item.code === profileCode
-      );
-      if (!profile?.id) {
-        toast.error(t("profileNotFound", "Profile not found"));
-        return;
-      }
-      await routingServiceUpdateRouteProfile({
-        profile: { ...profile, mode: "observe" },
+      await routingServiceRollbackRoutingReleaseAudit({
+        releaseId: release.id,
+        profileCode,
+        routingHash: overview?.routingHash,
+        windowMinutes: "60",
+        operator: "admin",
+        reason: t("grayRollbackReason", "manual rollback from admin"),
       });
       toast.success(t("rollbackObserveSuccess", "Rolled back to observe"));
       await loadOverview();
@@ -958,6 +986,30 @@ function RoutingOverviewPanel() {
             <ShieldCheck className="size-4" />
             {t("saveAuditSnapshot", "Save audit snapshot")}
           </Button>
+          <ConfirmButton
+            cancelText={t("cancel", "Cancel")}
+            confirmText={t("confirm", "Confirm")}
+            description={t(
+              "confirmEnforceDescription",
+              "Confirm enforce with the latest allowed audit snapshot."
+            )}
+            onConfirm={confirmEnforce}
+            title={t("confirmEnforce", "Confirm enforce")}
+            trigger={
+              <Button
+                disabled={
+                  loading ||
+                  !latestRunnableGrayRelease(grayReleases)?.id ||
+                  !latestAllowedSnapshot(releaseReport)?.id
+                }
+                size="sm"
+                variant="default"
+              >
+                <ShieldCheck className="size-4" />
+                {t("confirmEnforce", "Confirm enforce")}
+              </Button>
+            }
+          />
         </div>
         <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
           {(releaseGate?.checks || []).map((check) => (
@@ -1055,6 +1107,84 @@ function RoutingOverviewPanel() {
             ) : (
               <div className="rounded-md border px-3 py-2 text-muted-foreground text-sm">
                 {t("noAuditSnapshots", "No audit snapshots")}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        <div>
+          <div className="mb-2 font-medium text-sm">
+            {t("releaseApprovals", "Release Approvals")}
+          </div>
+          <div className="grid gap-2">
+            {(releaseReport?.approvals || []).length > 0 ? (
+              (releaseReport?.approvals || []).slice(0, 5).map((approval) => (
+                <div
+                  className="min-w-0 rounded-md border px-3 py-2"
+                  key={approval.id}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate font-medium text-sm">
+                      {approval.id || "-"}
+                    </span>
+                    <Badge variant="default">
+                      {translatedValue(t, "statuses", "enforce")}
+                    </Badge>
+                  </div>
+                  <div className="mt-1 truncate text-muted-foreground text-xs">
+                    {dateCell(approval.confirmedAt)} ·{" "}
+                    {approval.operator || "-"}
+                  </div>
+                  <div className="mt-1 truncate text-muted-foreground text-xs">
+                    {approval.snapshotId || "-"} · {approval.routingHash || "-"}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-md border px-3 py-2 text-muted-foreground text-sm">
+                {t("noReleaseApprovals", "No release approvals")}
+              </div>
+            )}
+          </div>
+        </div>
+        <div>
+          <div className="mb-2 font-medium text-sm">
+            {t("rollbackAudits", "Rollback Audits")}
+          </div>
+          <div className="grid gap-2">
+            {(releaseReport?.rollbackAudits || []).length > 0 ? (
+              (releaseReport?.rollbackAudits || []).slice(0, 5).map((audit) => (
+                <div
+                  className="min-w-0 rounded-md border px-3 py-2"
+                  key={audit.id}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate font-medium text-sm">
+                      {audit.id || "-"}
+                    </span>
+                    <Badge variant="outline">
+                      {translatedValue(
+                        t,
+                        "grayStatuses",
+                        audit.afterReleaseStatus
+                      )}
+                    </Badge>
+                  </div>
+                  <div className="mt-1 truncate text-muted-foreground text-xs">
+                    {dateCell(audit.createdAt)} · {audit.operator || "-"} ·{" "}
+                    {translatedValue(t, "statuses", audit.beforeMode)} →{" "}
+                    {translatedValue(t, "statuses", audit.afterMode)}
+                  </div>
+                  <div className="mt-1 truncate text-muted-foreground text-xs">
+                    {audit.summary || audit.reason || "-"}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-md border px-3 py-2 text-muted-foreground text-sm">
+                {t("noRollbackAudits", "No rollback audits")}
               </div>
             )}
           </div>

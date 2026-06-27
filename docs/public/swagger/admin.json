@@ -4045,6 +4045,36 @@
         }
       }
     },
+    "/v1/admin/routing/release_confirm": {
+      "post": {
+        "tags": [
+          "RoutingService"
+        ],
+        "operationId": "RoutingService_ConfirmRoutingReleaseEnforce",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/api.admin.routing.v1.ConfirmRoutingReleaseEnforceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/api.admin.routing.v1.ConfirmRoutingReleaseEnforceReply"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/admin/routing/release_gate": {
       "get": {
         "tags": [
@@ -4323,6 +4353,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/api.admin.routing.v1.GetRoutingReleaseReportReply"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/routing/release_rollback": {
+      "post": {
+        "tags": [
+          "RoutingService"
+        ],
+        "operationId": "RoutingService_RollbackRoutingReleaseAudit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/api.admin.routing.v1.RollbackRoutingReleaseAuditRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/api.admin.routing.v1.RollbackRoutingReleaseAuditReply"
                 }
               }
             }
@@ -11738,6 +11798,44 @@
           }
         }
       },
+      "api.admin.routing.v1.ConfirmRoutingReleaseEnforceReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseApproval"
+          }
+        }
+      },
+      "api.admin.routing.v1.ConfirmRoutingReleaseEnforceRequest": {
+        "type": "object",
+        "properties": {
+          "releaseId": {
+            "type": "string"
+          },
+          "snapshotId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
       "api.admin.routing.v1.CreateDnsResolverRequest": {
         "type": "object",
         "properties": {
@@ -12193,6 +12291,44 @@
             "type": "string"
           },
           "scopeId": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RollbackRoutingReleaseAuditReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingRollbackAudit"
+          }
+        }
+      },
+      "api.admin.routing.v1.RollbackRoutingReleaseAuditRequest": {
+        "type": "object",
+        "properties": {
+          "releaseId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "windowMinutes": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "reason": {
             "type": "string"
           }
         }
@@ -12948,6 +13084,35 @@
           }
         }
       },
+      "api.admin.routing.v1.RoutingReleaseApproval": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "releaseId": {
+            "type": "string"
+          },
+          "snapshotId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "confirmedAt": {
+            "type": "string"
+          }
+        }
+      },
       "api.admin.routing.v1.RoutingReleaseAuditSnapshot": {
         "type": "object",
         "properties": {
@@ -13076,6 +13241,18 @@
           },
           "generatedAt": {
             "type": "string"
+          },
+          "approvals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseApproval"
+            }
+          },
+          "rollbackAudits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingRollbackAudit"
+            }
           }
         }
       },
@@ -13105,6 +13282,53 @@
           "minHealthReports": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingRollbackAudit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "releaseId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "beforeMode": {
+            "type": "string"
+          },
+          "afterMode": {
+            "type": "string"
+          },
+          "beforeReleaseStatus": {
+            "type": "string"
+          },
+          "afterReleaseStatus": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "alerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseAlert"
+            }
+          },
+          "createdAt": {
+            "type": "string"
           }
         }
       },
