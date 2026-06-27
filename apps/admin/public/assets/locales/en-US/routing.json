@@ -7,6 +7,7 @@
   "batchNo": "Batch",
   "cancel": "Cancel",
   "category": "Category",
+  "capabilityMatrix": "Capability Matrix",
   "code": "Code",
   "confirm": "Confirm",
   "confirmDelete": "Confirm Delete",
@@ -24,6 +25,7 @@
   "defaultGrayReleaseName": "Default gray release",
   "edit": "Edit",
   "editTitle": "Edit",
+  "e2eChecklist": "E2E Checklist",
   "enabled": "Enabled",
   "enforceGuard": "Enforce Guard",
   "enforceReady": "Enforce Ready",
@@ -60,6 +62,10 @@
   "proto": "Proto",
   "refresh": "Refresh",
   "region": "Region",
+  "ready": "Ready",
+  "releaseAllowed": "Allowed",
+  "releaseBlocked": "Blocked",
+  "releaseGate": "Release Gate",
   "resolverJson": "Resolver JSON",
   "rollback": "Rollback",
   "rollbackGrayDescription": "Mark this gray release as rolled back.",
@@ -88,6 +94,7 @@
   "userScopeHint": "Current user scope",
   "userSubscribeId": "User Subscribe ID",
   "yes": "Yes",
+  "waiting": "Waiting",
   "no": "No",
   "noHealthReports": "No health reports",
   "noRouteEvents": "No route events",
@@ -141,7 +148,9 @@
     "disabled": "disabled",
     "guarded": "guarded",
     "small-scope ready": "small-scope ready",
-    "empty": "empty"
+    "empty": "empty",
+    "blocked": "blocked",
+    "waiting": "waiting"
   },
   "healthKinds": {
     "outbound": "outbound",
@@ -166,6 +175,29 @@
     "user_subscribe": "user subscribe",
     "subscribe": "subscribe",
     "node": "node"
+  },
+  "releaseGateChecks": {
+    "profile_exists": "Profile exists",
+    "profile_enabled": "Profile enabled",
+    "profile_not_global": "Profile is scoped",
+    "gray_running": "Gray batch running",
+    "gray_not_paused_or_rolled_back": "Gray batch active",
+    "routing_hash_present": "Routing hash present",
+    "fallback_rate_ok": "Fallback rate below threshold",
+    "dns_fail_rate_ok": "DNS fail rate below threshold",
+    "outbound_fail_rate_ok": "Outbound fail rate below threshold",
+    "top_errors_clear": "No unconfirmed top errors"
+  },
+  "e2eItems": {
+    "admin_profile": "Admin profile exists",
+    "gray_release": "Gray release exists",
+    "public_scope": "Scoped profile is non-global",
+    "health_report": "Health report received",
+    "route_event": "Route event received",
+    "analytics": "Analytics has evidence",
+    "rollback": "Rollback path available",
+    "non_ppanel_guard": "Non-ppanel guarded",
+    "migration_smoke": "Migration smoke ready"
   },
   "topErrors": "Top Errors",
   "sources": {

@@ -36,13 +36,16 @@ import {
   routingServiceDeleteRouteProfile,
   routingServiceDeleteRouteRule,
   routingServiceDeleteUnlockService,
+  routingServiceGetRoutingAnalytics,
+  routingServiceGetRoutingCapabilityMatrix,
+  routingServiceGetRoutingE2EChecklist,
   routingServiceGetRoutingOverview,
+  routingServiceGetRoutingReleaseGate,
   routingServiceListDnsResolvers,
   routingServiceListRouteOutbounds,
   routingServiceListRouteProfiles,
   routingServiceListRouteRules,
   routingServiceListRoutingHealthReports,
-  routingServiceGetRoutingAnalytics,
   routingServiceListRoutingGrayReleases,
   routingServiceListRoutingRouteEvents,
   routingServiceListUnlockServices,
@@ -595,6 +598,13 @@ function RoutingOverviewPanel() {
   const [analytics, setAnalytics] = useState<API.RoutingAnalyticsData | null>(
     null
   );
+  const [releaseGate, setReleaseGate] = useState<API.RoutingReleaseGate | null>(
+    null
+  );
+  const [e2eChecklist, setE2eChecklist] =
+    useState<API.RoutingE2EChecklistData | null>(null);
+  const [capabilityMatrix, setCapabilityMatrix] =
+    useState<API.RoutingCapabilityMatrixData | null>(null);
   const [grayReleases, setGrayReleases] = useState<API.RoutingGrayRelease[]>(
     []
   );
@@ -602,32 +612,47 @@ function RoutingOverviewPanel() {
   const loadOverview = async () => {
     setLoading(true);
     try {
+      const overviewResp = await routingServiceGetRoutingOverview();
+      const latestOverview = overviewResp.data.data || null;
+      const profileCode = latestOverview?.profileCode;
+      const routingHash = latestOverview?.routingHash;
       const [
-        { data },
         reportsResp,
         routeEventsResp,
         analyticsResp,
         grayReleasesResp,
+        releaseGateResp,
+        e2eChecklistResp,
+        capabilityMatrixResp,
       ] = await Promise.all([
-        routingServiceGetRoutingOverview(),
         routingServiceListRoutingHealthReports({ page: "1", size: "6" }),
         routingServiceListRoutingRouteEvents({ page: "1", size: "6" }),
         routingServiceGetRoutingAnalytics({
-          profileCode: overview?.profileCode,
-          routingHash: overview?.routingHash,
+          profileCode,
+          routingHash,
           windowMinutes: "60",
         }),
         routingServiceListRoutingGrayReleases({
           page: "1",
           size: "6",
-          profileCode: overview?.profileCode,
+          profileCode,
         }),
+        routingServiceGetRoutingReleaseGate({
+          profileCode,
+          routingHash,
+          windowMinutes: "60",
+        }),
+        routingServiceGetRoutingE2EChecklist({ profileCode }),
+        routingServiceGetRoutingCapabilityMatrix(),
       ]);
-      setOverview(data.data || null);
+      setOverview(latestOverview);
       setReports(reportsResp.data.data?.list || []);
       setRouteEvents(routeEventsResp.data.data?.list || []);
       setAnalytics(analyticsResp.data.data || null);
       setGrayReleases(grayReleasesResp.data.data?.list || []);
+      setReleaseGate(releaseGateResp.data.data || null);
+      setE2eChecklist(e2eChecklistResp.data.data || null);
+      setCapabilityMatrix(capabilityMatrixResp.data.data || null);
     } finally {
       setLoading(false);
     }
@@ -808,6 +833,112 @@ function RoutingOverviewPanel() {
           label={t("outboundFailRate", "Outbound Fail Rate")}
           value={basisPointsCell(analytics?.outboundFailRateBp)}
         />
+      </div>
+
+      <div className="mt-4">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <div className="font-medium text-sm">
+            {t("releaseGate", "Release Gate")}
+          </div>
+          <Badge variant={releaseGate?.allowed ? "default" : "destructive"}>
+            {releaseGate?.allowed
+              ? t("releaseAllowed", "Allowed")
+              : t("releaseBlocked", "Blocked")}
+          </Badge>
+        </div>
+        <div className="mb-2 text-muted-foreground text-sm">
+          {releaseGate?.summary || "-"}
+        </div>
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          {(releaseGate?.checks || []).map((check) => (
+            <div
+              className="min-w-0 rounded-md border px-3 py-2"
+              key={check.key}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate font-medium text-sm">
+                  {t(`releaseGateChecks.${check.key}`, {
+                    defaultValue: check.label || check.key || "-",
+                  })}
+                </span>
+                <Badge variant={check.passed ? "default" : "destructive"}>
+                  {translatedValue(t, "statuses", check.status)}
+                </Badge>
+              </div>
+              <div className="mt-1 truncate text-muted-foreground text-xs">
+                {check.reason || "-"}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        <div>
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="font-medium text-sm">
+              {t("e2eChecklist", "E2E Checklist")}
+            </div>
+            <Badge variant={e2eChecklist?.ready ? "default" : "outline"}>
+              {e2eChecklist?.ready
+                ? t("ready", "Ready")
+                : t("waiting", "Waiting")}
+            </Badge>
+          </div>
+          <div className="grid gap-2">
+            {(e2eChecklist?.items || []).map((item) => (
+              <div
+                className="min-w-0 rounded-md border px-3 py-2"
+                key={item.key}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate font-medium text-sm">
+                    {t(`e2eItems.${item.key}`, {
+                      defaultValue: item.label || item.key || "-",
+                    })}
+                  </span>
+                  <Badge variant={item.passed ? "default" : "outline"}>
+                    {translatedValue(t, "statuses", item.status)}
+                  </Badge>
+                </div>
+                <div className="mt-1 truncate text-muted-foreground text-xs">
+                  {item.evidence || "-"}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-2 font-medium text-sm">
+            {t("capabilityMatrix", "Capability Matrix")}
+          </div>
+          <div className="grid gap-2">
+            {(capabilityMatrix?.items || []).map((item) => (
+              <div
+                className="min-w-0 rounded-md border px-3 py-2"
+                key={`${item.client}:${item.panel}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate font-medium text-sm">
+                    {item.client || "-"} · {item.panel || "-"}
+                  </span>
+                  <Badge
+                    variant={item.enforceCandidate ? "default" : "secondary"}
+                  >
+                    {item.executionMode || "-"}
+                  </Badge>
+                </div>
+                <div className="mt-1 truncate text-muted-foreground text-xs">
+                  {item.notes || "-"}
+                </div>
+                <div className="mt-1 truncate text-muted-foreground text-xs">
+                  {(item.supportedFeatures || []).join(", ") || "-"}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="mt-4">

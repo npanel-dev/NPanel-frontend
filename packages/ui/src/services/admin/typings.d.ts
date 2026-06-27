@@ -2893,6 +2893,73 @@ declare namespace API {
     data?: RoutingGrayReleaseData;
   };
 
+  type RoutingReleaseGateCheck = {
+    key?: string;
+    label?: string;
+    passed?: boolean;
+    status?: string;
+    reason?: string;
+  };
+
+  type RoutingReleaseGate = {
+    profileCode?: string;
+    routingHash?: string;
+    allowed?: boolean;
+    requiresConfirmation?: boolean;
+    summary?: string;
+    checks?: RoutingReleaseGateCheck[];
+    analytics?: RoutingAnalyticsData;
+    generatedAt?: string;
+  };
+
+  type GetRoutingReleaseGateReply = {
+    code?: number;
+    message?: string;
+    data?: RoutingReleaseGate;
+  };
+
+  type RoutingE2EChecklistItem = {
+    key?: string;
+    label?: string;
+    status?: string;
+    passed?: boolean;
+    evidence?: string;
+  };
+
+  type RoutingE2EChecklistData = {
+    items?: RoutingE2EChecklistItem[];
+    ready?: boolean;
+    generatedAt?: string;
+  };
+
+  type GetRoutingE2EChecklistReply = {
+    code?: number;
+    message?: string;
+    data?: RoutingE2EChecklistData;
+  };
+
+  type RoutingCapabilityMatrixItem = {
+    client?: string;
+    panel?: string;
+    minVersion?: string;
+    supportedFeatures?: string[];
+    missingFeatures?: string[];
+    executionMode?: string;
+    enforceCandidate?: boolean;
+    notes?: string;
+  };
+
+  type RoutingCapabilityMatrixData = {
+    items?: RoutingCapabilityMatrixItem[];
+    generatedAt?: string;
+  };
+
+  type GetRoutingCapabilityMatrixReply = {
+    code?: number;
+    message?: string;
+    data?: RoutingCapabilityMatrixData;
+  };
+
   type RoutingServiceListRoutingHealthReportsParams = {
     page?: string;
     size?: string;
@@ -2939,6 +3006,16 @@ declare namespace API {
     action?: string;
     operator?: string;
     reason?: string;
+  };
+
+  type RoutingServiceGetRoutingReleaseGateParams = {
+    profileCode?: string;
+    routingHash?: string;
+    windowMinutes?: string;
+  };
+
+  type RoutingServiceGetRoutingE2EChecklistParams = {
+    profileCode?: string;
   };
 
   type PreviewSubscribeTemplateData = {

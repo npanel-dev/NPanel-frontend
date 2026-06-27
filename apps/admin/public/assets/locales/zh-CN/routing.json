@@ -7,6 +7,7 @@
   "batchNo": "批次",
   "cancel": "取消",
   "category": "分类",
+  "capabilityMatrix": "能力矩阵",
   "code": "编码",
   "confirm": "确认",
   "confirmDelete": "确认删除",
@@ -24,6 +25,7 @@
   "defaultGrayReleaseName": "默认灰度批次",
   "edit": "编辑",
   "editTitle": "编辑",
+  "e2eChecklist": "端到端清单",
   "enabled": "启用",
   "enforceGuard": "Enforce 前置保护",
   "enforceReady": "Enforce 就绪",
@@ -60,6 +62,10 @@
   "proto": "协议",
   "refresh": "刷新",
   "region": "地区",
+  "ready": "就绪",
+  "releaseAllowed": "允许",
+  "releaseBlocked": "阻断",
+  "releaseGate": "发布准入",
   "resolverJson": "解析器 JSON",
   "rollback": "回滚",
   "rollbackGrayDescription": "将该灰度批次标记为已回滚。",
@@ -88,6 +94,7 @@
   "userScopeHint": "当前用户作用域",
   "userSubscribeId": "用户订阅 ID",
   "yes": "是",
+  "waiting": "等待",
   "no": "否",
   "noHealthReports": "暂无健康上报",
   "noRouteEvents": "暂无路由事件",
@@ -141,7 +148,9 @@
     "disabled": "已禁用",
     "guarded": "受保护",
     "small-scope ready": "小流量就绪",
-    "empty": "空"
+    "empty": "空",
+    "blocked": "阻断",
+    "waiting": "等待"
   },
   "healthKinds": {
     "outbound": "出口",
@@ -166,6 +175,29 @@
     "user_subscribe": "用户订阅",
     "subscribe": "套餐",
     "node": "节点"
+  },
+  "releaseGateChecks": {
+    "profile_exists": "Profile 存在",
+    "profile_enabled": "Profile 已启用",
+    "profile_not_global": "Profile 非全局",
+    "gray_running": "灰度批次运行中",
+    "gray_not_paused_or_rolled_back": "灰度批次未暂停/回滚",
+    "routing_hash_present": "Routing Hash 存在",
+    "fallback_rate_ok": "Fallback 率低于阈值",
+    "dns_fail_rate_ok": "DNS 失败率低于阈值",
+    "outbound_fail_rate_ok": "出口失败率低于阈值",
+    "top_errors_clear": "无未确认 Top 错误"
+  },
+  "e2eItems": {
+    "admin_profile": "Admin Profile 已配置",
+    "gray_release": "灰度批次已创建",
+    "public_scope": "Public scope 非全局",
+    "health_report": "健康上报已收到",
+    "route_event": "路由事件已收到",
+    "analytics": "分析数据可用",
+    "rollback": "回滚路径可用",
+    "non_ppanel_guard": "非 ppanel 已保护",
+    "migration_smoke": "迁移烟测就绪"
   },
   "topErrors": "错误 TopN",
   "sources": {

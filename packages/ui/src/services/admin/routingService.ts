@@ -318,6 +318,55 @@ export async function routingServiceActRoutingGrayRelease(
   );
 }
 
+/** 此处后端没有提供注释 GET /v1/admin/routing/release_gate */
+export async function routingServiceGetRoutingReleaseGate(
+  params: API.RoutingServiceGetRoutingReleaseGateParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.GetRoutingReleaseGateReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/routing/release_gate`,
+    {
+      method: "GET",
+      params: {
+        ...params,
+      },
+      ...(options || {}),
+    }
+  );
+}
+
+/** 此处后端没有提供注释 GET /v1/admin/routing/e2e_checklist */
+export async function routingServiceGetRoutingE2EChecklist(
+  params: API.RoutingServiceGetRoutingE2EChecklistParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.GetRoutingE2EChecklistReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/routing/e2e_checklist`,
+    {
+      method: "GET",
+      params: {
+        ...params,
+      },
+      ...(options || {}),
+    }
+  );
+}
+
+/** 此处后端没有提供注释 GET /v1/admin/routing/capability_matrix */
+export async function routingServiceGetRoutingCapabilityMatrix(options?: {
+  [key: string]: any;
+}) {
+  return request<API.GetRoutingCapabilityMatrixReply>(
+    `${
+      import.meta.env.VITE_API_PREFIX || ""
+    }/v1/admin/routing/capability_matrix`,
+    {
+      method: "GET",
+      ...(options || {}),
+    }
+  );
+}
+
 /** 此处后端没有提供注释 PUT /v1/admin/routing/profile */
 export async function routingServiceUpdateRouteProfile(
   body: API.UpdateRouteProfileRequest,
