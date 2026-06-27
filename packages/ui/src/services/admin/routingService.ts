@@ -367,6 +367,43 @@ export async function routingServiceGetRoutingCapabilityMatrix(options?: {
   );
 }
 
+/** 此处后端没有提供注释 GET /v1/admin/routing/release_report */
+export async function routingServiceGetRoutingReleaseReport(
+  params: API.RoutingServiceGetRoutingReleaseReportParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.GetRoutingReleaseReportReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/routing/release_report`,
+    {
+      method: "GET",
+      params: {
+        ...params,
+      },
+      ...(options || {}),
+    }
+  );
+}
+
+/** 此处后端没有提供注释 POST /v1/admin/routing/release_audit_snapshot */
+export async function routingServiceSnapshotRoutingReleaseAudit(
+  body: API.SnapshotRoutingReleaseAuditRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.SnapshotRoutingReleaseAuditReply>(
+    `${
+      import.meta.env.VITE_API_PREFIX || ""
+    }/v1/admin/routing/release_audit_snapshot`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
 /** 此处后端没有提供注释 PUT /v1/admin/routing/profile */
 export async function routingServiceUpdateRouteProfile(
   body: API.UpdateRouteProfileRequest,

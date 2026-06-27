@@ -2910,6 +2910,7 @@ declare namespace API {
     checks?: RoutingReleaseGateCheck[];
     analytics?: RoutingAnalyticsData;
     generatedAt?: string;
+    thresholds?: RoutingReleaseThresholds;
   };
 
   type GetRoutingReleaseGateReply = {
@@ -2958,6 +2959,68 @@ declare namespace API {
     code?: number;
     message?: string;
     data?: RoutingCapabilityMatrixData;
+  };
+
+  type RoutingReleaseThresholds = {
+    fallbackRateBp?: number;
+    dnsFailRateBp?: number;
+    outboundFailRateBp?: number;
+    topErrorsMax?: number;
+    minRouteEvents?: number;
+    minHealthReports?: number;
+  };
+
+  type RoutingReleaseAlert = {
+    key?: string;
+    severity?: string;
+    message?: string;
+    evidence?: string;
+  };
+
+  type RoutingReleaseAuditSnapshot = {
+    id?: string;
+    releaseId?: string;
+    profileCode?: string;
+    routingHash?: string;
+    operator?: string;
+    allowed?: boolean;
+    summary?: string;
+    thresholds?: RoutingReleaseThresholds;
+    gate?: RoutingReleaseGate;
+    alerts?: RoutingReleaseAlert[];
+    reportJson?: string;
+    createdAt?: string;
+  };
+
+  type RoutingReleaseReport = {
+    profileCode?: string;
+    routingHash?: string;
+    thresholds?: RoutingReleaseThresholds;
+    gate?: RoutingReleaseGate;
+    alerts?: RoutingReleaseAlert[];
+    snapshots?: RoutingReleaseAuditSnapshot[];
+    generatedAt?: string;
+  };
+
+  type GetRoutingReleaseReportReply = {
+    code?: number;
+    message?: string;
+    data?: RoutingReleaseReport;
+  };
+
+  type SnapshotRoutingReleaseAuditRequest = {
+    releaseId?: string;
+    profileCode?: string;
+    routingHash?: string;
+    windowMinutes?: string;
+    operator?: string;
+    thresholds?: RoutingReleaseThresholds;
+  };
+
+  type SnapshotRoutingReleaseAuditReply = {
+    code?: number;
+    message?: string;
+    data?: RoutingReleaseAuditSnapshot;
   };
 
   type RoutingServiceListRoutingHealthReportsParams = {
@@ -3012,10 +3075,29 @@ declare namespace API {
     profileCode?: string;
     routingHash?: string;
     windowMinutes?: string;
+    fallbackRateBp?: string;
+    dnsFailRateBp?: string;
+    outboundFailRateBp?: string;
+    topErrorsMax?: string;
+    minRouteEvents?: string;
+    minHealthReports?: string;
   };
 
   type RoutingServiceGetRoutingE2EChecklistParams = {
     profileCode?: string;
+  };
+
+  type RoutingServiceGetRoutingReleaseReportParams = {
+    releaseId?: string;
+    profileCode?: string;
+    routingHash?: string;
+    windowMinutes?: string;
+    fallbackRateBp?: string;
+    dnsFailRateBp?: string;
+    outboundFailRateBp?: string;
+    topErrorsMax?: string;
+    minRouteEvents?: string;
+    minHealthReports?: string;
   };
 
   type PreviewSubscribeTemplateData = {

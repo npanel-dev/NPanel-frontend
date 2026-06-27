@@ -41,6 +41,7 @@ import {
   routingServiceGetRoutingE2EChecklist,
   routingServiceGetRoutingOverview,
   routingServiceGetRoutingReleaseGate,
+  routingServiceGetRoutingReleaseReport,
   routingServiceListDnsResolvers,
   routingServiceListRouteOutbounds,
   routingServiceListRouteProfiles,
@@ -50,6 +51,7 @@ import {
   routingServiceListRoutingRouteEvents,
   routingServiceListUnlockServices,
   routingServicePreviewRouteConfig,
+  routingServiceSnapshotRoutingReleaseAudit,
   routingServiceUpdateDnsResolver,
   routingServiceUpdateRouteOutbound,
   routingServiceUpdateRouteProfile,
@@ -194,6 +196,32 @@ function basisPointsCell(value: unknown) {
     return "0.00%";
   }
   return `${(parsed / 100).toFixed(2)}%`;
+}
+
+const defaultReleaseThresholds: Required<API.RoutingReleaseThresholds> = {
+  fallbackRateBp: 500,
+  dnsFailRateBp: 500,
+  outboundFailRateBp: 500,
+  topErrorsMax: 0,
+  minRouteEvents: 1,
+  minHealthReports: 1,
+};
+
+function thresholdQueryParams(thresholds: API.RoutingReleaseThresholds) {
+  return {
+    fallbackRateBp: String(thresholds.fallbackRateBp ?? 500),
+    dnsFailRateBp: String(thresholds.dnsFailRateBp ?? 500),
+    outboundFailRateBp: String(thresholds.outboundFailRateBp ?? 500),
+    topErrorsMax: String(thresholds.topErrorsMax ?? 0),
+    minRouteEvents: String(thresholds.minRouteEvents ?? 1),
+    minHealthReports: String(thresholds.minHealthReports ?? 1),
+  };
+}
+
+function latestRunnableGrayRelease(items: API.RoutingGrayRelease[]) {
+  return items.find((item) =>
+    ["running", "draft", "paused"].includes(String(item.status || ""))
+  );
 }
 
 function toRequestParams(pagination: { page?: number; size?: number }) {
@@ -601,12 +629,17 @@ function RoutingOverviewPanel() {
   const [releaseGate, setReleaseGate] = useState<API.RoutingReleaseGate | null>(
     null
   );
+  const [releaseReport, setReleaseReport] =
+    useState<API.RoutingReleaseReport | null>(null);
   const [e2eChecklist, setE2eChecklist] =
     useState<API.RoutingE2EChecklistData | null>(null);
   const [capabilityMatrix, setCapabilityMatrix] =
     useState<API.RoutingCapabilityMatrixData | null>(null);
   const [grayReleases, setGrayReleases] = useState<API.RoutingGrayRelease[]>(
     []
+  );
+  const [thresholds, setThresholds] = useState<API.RoutingReleaseThresholds>(
+    defaultReleaseThresholds
   );
 
   const loadOverview = async () => {
@@ -616,6 +649,7 @@ function RoutingOverviewPanel() {
       const latestOverview = overviewResp.data.data || null;
       const profileCode = latestOverview?.profileCode;
       const routingHash = latestOverview?.routingHash;
+      const thresholdParams = thresholdQueryParams(thresholds);
       const [
         reportsResp,
         routeEventsResp,
@@ -641,16 +675,27 @@ function RoutingOverviewPanel() {
           profileCode,
           routingHash,
           windowMinutes: "60",
+          ...thresholdParams,
         }),
         routingServiceGetRoutingE2EChecklist({ profileCode }),
         routingServiceGetRoutingCapabilityMatrix(),
       ]);
+      const releases = grayReleasesResp.data.data?.list || [];
+      const release = latestRunnableGrayRelease(releases);
+      const releaseReportResp = await routingServiceGetRoutingReleaseReport({
+        releaseId: release?.id,
+        profileCode,
+        routingHash,
+        windowMinutes: "60",
+        ...thresholdParams,
+      });
       setOverview(latestOverview);
       setReports(reportsResp.data.data?.list || []);
       setRouteEvents(routeEventsResp.data.data?.list || []);
       setAnalytics(analyticsResp.data.data || null);
-      setGrayReleases(grayReleasesResp.data.data?.list || []);
+      setGrayReleases(releases);
       setReleaseGate(releaseGateResp.data.data || null);
+      setReleaseReport(releaseReportResp.data.data || null);
       setE2eChecklist(e2eChecklistResp.data.data || null);
       setCapabilityMatrix(capabilityMatrixResp.data.data || null);
     } finally {
@@ -705,6 +750,33 @@ function RoutingOverviewPanel() {
     });
     toast.success(t("grayActionSuccess", "Gray action saved"));
     await loadOverview();
+  };
+  const saveAuditSnapshot = async () => {
+    const release = latestRunnableGrayRelease(grayReleases);
+    if (!release?.id) {
+      toast.error(t("missingGrayRelease", "Missing gray release"));
+      return;
+    }
+    await routingServiceSnapshotRoutingReleaseAudit({
+      releaseId: release.id,
+      profileCode: overview?.profileCode,
+      routingHash: overview?.routingHash,
+      windowMinutes: "60",
+      operator: "admin",
+      thresholds,
+    });
+    toast.success(t("auditSnapshotSaved", "Audit snapshot saved"));
+    await loadOverview();
+  };
+  const updateThreshold = (
+    key: keyof API.RoutingReleaseThresholds,
+    value: string
+  ) => {
+    const parsed = Number(value);
+    setThresholds((current) => ({
+      ...current,
+      [key]: Number.isFinite(parsed) ? parsed : 0,
+    }));
   };
   const rollbackToObserve = async () => {
     const profileCode = overview?.profileCode;
@@ -849,6 +921,44 @@ function RoutingOverviewPanel() {
         <div className="mb-2 text-muted-foreground text-sm">
           {releaseGate?.summary || "-"}
         </div>
+        <div className="mb-3 grid gap-2 md:grid-cols-3 xl:grid-cols-6">
+          {(
+            [
+              ["fallbackRateBp", "fallbackThreshold"],
+              ["dnsFailRateBp", "dnsThreshold"],
+              ["outboundFailRateBp", "outboundThreshold"],
+              ["topErrorsMax", "topErrorsMax"],
+              ["minRouteEvents", "minRouteEvents"],
+              ["minHealthReports", "minHealthReports"],
+            ] as [keyof API.RoutingReleaseThresholds, string][]
+          ).map(([key, label]) => (
+            <div key={key}>
+              <Label className="text-xs">{t(label, label)}</Label>
+              <Input
+                className="mt-1 h-8"
+                min={0}
+                onChange={(event) => updateThreshold(key, event.target.value)}
+                type="number"
+                value={String(thresholds[key] ?? 0)}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="mb-3 flex flex-wrap gap-2">
+          <Button disabled={loading} onClick={loadOverview} size="sm">
+            <RefreshCw className="size-4" />
+            {t("recalculate", "Recalculate")}
+          </Button>
+          <Button
+            disabled={loading || !latestRunnableGrayRelease(grayReleases)?.id}
+            onClick={saveAuditSnapshot}
+            size="sm"
+            variant="outline"
+          >
+            <ShieldCheck className="size-4" />
+            {t("saveAuditSnapshot", "Save audit snapshot")}
+          </Button>
+        </div>
         <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
           {(releaseGate?.checks || []).map((check) => (
             <div
@@ -870,6 +980,84 @@ function RoutingOverviewPanel() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        <div>
+          <div className="mb-2 font-medium text-sm">
+            {t("releaseAlerts", "Release Alerts")}
+          </div>
+          <div className="grid gap-2">
+            {(releaseReport?.alerts || []).length > 0 ? (
+              (releaseReport?.alerts || []).map((alert) => (
+                <div
+                  className="min-w-0 rounded-md border px-3 py-2"
+                  key={`${alert.severity}:${alert.key}:${alert.message}`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate font-medium text-sm">
+                      {alert.message || alert.key || "-"}
+                    </span>
+                    <Badge
+                      variant={
+                        alert.severity === "critical"
+                          ? "destructive"
+                          : "outline"
+                      }
+                    >
+                      {translatedValue(t, "alertSeverities", alert.severity)}
+                    </Badge>
+                  </div>
+                  <div className="mt-1 truncate text-muted-foreground text-xs">
+                    {alert.evidence || "-"}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-md border px-3 py-2 text-muted-foreground text-sm">
+                {t("noReleaseAlerts", "No release alerts")}
+              </div>
+            )}
+          </div>
+        </div>
+        <div>
+          <div className="mb-2 font-medium text-sm">
+            {t("auditSnapshots", "Audit Snapshots")}
+          </div>
+          <div className="grid gap-2">
+            {(releaseReport?.snapshots || []).length > 0 ? (
+              (releaseReport?.snapshots || []).slice(0, 5).map((snapshot) => (
+                <div
+                  className="min-w-0 rounded-md border px-3 py-2"
+                  key={snapshot.id}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate font-medium text-sm">
+                      {snapshot.id || "-"}
+                    </span>
+                    <Badge
+                      variant={snapshot.allowed ? "default" : "destructive"}
+                    >
+                      {snapshot.allowed
+                        ? t("releaseAllowed", "Allowed")
+                        : t("releaseBlocked", "Blocked")}
+                    </Badge>
+                  </div>
+                  <div className="mt-1 truncate text-muted-foreground text-xs">
+                    {dateCell(snapshot.createdAt)} · {snapshot.operator || "-"}
+                  </div>
+                  <div className="mt-1 truncate text-muted-foreground text-xs">
+                    {snapshot.summary || "-"}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-md border px-3 py-2 text-muted-foreground text-sm">
+                {t("noAuditSnapshots", "No audit snapshots")}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
