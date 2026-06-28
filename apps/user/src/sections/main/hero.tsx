@@ -2,7 +2,6 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Link } from "@tanstack/react-router";
 import { HoverBorderGradient } from "@workspace/ui/components/hover-border-gradient";
 import { TextGenerateEffect } from "@workspace/ui/components/text-generate-effect";
-import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useGlobalStore } from "@/stores/global";
 
@@ -13,13 +12,7 @@ export function Hero() {
 
   return (
     <div className="grid gap-8 pt-16 sm:grid-cols-2">
-      <motion.div
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-start justify-center"
-        initial={{ opacity: 0, y: 50 }}
-        transition={{ type: "spring", stiffness: 80, damping: 15, delay: 0.3 }}
-        viewport={{ once: true, amount: 0.3 }}
-      >
+      <div className="flex flex-col items-start justify-center">
         <h1 className="my-6 font-bold text-4xl lg:text-6xl">
           {t("welcome", "Welcome to")} {site.site_name}
         </h1>
@@ -38,21 +31,15 @@ export function Hero() {
             {t("started", "Get Started")}
           </HoverBorderGradient>
         </Link>
-      </motion.div>
-      <motion.div
-        animate={{ opacity: 1, y: 0 }}
-        className="flex w-full"
-        initial={{ opacity: 0, y: 50 }}
-        transition={{ type: "spring", stiffness: 80, damping: 15, delay: 0.5 }}
-        viewport={{ once: true, amount: 0.3 }}
-      >
+      </div>
+      <div className="flex w-full">
         <DotLottieReact
           autoplay
           className="min-h-64 w-full sm:min-h-80"
           loop
           src="/assets/lotties/network-security.json"
         />
-      </motion.div>
+      </div>
     </div>
   );
 }
