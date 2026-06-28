@@ -21,18 +21,39 @@ type ParsedSubscribeDescription = {
 function parseJSON(value?: unknown) {
   if (typeof value !== "string" || value.trim() === "") return null;
   try {
-    return JSON.parse(value);
+    const parsed = JSON.parse(value);
+    if (typeof parsed === "string" && parsed.trim() !== value.trim()) {
+      return parseJSON(parsed) ?? parsed;
+    }
+    return parsed;
   } catch {
     return null;
   }
 }
 
+function isJSONLikeString(value?: unknown) {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  return (
+    (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+    (trimmed.startsWith("[") && trimmed.endsWith("]"))
+  );
+}
+
 function normalizeFeatures(value?: unknown): SubscribeFeature[] {
   const parsed = typeof value === "string" ? parseJSON(value) : value;
-  if (!Array.isArray(parsed)) return [];
+  const source =
+    parsed && !Array.isArray(parsed) && typeof parsed === "object"
+      ? (parsed as Record<string, unknown>).features
+      : parsed;
+  if (!Array.isArray(source)) return [];
 
-  return parsed
+  return source
     .map((item) => {
+      if (typeof item === "string") {
+        const label = item.trim();
+        return label ? { icon: "", label, type: "default" } : null;
+      }
       if (!item || typeof item !== "object") return null;
       const feature = item as Record<string, unknown>;
       const label = feature.label ?? feature.feature ?? feature.text;
@@ -55,6 +76,30 @@ function normalizeFeatures(value?: unknown): SubscribeFeature[] {
     .filter(Boolean) as SubscribeFeature[];
 }
 
+function firstFeatureList(...values: unknown[]) {
+  for (const value of values) {
+    const features = normalizeFeatures(value);
+    if (features.length > 0) return features;
+  }
+  return [];
+}
+
+function normalizeTextDescription(value?: unknown) {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  return isJSONLikeString(trimmed) ? "" : trimmed;
+}
+
+function firstText(...values: unknown[]) {
+  for (const value of values) {
+    if (typeof value !== "string") continue;
+    const trimmed = value.trim();
+    if (trimmed) return trimmed;
+  }
+  return "";
+}
+
 function normalizeDetailFormat(value?: unknown): "markdown" | "html" | "text" {
   const format = String(value || "").toLowerCase();
   if (format === "html") return "html";
@@ -71,36 +116,20 @@ function isFeatureImageIcon(value?: string) {
 export function parseSubscribeDescription(
   subscribe?: Partial<API.Subscribe> | null
 ): ParsedSubscribeDescription {
-  const legacy = parseJSON(subscribe?.description);
-  const legacyObject =
-    legacy && !Array.isArray(legacy) && typeof legacy === "object"
-      ? (legacy as Record<string, unknown>)
-      : null;
-
   const shortDescription =
-    String(
+    normalizeTextDescription(
       (subscribe as any)?.short_description ??
-        (subscribe as any)?.shortDescription ??
-        legacyObject?.description ??
-        ""
-    ).trim() ||
-    (legacy === null && typeof subscribe?.description === "string"
-      ? subscribe.description.trim()
-      : "");
+        (subscribe as any)?.shortDescription
+    ) || normalizeTextDescription(subscribe?.description);
 
-  const features = normalizeFeatures(
-    (subscribe as any)?.features ?? legacyObject?.features ?? legacy
-  );
+  const features = firstFeatureList((subscribe as any)?.features);
 
   const detailFormat = normalizeDetailFormat(
     (subscribe as any)?.detail_format ?? (subscribe as any)?.detailFormat
   );
-  const detailContent = String(
-    (subscribe as any)?.detail_content ??
-      (subscribe as any)?.detailContent ??
-      legacyObject?.detail_content ??
-      ""
-  ).trim();
+  const detailContent = firstText(
+    (subscribe as any)?.detail_content ?? (subscribe as any)?.detailContent
+  );
 
   return {
     shortDescription,

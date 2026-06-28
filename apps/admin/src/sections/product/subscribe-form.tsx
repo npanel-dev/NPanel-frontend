@@ -122,7 +122,6 @@ const defaultValues = {
   features: [],
   detail_format: "rich",
   detail_content: "",
-  legacy_description_input: "",
   deduction_ratio: 0,
   purchase_with_discount: false,
   reset_cycle: 0,
@@ -184,9 +183,17 @@ function parseJSON(value?: unknown) {
 
 function normalizeFeatureItems(value?: unknown): SubscribeFeatureEditorItem[] {
   const parsed = typeof value === "string" ? parseJSON(value) : value;
-  if (!Array.isArray(parsed)) return [];
-  return parsed
+  const source =
+    parsed && !Array.isArray(parsed) && typeof parsed === "object"
+      ? (parsed as Record<string, unknown>).features
+      : parsed;
+  if (!Array.isArray(source)) return [];
+  return source
     .map((item) => {
+      if (typeof item === "string") {
+        const label = item.trim();
+        return label ? { icon: "", label, type: "default" } : null;
+      }
       if (!item || typeof item !== "object") return null;
       const raw = item as Record<string, unknown>;
       const label = raw.label ?? raw.feature ?? raw.text;
@@ -255,10 +262,7 @@ function normalizeDetailEditorMode(value?: unknown): SubscribeDetailEditorMode {
 }
 
 function buildLegacyDescription(values: Record<string, any>) {
-  return JSON.stringify({
-    description: values.short_description || "",
-    features: normalizeFeatureItems(values.features),
-  });
+  return String(values.short_description || "").trim();
 }
 
 function isArchivedPriceOptionValue(item: Record<string, any>) {
@@ -333,9 +337,13 @@ function dedupeVisibleDurationOptions<T extends Record<string, any>>(
 }
 
 function normalizeSubscribeValues<T extends Record<string, any>>(values?: T) {
+  const inputValues = shake(values, (value) => value === null) as Record<
+    string,
+    any
+  >;
   const processedValues: Record<string, any> = {
     ...defaultValues,
-    ...(shake(values, (value) => value === null) as Record<string, any>),
+    ...inputValues,
   };
 
   const rawPriceOptions = Array.isArray(processedValues.price_options)
@@ -393,13 +401,36 @@ function normalizeSubscribeValues<T extends Record<string, any>>(values?: T) {
     );
     if (firstVisible) firstVisible.is_default = true;
   }
+  const rawShortDescription =
+    inputValues.short_description ?? inputValues.shortDescription;
+  const shortDescriptionLegacy = parseLegacyDescription(rawShortDescription);
   const legacyDescription = parseLegacyDescription(processedValues.description);
-  const features =
-    processedValues.features !== undefined &&
-    processedValues.features !== null &&
-    processedValues.features !== ""
-      ? normalizeFeatureItems(processedValues.features)
+  const hasFeatureInput =
+    inputValues.features !== undefined &&
+    inputValues.features !== null &&
+    inputValues.features !== "";
+  const features = hasFeatureInput
+    ? normalizeFeatureItems(inputValues.features)
+    : shortDescriptionLegacy.features.length > 0
+      ? shortDescriptionLegacy.features
       : legacyDescription.features;
+  const legacyDetailContent =
+    shortDescriptionLegacy.detailContent || legacyDescription.detailContent;
+  const legacyDetailFormat = shortDescriptionLegacy.detailContent
+    ? shortDescriptionLegacy.detailFormat
+    : legacyDescription.detailFormat;
+  const detailFormatSource =
+    inputValues.detail_format ??
+    inputValues.detailFormat ??
+    (legacyDetailContent ? legacyDetailFormat : processedValues.detail_format);
+  const detailContentSource =
+    inputValues.detail_content ??
+    inputValues.detailContent ??
+    legacyDetailContent;
+  const hasShortDescriptionInput =
+    rawShortDescription !== undefined &&
+    rawShortDescription !== null &&
+    rawShortDescription !== "";
 
   return {
     ...processedValues,
@@ -452,23 +483,12 @@ function normalizeSubscribeValues<T extends Record<string, any>>(values?: T) {
         }))
       : [],
     short_description:
-      processedValues.short_description ??
-      processedValues.shortDescription ??
-      legacyDescription.shortDescription,
+      hasShortDescriptionInput || shortDescriptionLegacy.features.length > 0
+        ? shortDescriptionLegacy.shortDescription
+        : legacyDescription.shortDescription,
     features,
-    detail_format: normalizeDetailEditorMode(
-      processedValues.detail_format ??
-        processedValues.detailFormat ??
-        legacyDescription.detailFormat
-    ),
-    detail_content:
-      processedValues.detail_content ??
-      processedValues.detailContent ??
-      legacyDescription.detailContent,
-    legacy_description_input:
-      typeof processedValues.description === "string"
-        ? processedValues.description
-        : "",
+    detail_format: normalizeDetailEditorMode(detailFormatSource),
+    detail_content: detailContentSource,
   };
 }
 
@@ -1709,7 +1729,6 @@ export default function SubscribeForm<T extends Record<string, any>>({
       .optional(),
     detail_format: z.enum(["rich", "markdown", "html", "text"]).optional(),
     detail_content: z.string().optional(),
-    legacy_description_input: z.string().optional(),
     unit_price: z.number(),
     unit_time: z.string(),
     price_options: z
@@ -1786,10 +1805,8 @@ export default function SubscribeForm<T extends Record<string, any>>({
     );
     const defaultOption =
       priceOptions.find((item) => item.is_default) || priceOptions[0];
-    const { legacy_description_input: _legacyDescriptionInput, ...formData } =
-      data;
     const submitData: Record<string, any> = {
-      ...formData,
+      ...data,
       category_id: data.category_id ? Number(data.category_id) : 0,
       description: buildLegacyDescription(data),
       features: JSON.stringify(normalizeFeatureItems(data.features)),
@@ -1814,39 +1831,6 @@ export default function SubscribeForm<T extends Record<string, any>>({
   } = useNode();
 
   const tagGroups = getAllAvailableTags();
-
-  const applyLegacyDescriptionInput = (value: string) => {
-    form.setValue("legacy_description_input", value, { shouldDirty: true });
-    const parsed = parseJSON(value);
-    if (!parsed) return;
-
-    if (Array.isArray(parsed)) {
-      form.setValue("features", normalizeFeatureItems(parsed), {
-        shouldDirty: true,
-      });
-      return;
-    }
-
-    if (typeof parsed !== "object") return;
-
-    const legacyDescription = parseLegacyDescription(value);
-    form.setValue("short_description", legacyDescription.shortDescription, {
-      shouldDirty: true,
-    });
-    form.setValue("features", legacyDescription.features, {
-      shouldDirty: true,
-    });
-    form.setValue(
-      "detail_format",
-      normalizeDetailEditorMode(legacyDescription.detailFormat),
-      {
-        shouldDirty: true,
-      }
-    );
-    form.setValue("detail_content", legacyDescription.detailContent, {
-      shouldDirty: true,
-    });
-  };
 
   // Fetch node groups (exclude expired groups)
   const { data: nodeGroupsData } = useQuery({
@@ -2199,35 +2183,6 @@ export default function SubscribeForm<T extends Record<string, any>>({
                 </TabsContent>
 
                 <TabsContent className="space-y-6" value="content">
-                  <FormField
-                    control={form.control}
-                    name="legacy_description_input"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {t("form.legacyDescriptionJson", "Legacy JSON")}
-                        </FormLabel>
-                        <FormControl>
-                          <Textarea
-                            className="min-h-28 font-mono text-xs"
-                            onChange={(event) =>
-                              applyLegacyDescriptionInput(event.target.value)
-                            }
-                            placeholder='{"description":"Fast and stable","features":[{"icon":"uil:shield-check","label":"Premium nodes","type":"success"}],"detail_format":"markdown","detail_content":"### Details"}'
-                            value={field.value || ""}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          {t(
-                            "form.legacyDescriptionJsonDescription",
-                            "Paste the old description JSON here to import it into the fields below."
-                          )}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   <FormField
                     control={form.control}
                     name="short_description"
