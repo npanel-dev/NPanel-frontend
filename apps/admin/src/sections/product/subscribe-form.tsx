@@ -682,10 +682,13 @@ function isQuickPeriodOption(
   if (item.type && item.type !== "duration") return false;
   if (item.code === period.code) return true;
   return (
-    !item.code?.startsWith("custom_") &&
     item.duration_unit === period.duration_unit &&
     Number(item.duration_value || 0) === period.duration_value
   );
+}
+
+function isQuickDurationOption(item: Partial<PriceOptionEditorItem>) {
+  return QUICK_PRICE_PERIODS.some((period) => isQuickPeriodOption(item, period));
 }
 
 function isArchivedPriceOption(item: Partial<PriceOptionEditorItem>) {
@@ -719,21 +722,42 @@ function PriceOptionsEditor({
     { label: t("form.NoLimit"), value: "NoLimit" },
   ];
 
-  const createDefaultOption = (index: number): PriceOptionEditorItem => ({
-    code: `custom_${index + 1}`,
-    type: "duration",
-    name: "",
-    duration_unit: "Month",
-    duration_value: 1,
-    price: 0,
-    original_price: 0,
-    inventory: -1,
-    show: true,
-    sell: true,
-    is_default: index === 0,
-    sort: (index + 1) * 100,
-    version: 0,
-  });
+  const createDefaultOption = (
+    index: number,
+    existingItems: PriceOptionEditorItem[] = []
+  ): PriceOptionEditorItem => {
+    const candidates = [
+      { duration_unit: "Week", duration_value: 1 },
+      { duration_unit: "Day", duration_value: 1 },
+      { duration_unit: "Month", duration_value: 2 },
+      { duration_unit: "Month", duration_value: 5 },
+      { duration_unit: "Year", duration_value: 4 },
+    ];
+    const candidate =
+      candidates.find(
+        (item) =>
+          !existingItems.some(
+            (option) =>
+              option.duration_unit === item.duration_unit &&
+              Number(option.duration_value || 0) === item.duration_value
+          )
+      ) || candidates[0]!;
+    return {
+      code: `custom_${index + 1}_${Date.now()}`,
+      type: "duration",
+      name: "",
+      duration_unit: candidate.duration_unit,
+      duration_value: candidate.duration_value,
+      price: 0,
+      original_price: 0,
+      inventory: -1,
+      show: true,
+      sell: true,
+      is_default: existingItems.length === 0,
+      sort: (index + 1) * 100,
+      version: 0,
+    };
+  };
 
   const normalizeItems = (items: Partial<PriceOptionEditorItem>[]) => {
     const seenCodes = new Set<string>();
@@ -787,7 +811,10 @@ function PriceOptionsEditor({
     (item) => !isArchivedPriceOption(item)
   );
   const safeValue =
-    visibleValue.length > 0 ? visibleValue : [createDefaultOption(0)];
+    visibleValue.length > 0 ? visibleValue : [createDefaultOption(0, [])];
+  const customEntries = safeValue
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => !isQuickDurationOption(item));
 
   const emitChange = (items: Partial<PriceOptionEditorItem>[]) => {
     const normalizedItems = normalizeItems(items);
@@ -811,6 +838,29 @@ function PriceOptionsEditor({
       return { ...item, ...patch };
     });
     emitChange(nextItems);
+  };
+
+  const updateCustomItem = (
+    index: number,
+    patch: Partial<PriceOptionEditorItem>
+  ) => {
+    const current = safeValue[index];
+    if (!current) return;
+    const nextItem = {
+      ...current,
+      ...patch,
+      type: patch.type || current.type || "duration",
+    };
+    if (isQuickDurationOption(nextItem)) {
+      toast.info(
+        t(
+          "form.quickPriceOptionConflict",
+          "This duration belongs to common price options. Edit it above."
+        )
+      );
+      return;
+    }
+    updateItem(index, patch);
   };
 
   const quickIndex = (period: QuickPricePeriod) =>
@@ -889,7 +939,7 @@ function PriceOptionsEditor({
   };
 
   const addOption = () => {
-    emitChange([...safeValue, createDefaultOption(safeValue.length)]);
+    emitChange([...safeValue, createDefaultOption(safeValue.length, safeValue)]);
   };
 
   const removeOption = (index: number) => {
@@ -1019,7 +1069,7 @@ function PriceOptionsEditor({
               <span />
             </div>
             <div className="space-y-2">
-              {safeValue.map((item, index) => (
+              {customEntries.map(({ item, index }) => (
                 <div
                   className="grid gap-3 rounded-lg border bg-card p-3 lg:grid-cols-[minmax(220px,1.25fr)_minmax(160px,1fr)_minmax(160px,1fr)_80px_88px_44px] lg:items-end"
                   key={`${item.id ?? item.code}-${index}`}
@@ -1031,7 +1081,7 @@ function PriceOptionsEditor({
                         disabled={item.duration_unit === "NoLimit"}
                         min={1}
                         onValueChange={(durationValue) =>
-                          updateItem(index, {
+                          updateCustomItem(index, {
                             code: item.code?.startsWith("custom_")
                               ? item.code
                               : defaultPriceOptionCode(
@@ -1056,7 +1106,7 @@ function PriceOptionsEditor({
                       />
                       <Combobox<string, false>
                         onChange={(durationUnit) =>
-                          updateItem(index, {
+                          updateCustomItem(index, {
                             code: item.code?.startsWith("custom_")
                               ? item.code
                               : defaultPriceOptionCode(
@@ -1093,7 +1143,7 @@ function PriceOptionsEditor({
                       }
                       min={0}
                       onValueChange={(originalPrice) =>
-                        updateItem(index, {
+                        updateCustomItem(index, {
                           original_price: toNumber(originalPrice) ?? 0,
                         })
                       }
@@ -1114,7 +1164,7 @@ function PriceOptionsEditor({
                       }
                       min={0}
                       onValueChange={(price) =>
-                        updateItem(index, { price: toNumber(price) ?? 0 })
+                        updateCustomItem(index, { price: toNumber(price) ?? 0 })
                       }
                       prefix={currencySymbol}
                       step={0.01}
@@ -1145,7 +1195,7 @@ function PriceOptionsEditor({
                           ) {
                             toast.info(t("form.recommendedOptionChanged"));
                           }
-                          updateItem(index, { is_default: true });
+                          updateCustomItem(index, { is_default: true });
                         }}
                       />
                     </div>

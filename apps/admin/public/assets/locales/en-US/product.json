@@ -146,6 +146,7 @@
     "recommended": "Recommended",
     "recommendedOption": "Recommended",
     "recommendedOptionChanged": "Only one price option can be recommended. This option is now recommended.",
+    "quickPriceOptionConflict": "This duration belongs to common price options. Edit it above.",
     "replacement": "Reset Price (per time)",
     "resetCycle": "Reset Cycle",
     "resetOn1st": "Reset on the 1st",

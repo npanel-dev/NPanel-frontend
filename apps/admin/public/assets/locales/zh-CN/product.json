@@ -146,6 +146,7 @@
     "recommended": "推荐",
     "recommendedOption": "推荐",
     "recommendedOptionChanged": "只能设置一个推荐档位，已将当前档位设为推荐。",
+    "quickPriceOptionConflict": "该周期属于常规套餐价格，请在上方常规档位中编辑。",
     "replacement": "重置价格（每次）",
     "resetCycle": "重置周期",
     "resetOn1st": "每月1日重置",
