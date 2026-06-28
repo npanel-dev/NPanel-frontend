@@ -50,7 +50,7 @@ export default function Main() {
               autoplay
               className="mx-auto hidden w-[275px] lg:block xl:w-[500px]"
               loop
-              src="./assets/lotties/login.json"
+              src="/assets/lotties/login.json"
             />
             <p className="hidden w-[275px] text-center md:w-1/2 lg:block xl:w-[500px]">
               {site.site_desc}
