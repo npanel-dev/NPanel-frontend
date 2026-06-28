@@ -55,7 +55,7 @@ export function Hero() {
         <DotLottieReact
           autoplay
           loop
-          src="./assets/lotties/network-security.json"
+          src="/assets/lotties/network-security.json"
         />
       </motion.div>
     </motion.div>
