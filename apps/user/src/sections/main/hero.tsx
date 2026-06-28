@@ -54,6 +54,7 @@ export function Hero() {
       >
         <DotLottieReact
           autoplay
+          className="min-h-64 w-full sm:min-h-80"
           loop
           src="/assets/lotties/network-security.json"
         />
