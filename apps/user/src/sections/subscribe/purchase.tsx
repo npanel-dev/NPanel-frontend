@@ -36,6 +36,11 @@ interface PurchaseProps {
   setSubscribe: (subscribe?: API.Subscribe) => void;
 }
 
+function toPayloadNumber(value: unknown, fallback = 0) {
+  const parsed = Number(value ?? fallback);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 export default function Purchase({
   subscribe,
   setSubscribe,
@@ -57,27 +62,43 @@ export default function Purchase({
       (item) =>
         String(getOptionId(item)) === String((params as any).price_option_id)
     ) || getDefaultPriceOption(subscribe);
+  const selectedPriceOptionId = selectedOption
+    ? getOptionId(selectedOption)
+    : (params as any).price_option_id;
+  const selectedQuantity = selectedOption
+    ? getOptionDurationValue(selectedOption)
+    : Number(params.quantity ?? 1);
+
+  const buildPurchaseParams = useCallback(
+    () =>
+      ({
+        ...params,
+        subscribe_id: toPayloadNumber(subscribe?.id ?? params.subscribe_id),
+        quantity: toPayloadNumber(selectedQuantity, 1),
+        payment: toPayloadNumber(params.payment),
+        price_option_id: toPayloadNumber(selectedPriceOptionId),
+      }) as API.PurchaseOrderRequest,
+    [params, selectedPriceOptionId, selectedQuantity, subscribe?.id]
+  );
 
   const { data: order } = useQuery({
     enabled:
       !!subscribe?.id &&
       !!params.payment &&
-      (!priceOptions.length || !!(params as any).price_option_id),
+      (!priceOptions.length || !!selectedPriceOptionId),
     queryKey: [
       "preCreateOrder",
       subscribe?.id,
-      params.quantity,
-      (params as any).price_option_id,
+      selectedQuantity,
+      selectedPriceOptionId,
       params.payment,
       params.coupon,
     ],
     queryFn: async () => {
       try {
         const { data } = await preCreateOrder({
-          ...params,
+          ...buildPurchaseParams(),
           type: 1,
-          subscribe_id: subscribe?.id ?? "",
-          price_option_id: (params as any).price_option_id,
         } as API.PurchaseOrderRequest);
         const result = data.data || null;
         if (result) {
@@ -124,7 +145,7 @@ export default function Purchase({
   const handleSubmit = useCallback(async () => {
     startTransition(async () => {
       try {
-        const response = await purchase(params as API.PurchaseOrderRequest);
+        const response = await purchase(buildPurchaseParams());
         const orderNo = response.data.data?.order_no;
         if (orderNo) {
           getUserInfo();
@@ -134,7 +155,7 @@ export default function Purchase({
         /* empty */
       }
     });
-  }, [params, router, getUserInfo]);
+  }, [buildPurchaseParams, router, getUserInfo]);
 
   return (
     <Dialog
@@ -218,7 +239,7 @@ export default function Purchase({
               disabled={
                 loading ||
                 !params.payment ||
-                (priceOptions.length > 0 && !(params as any).price_option_id)
+                (priceOptions.length > 0 && !selectedPriceOptionId)
               }
               onClick={handleSubmit}
             >

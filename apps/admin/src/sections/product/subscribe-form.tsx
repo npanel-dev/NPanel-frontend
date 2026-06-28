@@ -261,39 +261,109 @@ function buildLegacyDescription(values: Record<string, any>) {
   });
 }
 
+function isArchivedPriceOptionValue(item: Record<string, any>) {
+  return item.show === false && item.sell === false;
+}
+
+function getDurationOptionKey(item: Record<string, any>) {
+  const optionType = item.type || item.option_type || "duration";
+  if (optionType !== "duration" || item.show === false || item.sell === false) {
+    return;
+  }
+  const unit = item.duration_unit || item.durationUnit || "Month";
+  const value = unit === "NoLimit" ? 0 : toNumber(item.duration_value) || 1;
+  return `${unit}:${value}`;
+}
+
+function preferPriceOption(
+  candidate: Record<string, any>,
+  current: Record<string, any>
+) {
+  if (Boolean(candidate.is_default) !== Boolean(current.is_default)) {
+    return Boolean(candidate.is_default);
+  }
+  const sortDiff =
+    (toNumber(candidate.sort) ?? 0) - (toNumber(current.sort) ?? 0);
+  if (sortDiff !== 0) return sortDiff > 0;
+
+  const candidateID = toNumber(candidate.id) ?? Number.POSITIVE_INFINITY;
+  const currentID = toNumber(current.id) ?? Number.POSITIVE_INFINITY;
+  return candidateID < currentID;
+}
+
+function archivePriceOption<T extends Record<string, any>>(item: T): T {
+  return {
+    ...item,
+    show: false,
+    sell: false,
+    is_default: false,
+  };
+}
+
+function dedupeVisibleDurationOptions<T extends Record<string, any>>(
+  items: T[]
+) {
+  const result: T[] = [];
+  const visibleDurationIndex = new Map<string, number>();
+
+  for (const item of items) {
+    const key = getDurationOptionKey(item);
+    if (!key) {
+      result.push(item);
+      continue;
+    }
+
+    const existingIndex = visibleDurationIndex.get(key);
+    if (existingIndex === undefined) {
+      visibleDurationIndex.set(key, result.length);
+      result.push(item);
+      continue;
+    }
+
+    const existing = result[existingIndex]!;
+    if (preferPriceOption(item, existing)) {
+      result[existingIndex] = item;
+      result.push(archivePriceOption(existing));
+      continue;
+    }
+    result.push(archivePriceOption(item));
+  }
+
+  return result;
+}
+
 function normalizeSubscribeValues<T extends Record<string, any>>(values?: T) {
   const processedValues: Record<string, any> = {
     ...defaultValues,
     ...(shake(values, (value) => value === null) as Record<string, any>),
   };
 
-  const priceOptions = Array.isArray(processedValues.price_options)
-    ? processedValues.price_options
-        .filter((item: Record<string, any>) => item.show !== false || item.sell !== false)
-        .map((item: Record<string, any>) => ({
-          ...item,
-          code: item.code ?? "",
-          type: item.type || item.option_type || "duration",
-          name: item.name ?? "",
-          version: toNumber(item.version) ?? 0,
-          created_at: item.created_at ?? item.createdAt,
-          updated_at: item.updated_at ?? item.updatedAt,
-          duration_unit:
-            item.duration_unit || processedValues.unit_time || "Month",
-          duration_value:
-            item.duration_unit === "NoLimit"
-              ? 0
-              : toNumber(item.duration_value) || 1,
-          price:
-            toNumber(item.price) ?? toNumber(processedValues.unit_price) ?? 0,
-          original_price: toNumber(item.original_price) ?? 0,
-          inventory: toNumber(item.inventory) ?? -1,
-          show: item.show ?? true,
-          sell: item.sell ?? true,
-          is_default: item.is_default ?? false,
-          sort: toNumber(item.sort) ?? 0,
-        }))
+  const rawPriceOptions = Array.isArray(processedValues.price_options)
+    ? processedValues.price_options.map((item: Record<string, any>) => ({
+        ...item,
+        code: item.code ?? "",
+        type: item.type || item.option_type || "duration",
+        name: item.name ?? "",
+        version: toNumber(item.version) ?? 0,
+        created_at: item.created_at ?? item.createdAt,
+        updated_at: item.updated_at ?? item.updatedAt,
+        duration_unit:
+          item.duration_unit || processedValues.unit_time || "Month",
+        duration_value:
+          item.duration_unit === "NoLimit"
+            ? 0
+            : toNumber(item.duration_value) || 1,
+        price:
+          toNumber(item.price) ?? toNumber(processedValues.unit_price) ?? 0,
+        original_price: toNumber(item.original_price) ?? 0,
+        inventory: toNumber(item.inventory) ?? -1,
+        show: item.show ?? true,
+        sell: item.sell ?? true,
+        is_default: item.is_default ?? false,
+        sort: toNumber(item.sort) ?? 0,
+      }))
     : [];
+  const priceOptions = dedupeVisibleDurationOptions(rawPriceOptions);
   if (priceOptions.length === 0) {
     priceOptions.push({
       code: "monthly",
@@ -313,8 +383,15 @@ function normalizeSubscribeValues<T extends Record<string, any>>(values?: T) {
       sort: 100,
     });
   }
-  if (!priceOptions.some((item) => item.is_default)) {
-    priceOptions[0]!.is_default = true;
+  if (
+    !priceOptions.some(
+      (item) => item.is_default && !isArchivedPriceOptionValue(item)
+    )
+  ) {
+    const firstVisible = priceOptions.find(
+      (item) => !isArchivedPriceOptionValue(item)
+    );
+    if (firstVisible) firstVisible.is_default = true;
   }
   const legacyDescription = parseLegacyDescription(processedValues.description);
   const features =
@@ -431,13 +508,14 @@ function normalizePriceOptionsForSubmit(
       version: toNumber(item.version) ?? 0,
     };
   });
-  if (!normalized.some((item) => item.is_default)) {
-    const firstVisible = normalized.find(
-      (item) => !(item.show === false && item.sell === false)
+  const deduped = dedupeVisibleDurationOptions(normalized);
+  if (!deduped.some((item) => item.is_default)) {
+    const firstVisible = deduped.find(
+      (item) => !isArchivedPriceOptionValue(item)
     );
     if (firstVisible) firstVisible.is_default = true;
   }
-  return normalized;
+  return deduped;
 }
 
 function buildCategoryOptions(categories: API.SubscribeCategoryInfo[] = []) {
@@ -700,7 +778,7 @@ function PriceOptionsEditor({
         .map((id) => String(id))
     );
     const retainedArchived = archivedValue.filter(
-      (item) => !item.id || !nextIDs.has(String(item.id))
+      (item) => !(item.id && nextIDs.has(String(item.id)))
     );
     onChange([...normalizedItems, ...retainedArchived]);
   };
@@ -736,21 +814,21 @@ function PriceOptionsEditor({
         ? safeValue[index]!
         : archivedOption
           ? archivedOption
-        : {
-            code: period.code,
-            type: "duration",
-            name: t(`form.${period.labelKey}`, period.fallbackLabel),
-            duration_unit: period.duration_unit,
-            duration_value: period.duration_value,
-            price: 0,
-            original_price: 0,
-            inventory: -1,
-            show: true,
-            sell: true,
-            is_default: false,
-            sort: period.sort,
-            version: 0,
-          };
+          : {
+              code: period.code,
+              type: "duration",
+              name: t(`form.${period.labelKey}`, period.fallbackLabel),
+              duration_unit: period.duration_unit,
+              duration_value: period.duration_value,
+              price: 0,
+              original_price: 0,
+              inventory: -1,
+              show: true,
+              sell: true,
+              is_default: false,
+              sort: period.sort,
+              version: 0,
+            };
     const nextOption = {
       ...base,
       code: period.code,
@@ -1648,10 +1726,10 @@ export default function SubscribeForm<T extends Record<string, any>>({
           inventory: z.number().optional(),
           show: z.boolean().optional(),
           sell: z.boolean().optional(),
-	          is_default: z.boolean().optional(),
-	          sort: z.number().optional(),
-	          version: z.number().optional(),
-	        })
+          is_default: z.boolean().optional(),
+          sort: z.number().optional(),
+          version: z.number().optional(),
+        })
       )
       .optional(),
     replacement: z.number().optional(),

@@ -214,22 +214,22 @@ export default function SubscribeTable() {
                   updated_at: _updated_at,
                   created_at: _created_at,
                   ...params
-	                } = row;
-	                await createSubscribe({
-	                  ...params,
-	                  price_options: row.price_options?.map(
-	                    ({
-	                      id: _optionId,
-	                      subscribe_id: _optionSubscribeID,
-	                      version: _optionVersion,
-	                      created_at: _optionCreatedAt,
-	                      updated_at: _optionUpdatedAt,
-	                      ...option
-	                    }) => option
-	                  ),
-	                  show: false,
-	                  sell: false,
-	                } as API.CreateSubscribeRequest);
+                } = row;
+                await createSubscribe({
+                  ...params,
+                  price_options: row.price_options?.map(
+                    ({
+                      id: _optionId,
+                      subscribe_id: _optionSubscribeID,
+                      version: _optionVersion,
+                      created_at: _optionCreatedAt,
+                      updated_at: _optionUpdatedAt,
+                      ...option
+                    }) => option
+                  ),
+                  show: false,
+                  sell: false,
+                } as API.CreateSubscribeRequest);
                 toast.success(t("copySuccess"));
                 ref.current?.refresh();
                 fetchSubscribes();
@@ -323,13 +323,16 @@ export default function SubscribeTable() {
           header: t("unitPrice"),
           cell: ({ row }) => {
             const options = (row.original.price_options || []).filter(
-              (item) => item.show !== false || item.sell !== false
+              (item) => item.show !== false && item.sell !== false
             );
             const option =
               options.find((item) => item.is_default) || options[0];
-            const durationUnit = option?.duration_unit || row.original.unit_time;
+            const durationUnit =
+              option?.duration_unit || row.original.unit_time;
             const durationValue =
-              durationUnit === "NoLimit" ? 0 : Number(option?.duration_value || 1);
+              durationUnit === "NoLimit"
+                ? 0
+                : Number(option?.duration_value || 1);
             return (
               <div className="flex flex-col gap-1">
                 <span>
@@ -337,7 +340,8 @@ export default function SubscribeTable() {
                     type="currency"
                     value={option?.price ?? row.getValue("unit_price")}
                   />
-                  /{durationUnit === "NoLimit"
+                  /
+                  {durationUnit === "NoLimit"
                     ? t("form.NoLimit")
                     : `${durationValue} ${t(durationUnit ? `form.${durationUnit}` : "form.Month")}`}
                 </span>

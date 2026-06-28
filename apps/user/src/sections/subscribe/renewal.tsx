@@ -36,6 +36,11 @@ interface RenewalProps {
   subscribe: API.Subscribe;
 }
 
+function toPayloadNumber(value: unknown, fallback = 0) {
+  const parsed = Number(value ?? fallback);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 export default function Renewal({ id, subscribe }: Readonly<RenewalProps>) {
   const { t } = useTranslation("subscribe");
   const { getUserInfo } = useGlobalStore();
@@ -57,28 +62,45 @@ export default function Renewal({ id, subscribe }: Readonly<RenewalProps>) {
       (item) =>
         String(getOptionId(item)) === String((params as any).price_option_id)
     ) || getDefaultPriceOption(subscribe);
+  const selectedPriceOptionId = selectedOption
+    ? getOptionId(selectedOption)
+    : (params as any).price_option_id;
+  const selectedQuantity = selectedOption
+    ? getOptionDurationValue(selectedOption)
+    : Number(params.quantity ?? 1);
+
+  const buildRenewalParams = useCallback(
+    () =>
+      ({
+        ...params,
+        user_subscribe_id: toPayloadNumber(id),
+        quantity: toPayloadNumber(selectedQuantity, 1),
+        payment: toPayloadNumber(params.payment),
+        price_option_id: toPayloadNumber(selectedPriceOptionId),
+      }) as API.RenewalOrderRequest,
+    [id, params, selectedPriceOptionId, selectedQuantity]
+  );
 
   const { data: order } = useQuery({
     enabled:
       !!subscribe.id &&
       open &&
       !!params.payment &&
-      (!priceOptions.length || !!(params as any).price_option_id),
+      (!priceOptions.length || !!selectedPriceOptionId),
     queryKey: [
       "preCreateOrder",
       subscribe.id,
-      params.quantity,
-      (params as any).price_option_id,
+      selectedQuantity,
+      selectedPriceOptionId,
       params.payment,
       params.coupon,
     ],
     queryFn: async () => {
       try {
         const { data } = await preCreateOrder({
-          ...params,
+          ...buildRenewalParams(),
           type: 2,
-          subscribe_id: subscribe.id,
-          price_option_id: (params as any).price_option_id,
+          subscribe_id: toPayloadNumber(subscribe.id),
         } as API.PurchaseOrderRequest);
         const result = data.data || null;
         if (result) {
@@ -126,7 +148,7 @@ export default function Renewal({ id, subscribe }: Readonly<RenewalProps>) {
   const handleSubmit = useCallback(async () => {
     startTransition(async () => {
       try {
-        const response = await renewal(params as API.RenewalOrderRequest);
+        const response = await renewal(buildRenewalParams());
         const orderNo = response.data.data?.order_no;
         if (orderNo) {
           getUserInfo();
@@ -136,7 +158,7 @@ export default function Renewal({ id, subscribe }: Readonly<RenewalProps>) {
         /* empty */
       }
     });
-  }, [params, getUserInfo, navigate]);
+  }, [buildRenewalParams, getUserInfo, navigate]);
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
@@ -219,7 +241,7 @@ export default function Renewal({ id, subscribe }: Readonly<RenewalProps>) {
               disabled={
                 loading ||
                 !params.payment ||
-                (priceOptions.length > 0 && !(params as any).price_option_id)
+                (priceOptions.length > 0 && !selectedPriceOptionId)
               }
               onClick={handleSubmit}
             >
