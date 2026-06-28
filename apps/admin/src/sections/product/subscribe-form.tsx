@@ -269,13 +269,41 @@ function isArchivedPriceOptionValue(item: Record<string, any>) {
   return item.show === false && item.sell === false;
 }
 
+function getPriceOptionType(item: Record<string, any>) {
+  return item.type || item.option_type || item.optionType || "duration";
+}
+
+function getPriceOptionDurationUnit(
+  item: Record<string, any>,
+  fallback = "Month"
+) {
+  return item.duration_unit || item.durationUnit || fallback;
+}
+
+function getPriceOptionDurationValue(
+  item: Record<string, any>,
+  durationUnit = getPriceOptionDurationUnit(item)
+) {
+  return durationUnit === "NoLimit"
+    ? 0
+    : toNumber(item.duration_value ?? item.durationValue) || 1;
+}
+
+function getPriceOptionOriginalPrice(item: Record<string, any>) {
+  return toNumber(item.original_price ?? item.originalPrice) ?? 0;
+}
+
+function getPriceOptionIsDefault(item: Record<string, any>, fallback = false) {
+  return item.is_default ?? item.isDefault ?? fallback;
+}
+
 function getDurationOptionKey(item: Record<string, any>) {
-  const optionType = item.type || item.option_type || "duration";
+  const optionType = getPriceOptionType(item);
   if (optionType !== "duration" || item.show === false || item.sell === false) {
     return;
   }
-  const unit = item.duration_unit || item.durationUnit || "Month";
-  const value = unit === "NoLimit" ? 0 : toNumber(item.duration_value) || 1;
+  const unit = getPriceOptionDurationUnit(item);
+  const value = getPriceOptionDurationValue(item, unit);
   return `${unit}:${value}`;
 }
 
@@ -283,8 +311,10 @@ function preferPriceOption(
   candidate: Record<string, any>,
   current: Record<string, any>
 ) {
-  if (Boolean(candidate.is_default) !== Boolean(current.is_default)) {
-    return Boolean(candidate.is_default);
+  const candidateDefault = getPriceOptionIsDefault(candidate);
+  const currentDefault = getPriceOptionIsDefault(current);
+  if (Boolean(candidateDefault) !== Boolean(currentDefault)) {
+    return Boolean(candidateDefault);
   }
   const sortDiff =
     (toNumber(candidate.sort) ?? 0) - (toNumber(current.sort) ?? 0);
@@ -346,31 +376,35 @@ function normalizeSubscribeValues<T extends Record<string, any>>(values?: T) {
     ...inputValues,
   };
 
-  const rawPriceOptions = Array.isArray(processedValues.price_options)
-    ? processedValues.price_options.map((item: Record<string, any>) => ({
-        ...item,
-        code: item.code ?? "",
-        type: item.type || item.option_type || "duration",
-        name: item.name ?? "",
-        version: toNumber(item.version) ?? 0,
-        created_at: item.created_at ?? item.createdAt,
-        updated_at: item.updated_at ?? item.updatedAt,
-        duration_unit:
-          item.duration_unit || processedValues.unit_time || "Month",
-        duration_value:
-          item.duration_unit === "NoLimit"
-            ? 0
-            : toNumber(item.duration_value) || 1,
-        price:
-          toNumber(item.price) ?? toNumber(processedValues.unit_price) ?? 0,
-        original_price: toNumber(item.original_price) ?? 0,
-        inventory: toNumber(item.inventory) ?? -1,
-        show: item.show ?? true,
-        sell: item.sell ?? true,
-        is_default: item.is_default ?? false,
-        sort: toNumber(item.sort) ?? 0,
-      }))
-    : [];
+  const priceOptionInput = Array.isArray(processedValues.price_options)
+    ? processedValues.price_options
+    : Array.isArray(processedValues.priceOptions)
+      ? processedValues.priceOptions
+      : [];
+  const rawPriceOptions = priceOptionInput.map((item: Record<string, any>) => ({
+    ...item,
+    code: item.code ?? "",
+    type: getPriceOptionType(item),
+    name: item.name ?? "",
+    version: toNumber(item.version) ?? 0,
+    created_at: item.created_at ?? item.createdAt,
+    updated_at: item.updated_at ?? item.updatedAt,
+    duration_unit: getPriceOptionDurationUnit(
+      item,
+      processedValues.unit_time || "Month"
+    ),
+    duration_value: getPriceOptionDurationValue(
+      item,
+      getPriceOptionDurationUnit(item, processedValues.unit_time || "Month")
+    ),
+    price: toNumber(item.price) ?? toNumber(processedValues.unit_price) ?? 0,
+    original_price: getPriceOptionOriginalPrice(item),
+    inventory: toNumber(item.inventory) ?? -1,
+    show: item.show ?? true,
+    sell: item.sell ?? true,
+    is_default: getPriceOptionIsDefault(item),
+    sort: toNumber(item.sort) ?? 0,
+  }));
   const priceOptions = dedupeVisibleDurationOptions(rawPriceOptions);
   if (priceOptions.length === 0) {
     priceOptions.push({
@@ -498,8 +532,11 @@ function normalizePriceOptionsForSubmit(
 ) {
   const source = Array.isArray(items) && items.length > 0 ? items : [];
   const normalized = source.map((item, index) => {
-    const durationUnit = item.duration_unit || fallback.unit_time || "Month";
-    const optionType = item.type || item.option_type || "duration";
+    const durationUnit = getPriceOptionDurationUnit(
+      item,
+      fallback.unit_time || "Month"
+    );
+    const optionType = getPriceOptionType(item);
     const show = item.show ?? true;
     const sell = item.sell ?? true;
     const isArchived = show === false && sell === false;
@@ -510,20 +547,21 @@ function normalizePriceOptionsForSubmit(
         defaultPriceOptionCode(
           optionType,
           durationUnit,
-          durationUnit === "NoLimit" ? 0 : toNumber(item.duration_value) || 1,
+          getPriceOptionDurationValue(item, durationUnit),
           index
         ),
       type: optionType,
       name: String(item.name || ""),
       duration_unit: durationUnit,
-      duration_value:
-        durationUnit === "NoLimit" ? 0 : toNumber(item.duration_value) || 1,
+      duration_value: getPriceOptionDurationValue(item, durationUnit),
       price: toNumber(item.price) ?? 0,
-      original_price: toNumber(item.original_price) ?? 0,
+      original_price: getPriceOptionOriginalPrice(item),
       inventory: toNumber(item.inventory) ?? -1,
       show,
       sell,
-      is_default: isArchived ? false : (item.is_default ?? index === 0),
+      is_default: isArchived
+        ? false
+        : getPriceOptionIsDefault(item, index === 0),
       sort: toNumber(item.sort) ?? source.length - index,
       version: toNumber(item.version) ?? 0,
     };
@@ -679,16 +717,20 @@ function isQuickPeriodOption(
   item: Partial<PriceOptionEditorItem>,
   period: QuickPricePeriod
 ) {
-  if (item.type && item.type !== "duration") return false;
+  const optionType = getPriceOptionType(item);
+  if (optionType !== "duration") return false;
   if (item.code === period.code) return true;
+  const durationUnit = getPriceOptionDurationUnit(item);
   return (
-    item.duration_unit === period.duration_unit &&
-    Number(item.duration_value || 0) === period.duration_value
+    durationUnit === period.duration_unit &&
+    getPriceOptionDurationValue(item, durationUnit) === period.duration_value
   );
 }
 
 function isQuickDurationOption(item: Partial<PriceOptionEditorItem>) {
-  return QUICK_PRICE_PERIODS.some((period) => isQuickPeriodOption(item, period));
+  return QUICK_PRICE_PERIODS.some((period) =>
+    isQuickPeriodOption(item, period)
+  );
 }
 
 function isArchivedPriceOption(item: Partial<PriceOptionEditorItem>) {
@@ -738,8 +780,8 @@ function PriceOptionsEditor({
         (item) =>
           !existingItems.some(
             (option) =>
-              option.duration_unit === item.duration_unit &&
-              Number(option.duration_value || 0) === item.duration_value
+              getPriceOptionDurationUnit(option) === item.duration_unit &&
+              getPriceOptionDurationValue(option) === item.duration_value
           )
       ) || candidates[0]!;
     return {
@@ -762,14 +804,14 @@ function PriceOptionsEditor({
   const normalizeItems = (items: Partial<PriceOptionEditorItem>[]) => {
     const seenCodes = new Set<string>();
     const normalized: PriceOptionEditorItem[] = items.map((item, index) => {
-      const durationUnit = item.duration_unit || "Month";
-      const optionType = item.type || "duration";
+      const durationUnit = getPriceOptionDurationUnit(item);
+      const optionType = getPriceOptionType(item);
       const baseCode =
         String(item.code || "").trim() ||
         defaultPriceOptionCode(
           optionType,
           durationUnit,
-          durationUnit === "NoLimit" ? 0 : toNumber(item.duration_value) || 1,
+          getPriceOptionDurationValue(item, durationUnit),
           index
         );
       let code = baseCode;
@@ -785,14 +827,13 @@ function PriceOptionsEditor({
         type: optionType,
         name: String(item.name || ""),
         duration_unit: durationUnit,
-        duration_value:
-          durationUnit === "NoLimit" ? 0 : toNumber(item.duration_value) || 1,
+        duration_value: getPriceOptionDurationValue(item, durationUnit),
         price: toNumber(item.price) ?? 0,
-        original_price: toNumber(item.original_price) ?? 0,
+        original_price: getPriceOptionOriginalPrice(item),
         inventory: toNumber(item.inventory) ?? -1,
         show: item.show ?? true,
         sell: item.sell ?? true,
-        is_default: item.is_default ?? index === 0,
+        is_default: getPriceOptionIsDefault(item, index === 0),
         sort: toNumber(item.sort) ?? (index + 1) * 100,
         version: toNumber(item.version) ?? 0,
       };
@@ -939,7 +980,10 @@ function PriceOptionsEditor({
   };
 
   const addOption = () => {
-    emitChange([...safeValue, createDefaultOption(safeValue.length, safeValue)]);
+    emitChange([
+      ...safeValue,
+      createDefaultOption(safeValue.length, safeValue),
+    ]);
   };
 
   const removeOption = (index: number) => {
@@ -997,11 +1041,12 @@ function PriceOptionsEditor({
                       unitConversion("dollarsToCents", inputValue)
                     }
                     min={0}
-                    onValueChange={(originalPrice) =>
+                    onValueChange={(originalPrice) => {
+                      if (!enabled) return;
                       updateQuickOption(period, {
                         original_price: toNumber(originalPrice) ?? 0,
-                      })
-                    }
+                      });
+                    }}
                     prefix={currencySymbol}
                     step={0.01}
                     type="number"
@@ -1019,9 +1064,12 @@ function PriceOptionsEditor({
                       unitConversion("dollarsToCents", inputValue)
                     }
                     min={0}
-                    onValueChange={(price) =>
-                      updateQuickOption(period, { price: toNumber(price) ?? 0 })
-                    }
+                    onValueChange={(price) => {
+                      if (!enabled) return;
+                      updateQuickOption(period, {
+                        price: toNumber(price) ?? 0,
+                      });
+                    }}
                     prefix={currencySymbol}
                     step={0.01}
                     type="number"
