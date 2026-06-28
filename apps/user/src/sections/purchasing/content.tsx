@@ -30,6 +30,11 @@ import {
 } from "@/sections/subscribe/price-options";
 import { useGlobalStore } from "@/stores/global";
 
+function toPayloadNumber(value: unknown, fallback = 0) {
+  const parsed = Number(value ?? fallback);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 export default function Content({
   subscription,
 }: {
@@ -67,24 +72,40 @@ export default function Content({
       (item) =>
         String(getOptionId(item)) === String((params as any).price_option_id)
     ) || getDefaultPriceOption(subscription);
+  const selectedPriceOptionId = selectedOption
+    ? getOptionId(selectedOption)
+    : (params as any).price_option_id;
+  const selectedQuantity = selectedOption
+    ? getOptionDurationValue(selectedOption)
+    : Number(params.quantity ?? 1);
+
+  const buildPurchaseParams = useCallback(
+    () =>
+      ({
+        ...params,
+        subscribe_id: toPayloadNumber(subscription?.id ?? params.subscribe_id),
+        quantity: toPayloadNumber(selectedQuantity, 1),
+        payment: toPayloadNumber(params.payment),
+        price_option_id: toPayloadNumber(selectedPriceOptionId),
+      }) as API.PortalPurchaseRequest,
+    [params, selectedPriceOptionId, selectedQuantity, subscription?.id]
+  );
 
   const { data: order } = useQuery({
     enabled:
       !!subscription?.id &&
       !!params.payment &&
-      (!priceOptions.length || !!(params as any).price_option_id),
+      (!priceOptions.length || !!selectedPriceOptionId),
     queryKey: [
       "preCreateOrder",
       params.coupon,
-      params.quantity,
-      (params as any).price_option_id,
+      selectedQuantity,
+      selectedPriceOptionId,
       params.payment,
     ],
     queryFn: async () => {
       const { data } = await prePurchaseOrder({
-        ...params,
-        subscribe_id: subscription?.id ?? "",
-        price_option_id: (params as any).price_option_id,
+        ...buildPurchaseParams(),
       } as API.PrePurchaseOrderRequest);
       return data.data || null;
     },
@@ -116,7 +137,7 @@ export default function Content({
   const handleSubmit = useCallback(async () => {
     startTransition(async () => {
       try {
-        const { data } = await purchase(params);
+        const { data } = await purchase(buildPurchaseParams());
         const { order_no } = data.data!;
         if (order_no) {
           localStorage.setItem(
@@ -132,7 +153,7 @@ export default function Content({
         console.log(error);
       }
     });
-  }, [params, navigate]);
+  }, [buildPurchaseParams, navigate]);
 
   if (!subscription) {
     return (
@@ -285,7 +306,7 @@ export default function Content({
                   );
                   setParams((prev) => ({
                     ...prev,
-                    price_option_id: value,
+                    price_option_id: getOptionId(option),
                     quantity: getOptionDurationValue(option),
                   }));
                 }}
@@ -315,7 +336,7 @@ export default function Content({
             !isEmailValid.valid ||
             loading ||
             !params.payment ||
-            (priceOptions.length > 0 && !(params as any).price_option_id)
+            (priceOptions.length > 0 && !selectedPriceOptionId)
           }
           onClick={handleSubmit}
           size="lg"
