@@ -1,7 +1,9 @@
 {
   "Day": "Day",
+  "default_site_name": "NPanel",
   "global_map_description": "Explore seamless global connectivity. Choose network services that suit your needs and stay connected anytime, anywhere.",
   "global_map_itle": "Global Connection, Easy and Worry-free",
+  "hero_description": "Professional panel management for secure, reliable, and easy-to-use network services.",
   "Hour": "Hour",
   "locations": "Locations",
   "locations_description": "Available in multiple regions",

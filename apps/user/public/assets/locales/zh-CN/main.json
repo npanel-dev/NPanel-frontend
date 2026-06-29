@@ -1,7 +1,9 @@
 {
   "Day": "天",
+  "default_site_name": "NPanel",
   "global_map_description": "探索无缝的全球连接。选择适合您需求的网络服务，随时随地保持连接。",
   "global_map_itle": "全球连接，轻松无忧",
+  "hero_description": "专业、安全、稳定的网络服务面板，帮助您轻松管理订阅、节点与账户服务。",
   "Hour": "小时",
   "locations": "节点位置",
   "locations_description": "覆盖多个地区",

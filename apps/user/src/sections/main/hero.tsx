@@ -1,7 +1,6 @@
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Link } from "@tanstack/react-router";
 import { HoverBorderGradient } from "@workspace/ui/components/hover-border-gradient";
-import { TextGenerateEffect } from "@workspace/ui/components/text-generate-effect";
 import { useTranslation } from "react-i18next";
 import { useGlobalStore } from "@/stores/global";
 
@@ -9,19 +8,23 @@ export function Hero() {
   const { t } = useTranslation("main");
   const { common, user } = useGlobalStore();
   const { site } = common;
+  const siteName = site.site_name?.trim() || t("default_site_name", "NPanel");
+  const siteDescription =
+    site.site_desc?.trim() ||
+    t(
+      "hero_description",
+      "Professional panel management for secure, reliable, and easy-to-use network services."
+    );
 
   return (
     <div className="grid gap-8 pt-16 sm:grid-cols-2">
       <div className="flex flex-col items-start justify-center">
         <h1 className="my-6 font-bold text-4xl lg:text-6xl">
-          {t("welcome", "Welcome to")} {site.site_name}
+          {t("welcome", "Welcome to")} {siteName}
         </h1>
-        {site.site_desc && (
-          <TextGenerateEffect
-            className="mb-8 max-w-xl *:text-muted-foreground"
-            words={site.site_desc}
-          />
-        )}
+        <p className="mb-8 max-w-xl text-base text-muted-foreground leading-7 sm:text-lg">
+          {siteDescription}
+        </p>
         <Link to={user ? "/dashboard" : "/auth"}>
           <HoverBorderGradient
             as="button"
