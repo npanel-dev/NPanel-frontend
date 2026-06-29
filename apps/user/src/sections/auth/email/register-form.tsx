@@ -198,6 +198,16 @@ export default function RegisterForm({
   const composedEmail = form.watch("email");
 
   useEffect(() => {
+    const inviteCode = initialValues?.invite || localStorage.getItem("invite");
+    if (inviteCode && form.getValues("invite") !== inviteCode) {
+      form.setValue("invite", inviteCode, {
+        shouldDirty: false,
+        shouldValidate: false,
+      });
+    }
+  }, [form, initialValues?.invite]);
+
+  useEffect(() => {
     if (!enableSuffixSelect) return;
     const nextEmail = composeEmail(emailLocal || "", emailSuffix || "");
     if (form.getValues("email") !== nextEmail) {

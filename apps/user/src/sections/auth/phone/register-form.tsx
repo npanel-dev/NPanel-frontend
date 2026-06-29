@@ -13,7 +13,7 @@ import { Icon } from "@workspace/ui/composed/icon";
 import { Markdown } from "@workspace/ui/composed/markdown";
 import { PasswordInput } from "@workspace/ui/composed/password-input";
 import type { Dispatch, SetStateAction } from "react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -93,6 +93,16 @@ export default function RegisterForm({
       invite: localStorage.getItem("invite") || "",
     },
   });
+
+  useEffect(() => {
+    const inviteCode = initialValues?.invite || localStorage.getItem("invite");
+    if (inviteCode && form.getValues("invite") !== inviteCode) {
+      form.setValue("invite", inviteCode, {
+        shouldDirty: false,
+        shouldValidate: false,
+      });
+    }
+  }, [form, initialValues?.invite]);
 
   const turnstile = useRef<TurnstileRef>(null);
   const localCaptcha = useRef<LocalCaptchaRef>(null);

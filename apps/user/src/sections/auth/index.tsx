@@ -10,9 +10,10 @@ import {
 } from "@workspace/ui/components/tabs";
 import { LanguageSwitch } from "@workspace/ui/composed/language-switch";
 import { ThemeSwitch } from "@workspace/ui/composed/theme-switch";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useGlobalStore } from "@/stores/global";
+import { getInviteCodeFromLocation } from "@/utils/common";
 import EmailAuthForm from "./email/auth-form";
 import { OAuthMethods } from "./oauth-methods";
 import PhoneAuthForm from "./phone/auth-form";
@@ -23,6 +24,12 @@ export default function Main() {
   const { common } = useGlobalStore();
   const { site, auth } = common;
   const [formType, setFormType] = useState<AuthFormType>("login");
+
+  useEffect(() => {
+    if (getInviteCodeFromLocation()) {
+      setFormType("register");
+    }
+  }, []);
 
   const authMethods = useMemo(
     () =>

@@ -11,7 +11,11 @@ import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useGlobalStore } from "@/stores/global";
-import { getRedirectUrl, setAuthorization } from "@/utils/common";
+import {
+  getInviteCodeFromLocation,
+  getRedirectUrl,
+  setAuthorization,
+} from "@/utils/common";
 import type { AuthFormType } from "../types";
 import LoginForm from "./login-form";
 import RegisterForm from "./register-form";
@@ -46,9 +50,10 @@ export default function PhoneAuthForm({
   );
 
   useEffect(() => {
-    if (searchParams.invite) {
-      localStorage.setItem("invite", searchParams.invite);
-      setInitialValues((prev) => ({ ...prev, invite: searchParams.invite }));
+    const invite = searchParams.invite || getInviteCodeFromLocation();
+    if (invite) {
+      localStorage.setItem("invite", invite);
+      setInitialValues((prev) => ({ ...prev, invite }));
     }
   }, [searchParams.invite]);
 

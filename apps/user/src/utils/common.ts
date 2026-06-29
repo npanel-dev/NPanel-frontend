@@ -57,6 +57,23 @@ export function getRedirectUrl(): string {
   return redirect?.startsWith("/") ? redirect : "/dashboard";
 }
 
+export function getInviteCodeFromLocation(): string {
+  if (typeof window === "undefined") return "";
+
+  const queries = [window.location.search];
+  const hashQueryStart = window.location.hash.indexOf("?");
+  if (hashQueryStart >= 0) {
+    queries.push(window.location.hash.slice(hashQueryStart));
+  }
+
+  for (const query of queries) {
+    const invite = new URLSearchParams(query).get("invite")?.trim();
+    if (invite) return invite;
+  }
+
+  return "";
+}
+
 export function setRedirectUrl(value?: string) {
   if (value) {
     sessionStorage.setItem("redirect-url", value);
