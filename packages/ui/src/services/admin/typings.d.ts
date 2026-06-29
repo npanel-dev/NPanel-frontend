@@ -3442,6 +3442,7 @@ declare namespace API {
     mundoFakeMessage?: string;
     mundoAcceptProxyProtocol?: boolean;
     mundoUseTlsCertificate?: boolean;
+    proxyProtocol?: boolean;
   };
 
   type Protocol = {
@@ -3591,6 +3592,7 @@ declare namespace API {
     mundoFakeMessage?: string;
     mundoAcceptProxyProtocol?: boolean;
     mundoUseTlsCertificate?: boolean;
+    proxyProtocol?: boolean;
   };
 
   type PublicVerifyCodeConfig = {

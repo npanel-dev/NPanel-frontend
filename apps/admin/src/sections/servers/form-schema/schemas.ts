@@ -104,6 +104,7 @@ const ss = z.object({
   cert_mode: z.enum(CERT_MODES).nullish(),
   cert_dns_provider: nullableString,
   cert_dns_env: nullableString,
+  proxy_protocol: nullableBool,
   up_mbps: z.number().nullish(),
   down_mbps: z.number().nullish(),
 });
@@ -124,6 +125,7 @@ const vmess = z.object({
   cert_mode: z.enum(CERT_MODES).nullish(),
   cert_dns_provider: nullableString,
   cert_dns_env: nullableString,
+  proxy_protocol: nullableBool,
   up_mbps: z.number().nullish(),
   down_mbps: z.number().nullish(),
 });
@@ -160,6 +162,7 @@ const vless = z.object({
   cert_mode: z.enum(CERT_MODES).nullish(),
   cert_dns_provider: nullableString,
   cert_dns_env: nullableString,
+  proxy_protocol: nullableBool,
   up_mbps: z.number().nullish(),
   down_mbps: z.number().nullish(),
 });
@@ -180,6 +183,7 @@ const trojan = z.object({
   cert_mode: z.enum(CERT_MODES).nullish(),
   cert_dns_provider: nullableString,
   cert_dns_env: nullableString,
+  proxy_protocol: nullableBool,
   up_mbps: z.number().nullish(),
   down_mbps: z.number().nullish(),
 });
@@ -238,6 +242,7 @@ const anytls = z.object({
   cert_mode: z.enum(CERT_MODES).nullish(),
   cert_dns_provider: nullableString,
   cert_dns_env: nullableString,
+  proxy_protocol: nullableBool,
   up_mbps: z.number().nullish(),
   down_mbps: z.number().nullish(),
 });

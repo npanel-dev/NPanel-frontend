@@ -87,6 +87,8 @@
   "pageTitle": "Servers",
   "path": "Path",
   "port": "Port",
+  "proxy_protocol": "Accept Proxy Protocol",
+  "proxy_protocol_hint": "Enable only when this node is behind a trusted L4 proxy or load balancer. The upstream must send PROXY protocol v1 or v2; direct clients will fail to connect.",
   "add_protocol_type": "Protocol Type",
   "add_protocol": "Add Protocol",
   "duplicate_enabled_protocol_port": "Enabled protocol instances cannot share the same port",

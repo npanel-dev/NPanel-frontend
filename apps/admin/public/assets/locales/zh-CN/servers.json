@@ -87,6 +87,8 @@
   "pageTitle": "服务器",
   "path": "路径",
   "port": "端口",
+  "proxy_protocol": "接受 Proxy Protocol",
+  "proxy_protocol_hint": "仅当节点位于可信四层代理或负载均衡器后方时开启。开启后上游必须发送 PROXY protocol v1 或 v2，直连客户端会连接失败。",
   "add_protocol_type": "协议类型",
   "add_protocol": "添加协议",
   "duplicate_enabled_protocol_port": "已启用的协议实例不能共用同一个端口",

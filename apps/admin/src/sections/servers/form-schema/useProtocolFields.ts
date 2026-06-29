@@ -38,6 +38,13 @@ export function useProtocolFields() {
   const { t } = useTranslation("servers");
 
   return useMemo<Record<string, FieldConfig[]>>(() => {
+    const proxyProtocolField: FieldConfig = {
+      name: "proxy_protocol",
+      type: "switch",
+      label: t("proxy_protocol", "Accept Proxy Protocol"),
+      group: "transport",
+    };
+
     return {
       simnet: [
         {
@@ -1090,6 +1097,7 @@ export function useProtocolFields() {
           group: "security",
           condition: (p) => p.obfs === "tls" && p.cert_mode === "dns",
         },
+        proxyProtocolField,
       ],
       vmess: [
         {
@@ -1175,6 +1183,7 @@ export function useProtocolFields() {
           group: "transport",
           condition: (p) => p.transport === "grpc",
         },
+        proxyProtocolField,
         {
           name: "sni",
           type: "input",
@@ -1335,6 +1344,7 @@ export function useProtocolFields() {
           group: "transport",
           condition: (p) => p.transport === "xhttp",
         },
+        proxyProtocolField,
         {
           name: "sni",
           type: "input",
@@ -1622,6 +1632,7 @@ export function useProtocolFields() {
           group: "transport",
           condition: (p) => p.transport === "grpc",
         },
+        proxyProtocolField,
         {
           name: "sni",
           type: "input",
@@ -2576,6 +2587,7 @@ export function useProtocolFields() {
           group: "security",
           condition: (p) => p.cert_mode === "dns",
         },
+        proxyProtocolField,
       ],
     };
   }, [t]);
