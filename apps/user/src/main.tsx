@@ -31,6 +31,20 @@ initializeI18n({
 
 window.logout = Logout;
 
+function normalizeLegacyHashRoute() {
+  if (typeof window === "undefined") return;
+
+  const legacyPath = window.location.hash.startsWith("#/")
+    ? window.location.hash.slice(1)
+    : "";
+
+  if (!legacyPath.startsWith("/auth")) return;
+
+  window.history.replaceState(window.history.state, "", legacyPath);
+}
+
+normalizeLegacyHashRoute();
+
 // Create a new router instance
 const TanStackQueryProviderContext = TanStackQueryContext();
 const browserHistory = createBrowserHistory();

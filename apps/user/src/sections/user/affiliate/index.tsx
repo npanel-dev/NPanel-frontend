@@ -25,6 +25,12 @@ import { useGlobalStore } from "@/stores/global";
 export default function Affiliate() {
   const { t } = useTranslation("affiliate");
   const { user, common } = useGlobalStore();
+  const inviteLink =
+    typeof window !== "undefined" && user?.refer_code
+      ? `${window.location.origin}/auth?invite=${encodeURIComponent(
+          user.refer_code
+        )}`
+      : "";
   const { data } = useQuery({
     queryKey: ["queryUserAffiliate"],
     queryFn: async () => {
@@ -72,7 +78,7 @@ export default function Affiliate() {
                   toast.success(t("copySuccess", "Copy Success"));
                 }
               }}
-              text={`${location?.origin}/#/auth?invite=${user?.refer_code}`}
+              text={inviteLink}
             >
               <Button className="gap-2" size="sm" variant="secondary">
                 <Copy className="h-4 w-4" />

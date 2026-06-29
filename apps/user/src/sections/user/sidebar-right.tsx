@@ -22,6 +22,10 @@ export function SidebarRight({
 }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useGlobalStore();
   const { t } = useTranslation("layout");
+  const inviteLink =
+    isBrowser() && user?.refer_code
+      ? `${location.origin}/auth?invite=${encodeURIComponent(user.refer_code)}`
+      : "";
 
   return (
     <Sidebar collapsible="none" side="right" {...props}>
@@ -69,7 +73,7 @@ export function SidebarRight({
                     toast.success(t("copySuccess", "Copy Success"));
                   }
                 }}
-                text={`${isBrowser() && location?.origin}/#/auth?invite=${user?.refer_code}`}
+                text={inviteLink}
               >
                 <Button className="size-5 p-0" variant="ghost">
                   <Icon
