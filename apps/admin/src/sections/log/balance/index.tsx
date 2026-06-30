@@ -26,11 +26,13 @@ export default function BalanceLogPage() {
   // t("type.324", "Refund")
   // t("type.325", "Reward")
   // t("type.326", "Admin Adjust")
+  // t("type.327", "Commission Transfer")
   // t("type.331", "Purchase")
   // t("type.332", "Renewal")
   // t("type.333", "Refund")
   // t("type.334", "Withdraw")
   // t("type.335", "Admin Adjust")
+  // t("type.336", "Transfer to Balance")
   // t("type.341", "Increase")
   // t("type.342", "Reduce")
 
