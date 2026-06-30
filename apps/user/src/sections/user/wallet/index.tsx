@@ -58,8 +58,12 @@ function toNumber(value?: number | string | null) {
 }
 
 function moneyInputToCents(value: string) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.round(parsed * 100) : 0;
+  const trimmed = value.trim();
+  if (!/^\d+(\.\d{0,2})?$/.test(trimmed)) return 0;
+  const [yuan = "0", cents = ""] = trimmed.split(".");
+  const amount = Number.parseInt(yuan, 10) * 100;
+  const fraction = Number.parseInt(cents.padEnd(2, "0").slice(0, 2), 10) || 0;
+  return amount + fraction;
 }
 
 function normalizeMethod(value?: string | null) {
@@ -470,9 +474,11 @@ export default function Wallet() {
               </label>
               <Input
                 id="withdraw-amount"
+                inputMode="decimal"
                 min="0"
                 onChange={(event) => setWithdrawAmount(event.target.value)}
                 placeholder="0.00"
+                step="0.01"
                 type="number"
                 value={withdrawAmount}
               />
@@ -550,9 +556,11 @@ export default function Wallet() {
             </label>
             <Input
               id="transfer-amount"
+              inputMode="decimal"
               min="0"
               onChange={(event) => setTransferAmount(event.target.value)}
               placeholder="0.00"
+              step="0.01"
               type="number"
               value={transferAmount}
             />
