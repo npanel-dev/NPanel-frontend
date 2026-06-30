@@ -94,7 +94,7 @@ function parseWithdrawalMethods(raw?: string | null): WithdrawalMethod[] {
           };
         })
         .filter((item) => item.method && item.enabled);
-      return methods.length ? methods : DEFAULT_WITHDRAWAL_METHODS;
+      return methods;
     }
   } catch {
     const methods = raw
@@ -178,17 +178,32 @@ export default function Wallet() {
   const selectedMethod = withdrawalMethods.find(
     (item) => item.method === withdrawMethod
   );
+  const hasWithdrawalMethods = withdrawalMethods.length > 0;
 
   useEffect(() => {
-    if (!withdrawMethod && withdrawalMethods[0]?.method) {
-      setWithdrawMethod(withdrawalMethods[0].method);
+    if (!hasWithdrawalMethods) {
+      if (withdrawMethod) {
+        setWithdrawMethod("");
+      }
+      return;
     }
-  }, [withdrawMethod, withdrawalMethods]);
+    const firstMethod = withdrawalMethods[0]?.method;
+    if (
+      firstMethod &&
+      !withdrawalMethods.some((item) => item.method === withdrawMethod)
+    ) {
+      setWithdrawMethod(firstMethod);
+    }
+  }, [hasWithdrawalMethods, withdrawMethod, withdrawalMethods]);
 
   async function submitWithdraw() {
     const amount = moneyInputToCents(withdrawAmount);
     if (amount <= 0) {
       toast.error(t("invalidAmount", "Please enter a valid amount"));
+      return;
+    }
+    if (!hasWithdrawalMethods) {
+      toast.error(t("selectMethod", "Please select a withdrawal method"));
       return;
     }
     if (!withdrawMethod) {
@@ -277,10 +292,12 @@ export default function Wallet() {
                   <ArrowRightLeft className="size-4" />
                   {t("transferToBalance", "Transfer to Balance")}
                 </Button>
-                <Button onClick={() => setWithdrawOpen(true)} size="sm">
-                  <Banknote className="size-4" />
-                  {t("withdrawCommission", "Withdraw Commission")}
-                </Button>
+                {hasWithdrawalMethods && (
+                  <Button onClick={() => setWithdrawOpen(true)} size="sm">
+                    <Banknote className="size-4" />
+                    {t("withdrawCommission", "Withdraw Commission")}
+                  </Button>
+                )}
               </div>
             </div>
           </div>
