@@ -124,6 +124,23 @@
     "siteNamePlaceholder": "Enter site name",
     "title": "Site Configuration"
   },
+  "tawk": {
+    "description": "Configure the tawk.to chat widget for the user portal",
+    "enabled": "Enable Widget",
+    "enabledDescription": "Show the tawk.to chat widget on the user portal",
+    "identifyUser": "Identify Logged-in Users",
+    "identifyUserDescription": "Send the current user's basic identity to tawk.to after login",
+    "propertyId": "Property ID",
+    "propertyIdDescription": "The first ID segment in the tawk.to embed URL",
+    "secretKey": "Secure Mode Secret Key",
+    "secretKeyDescription": "Stored only on the backend and never returned in public config",
+    "secretKeyPlaceholder": "Paste the secret key from tawk.to",
+    "secureMode": "Secure Mode",
+    "secureModeDescription": "Use the backend secret to sign visitor identity",
+    "title": "Tawk Customer Service",
+    "widgetId": "Widget ID",
+    "widgetIdDescription": "The second ID segment in the tawk.to embed URL, usually default"
+  },
   "tos": {
     "description": "Edit and manage terms of service content",
     "title": "Terms of Service"

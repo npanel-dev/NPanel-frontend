@@ -124,6 +124,23 @@
     "siteNamePlaceholder": "输入站点名称",
     "title": "站点配置"
   },
+  "tawk": {
+    "description": "配置用户端的 tawk.to 在线客服组件",
+    "enabled": "启用客服组件",
+    "enabledDescription": "启用后，将在用户端显示 tawk.to 在线客服入口",
+    "identifyUser": "识别已登录用户",
+    "identifyUserDescription": "用户登录后，将向 tawk.to 发送基础访客身份信息",
+    "propertyId": "Property ID",
+    "propertyIdDescription": "tawk.to 嵌入地址中的第一段 ID",
+    "secretKey": "Secure Mode 密钥",
+    "secretKeyDescription": "仅保存在后端，不会通过公开配置返回给用户端",
+    "secretKeyPlaceholder": "粘贴 tawk.to 后台提供的密钥",
+    "secureMode": "Secure Mode",
+    "secureModeDescription": "使用后端密钥为访客身份生成签名",
+    "title": "Tawk 在线客服",
+    "widgetId": "Widget ID",
+    "widgetIdDescription": "tawk.to 嵌入地址中的第二段 ID，通常为 default"
+  },
   "tos": {
     "description": "编辑和管理服务条款内容",
     "title": "服务条款"
