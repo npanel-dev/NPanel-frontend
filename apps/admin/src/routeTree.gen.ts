@@ -17,6 +17,9 @@ const IndexLazyRouteImport = createFileRoute('/')()
 const DashboardIndexLazyRouteImport = createFileRoute('/dashboard/')()
 const DashboardServersLazyRouteImport = createFileRoute('/dashboard/servers')()
 const DashboardNodesLazyRouteImport = createFileRoute('/dashboard/nodes')()
+const DashboardWithdrawalIndexLazyRouteImport = createFileRoute(
+  '/dashboard/withdrawal/',
+)()
 const DashboardUserIndexLazyRouteImport = createFileRoute('/dashboard/user/')()
 const DashboardTicketIndexLazyRouteImport =
   createFileRoute('/dashboard/ticket/')()
@@ -124,6 +127,14 @@ const DashboardNodesLazyRoute = DashboardNodesLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/dashboard/nodes.lazy').then((d) => d.Route),
 )
+const DashboardWithdrawalIndexLazyRoute =
+  DashboardWithdrawalIndexLazyRouteImport.update({
+    id: '/withdrawal/',
+    path: '/withdrawal/',
+    getParentRoute: () => DashboardRouteLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/dashboard/withdrawal/index.lazy').then((d) => d.Route),
+  )
 const DashboardUserIndexLazyRoute = DashboardUserIndexLazyRouteImport.update({
   id: '/user/',
   path: '/user/',
@@ -376,6 +387,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/system': typeof DashboardSystemIndexLazyRoute
   '/dashboard/ticket': typeof DashboardTicketIndexLazyRoute
   '/dashboard/user': typeof DashboardUserIndexLazyRoute
+  '/dashboard/withdrawal': typeof DashboardWithdrawalIndexLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
@@ -410,6 +422,7 @@ export interface FileRoutesByTo {
   '/dashboard/system': typeof DashboardSystemIndexLazyRoute
   '/dashboard/ticket': typeof DashboardTicketIndexLazyRoute
   '/dashboard/user': typeof DashboardUserIndexLazyRoute
+  '/dashboard/withdrawal': typeof DashboardWithdrawalIndexLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -446,6 +459,7 @@ export interface FileRoutesById {
   '/dashboard/system/': typeof DashboardSystemIndexLazyRoute
   '/dashboard/ticket/': typeof DashboardTicketIndexLazyRoute
   '/dashboard/user/': typeof DashboardUserIndexLazyRoute
+  '/dashboard/withdrawal/': typeof DashboardWithdrawalIndexLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -483,6 +497,7 @@ export interface FileRouteTypes {
     | '/dashboard/system'
     | '/dashboard/ticket'
     | '/dashboard/user'
+    | '/dashboard/withdrawal'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -517,6 +532,7 @@ export interface FileRouteTypes {
     | '/dashboard/system'
     | '/dashboard/ticket'
     | '/dashboard/user'
+    | '/dashboard/withdrawal'
   id:
     | '__root__'
     | '/'
@@ -552,6 +568,7 @@ export interface FileRouteTypes {
     | '/dashboard/system/'
     | '/dashboard/ticket/'
     | '/dashboard/user/'
+    | '/dashboard/withdrawal/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -594,6 +611,13 @@ declare module '@tanstack/react-router' {
       path: '/nodes'
       fullPath: '/dashboard/nodes'
       preLoaderRoute: typeof DashboardNodesLazyRouteImport
+      parentRoute: typeof DashboardRouteLazyRoute
+    }
+    '/dashboard/withdrawal/': {
+      id: '/dashboard/withdrawal/'
+      path: '/withdrawal'
+      fullPath: '/dashboard/withdrawal'
+      preLoaderRoute: typeof DashboardWithdrawalIndexLazyRouteImport
       parentRoute: typeof DashboardRouteLazyRoute
     }
     '/dashboard/user/': {
@@ -827,6 +851,7 @@ interface DashboardRouteLazyRouteChildren {
   DashboardSystemIndexLazyRoute: typeof DashboardSystemIndexLazyRoute
   DashboardTicketIndexLazyRoute: typeof DashboardTicketIndexLazyRoute
   DashboardUserIndexLazyRoute: typeof DashboardUserIndexLazyRoute
+  DashboardWithdrawalIndexLazyRoute: typeof DashboardWithdrawalIndexLazyRoute
 }
 
 const DashboardRouteLazyRouteChildren: DashboardRouteLazyRouteChildren = {
@@ -861,6 +886,7 @@ const DashboardRouteLazyRouteChildren: DashboardRouteLazyRouteChildren = {
   DashboardSystemIndexLazyRoute: DashboardSystemIndexLazyRoute,
   DashboardTicketIndexLazyRoute: DashboardTicketIndexLazyRoute,
   DashboardUserIndexLazyRoute: DashboardUserIndexLazyRoute,
+  DashboardWithdrawalIndexLazyRoute: DashboardWithdrawalIndexLazyRoute,
 }
 
 const DashboardRouteLazyRouteWithChildren =

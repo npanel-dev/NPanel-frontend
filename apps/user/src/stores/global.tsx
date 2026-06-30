@@ -87,6 +87,8 @@ export const useGlobalStore = create<GlobalStore>((set, get) => ({
       forced_invite: false,
       referral_percentage: 0,
       only_first_purchase: false,
+      withdrawal_min_amount: 0,
+      withdrawal_methods: "",
     },
     currency: {
       currency_unit: "USD",

@@ -77,6 +77,11 @@ export function useNavs() {
             icon: "flat-color-icons:key",
           },
           {
+            title: t("Withdrawal Management", "Withdrawal Management"),
+            url: "/dashboard/withdrawal",
+            icon: "flat-color-icons:money-transfer",
+          },
+          {
             title: t("Marketing Management", "Marketing Management"),
             url: "/dashboard/marketing",
             icon: "flat-color-icons:bullish",

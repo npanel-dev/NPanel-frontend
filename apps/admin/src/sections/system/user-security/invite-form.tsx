@@ -38,10 +38,84 @@ function toNumber(value: unknown): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
+type WithdrawalMethod = {
+  method: string;
+  label: string;
+  enabled?: boolean;
+};
+
+const DEFAULT_WITHDRAWAL_METHODS: WithdrawalMethod[] = [
+  { method: "alipay", label: "Alipay", enabled: true },
+  { method: "wechat", label: "WeChat", enabled: true },
+  { method: "usdt", label: "USDT", enabled: true },
+];
+
+function normalizeMethod(value?: string | null) {
+  const method = String(value || "")
+    .trim()
+    .toLowerCase();
+  return method === "ustd" ? "usdt" : method;
+}
+
+function parseWithdrawalMethods(raw?: string | null): WithdrawalMethod[] {
+  if (!raw) return DEFAULT_WITHDRAWAL_METHODS;
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      const methods = parsed
+        .map((item) => {
+          if (typeof item === "string") {
+            return {
+              method: normalizeMethod(item),
+              label: item,
+              enabled: true,
+            };
+          }
+          return {
+            method: normalizeMethod(item?.method),
+            label: String(item?.label || item?.method || ""),
+            enabled: item?.enabled !== false,
+          };
+        })
+        .filter((item) => item.method);
+      return methods.length ? methods : DEFAULT_WITHDRAWAL_METHODS;
+    }
+  } catch {
+    const methods = raw
+      .split(/[\n,]/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((item) => ({
+        method: normalizeMethod(item),
+        label: item,
+        enabled: true,
+      }));
+    if (methods.length) return methods;
+  }
+  return DEFAULT_WITHDRAWAL_METHODS;
+}
+
+function isMethodEnabled(methods: WithdrawalMethod[], method: string) {
+  return methods.find((item) => item.method === method)?.enabled !== false;
+}
+
+function getConfigValue<T>(
+  source: unknown,
+  snakeKey: string,
+  camelKey: string
+) {
+  const record = (source || {}) as Record<string, T>;
+  return record[snakeKey] ?? record[camelKey];
+}
+
 const inviteSchema = z.object({
   forced_invite: z.boolean().optional(),
   referral_percentage: z.number().optional(),
   only_first_purchase: z.boolean().optional(),
+  withdrawal_min_amount: z.number().optional(),
+  alipay_enabled: z.boolean().optional(),
+  wechat_enabled: z.boolean().optional(),
+  usdt_enabled: z.boolean().optional(),
 });
 
 type InviteFormData = z.infer<typeof inviteSchema>;
@@ -66,14 +140,39 @@ export default function InviteConfig() {
       forced_invite: false,
       referral_percentage: 0,
       only_first_purchase: false,
+      withdrawal_min_amount: 0,
+      alipay_enabled: true,
+      wechat_enabled: true,
+      usdt_enabled: true,
     },
   });
 
   useEffect(() => {
     if (data) {
+      const methods = parseWithdrawalMethods(
+        getConfigValue<string>(data, "withdrawal_methods", "withdrawalMethods")
+      );
       form.reset({
-        ...data,
-        referral_percentage: toNumber(data.referral_percentage),
+        forced_invite: getConfigValue<boolean>(
+          data,
+          "forced_invite",
+          "forcedInvite"
+        ),
+        referral_percentage: toNumber(
+          getConfigValue(data, "referral_percentage", "referralPercentage")
+        ),
+        only_first_purchase: getConfigValue<boolean>(
+          data,
+          "only_first_purchase",
+          "onlyFirstPurchase"
+        ),
+        withdrawal_min_amount:
+          toNumber(
+            getConfigValue(data, "withdrawal_min_amount", "withdrawalMinAmount")
+          ) || 0,
+        alipay_enabled: isMethodEnabled(methods, "alipay"),
+        usdt_enabled: isMethodEnabled(methods, "usdt"),
+        wechat_enabled: isMethodEnabled(methods, "wechat"),
       });
     }
   }, [data, form]);
@@ -81,7 +180,30 @@ export default function InviteConfig() {
   async function onSubmit(values: InviteFormData) {
     setLoading(true);
     try {
-      await updateInviteConfig(values as API.InviteConfig);
+      const withdrawalMethods: WithdrawalMethod[] = [
+        {
+          method: "alipay",
+          label: t("invite.methodAlipay", "Alipay"),
+          enabled: values.alipay_enabled,
+        },
+        {
+          method: "wechat",
+          label: t("invite.methodWechat", "WeChat"),
+          enabled: values.wechat_enabled,
+        },
+        {
+          method: "usdt",
+          label: t("invite.methodUsdt", "USDT"),
+          enabled: values.usdt_enabled,
+        },
+      ];
+      await updateInviteConfig({
+        forced_invite: values.forced_invite,
+        referral_percentage: values.referral_percentage,
+        only_first_purchase: values.only_first_purchase,
+        withdrawal_min_amount: values.withdrawal_min_amount || 0,
+        withdrawal_methods: JSON.stringify(withdrawalMethods),
+      } as API.InviteConfig);
       toast.success(t("invite.saveSuccess", "Save Successful"));
       refetch();
       setOpen(false);
@@ -222,6 +344,82 @@ export default function InviteConfig() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="withdrawal_min_amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("invite.withdrawalMinAmount", "Minimum Withdrawal")}
+                    </FormLabel>
+                    <FormControl>
+                      <EnhancedInput
+                        min={0}
+                        onValueBlur={(value) => field.onChange(Number(value))}
+                        placeholder={t(
+                          "invite.inputPlaceholder",
+                          "Please enter"
+                        )}
+                        type="number"
+                        value={field.value}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        "invite.withdrawalMinAmountDescription",
+                        "Users can submit withdrawal requests only when the amount reaches this threshold"
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="space-y-3 rounded-lg border p-4">
+                <div>
+                  <p className="font-medium text-sm">
+                    {t("invite.withdrawalMethods", "Withdrawal Methods")}
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    {t(
+                      "invite.withdrawalMethodsDescription",
+                      "Enabled methods will be available on the user wallet withdrawal form"
+                    )}
+                  </p>
+                </div>
+                {[
+                  {
+                    name: "alipay_enabled" as const,
+                    title: t("invite.methodAlipay", "Alipay"),
+                  },
+                  {
+                    name: "wechat_enabled" as const,
+                    title: t("invite.methodWechat", "WeChat"),
+                  },
+                  {
+                    name: "usdt_enabled" as const,
+                    title: t("invite.methodUsdt", "USDT"),
+                  },
+                ].map((item) => (
+                  <FormField
+                    control={form.control}
+                    key={item.name}
+                    name={item.name}
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between gap-3">
+                        <FormLabel className="!mt-0">{item.title}</FormLabel>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
             </form>
           </Form>
         </ScrollArea>

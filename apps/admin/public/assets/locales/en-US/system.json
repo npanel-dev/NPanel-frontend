@@ -51,13 +51,20 @@
     "forcedInvite": "Require Invitation to Register",
     "forcedInviteDescription": "When enabled, users must register through an invitation link",
     "inputPlaceholder": "Please enter",
+    "methodAlipay": "Alipay",
+    "methodUsdt": "USDT",
+    "methodWechat": "WeChat",
     "onlyFirstPurchase": "First Purchase Reward Only",
     "onlyFirstPurchaseDescription": "When enabled, referrers only receive rewards for the first purchase by referred users",
     "referralPercentage": "Referral Reward Percentage",
     "referralPercentageDescription": "Percentage of reward given to referrers",
     "saveFailed": "Save Failed",
     "saveSuccess": "Save Successful",
-    "title": "Invitation Settings"
+    "title": "Invitation Settings",
+    "withdrawalMethods": "Withdrawal Methods",
+    "withdrawalMethodsDescription": "Enabled methods will be available on the user wallet withdrawal form",
+    "withdrawalMinAmount": "Minimum Withdrawal",
+    "withdrawalMinAmountDescription": "Users can submit withdrawal requests only when the amount reaches this threshold"
   },
   "logCleanup": {
     "autoClear": "Enable Auto Cleanup",

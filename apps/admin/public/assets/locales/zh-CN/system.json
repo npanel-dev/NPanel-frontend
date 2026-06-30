@@ -51,13 +51,20 @@
     "forcedInvite": "强制邀请注册",
     "forcedInviteDescription": "启用后，用户必须通过邀请链接注册",
     "inputPlaceholder": "请输入",
+    "methodAlipay": "支付宝",
+    "methodUsdt": "USDT",
+    "methodWechat": "微信",
     "onlyFirstPurchase": "仅首次购买奖励",
     "onlyFirstPurchaseDescription": "启用后，推荐人仅在被推荐用户首次购买时获得奖励",
     "referralPercentage": "推荐奖励百分比",
     "referralPercentageDescription": "给予推荐人的奖励百分比",
     "saveFailed": "保存失败",
     "saveSuccess": "保存成功",
-    "title": "邀请设置"
+    "title": "邀请设置",
+    "withdrawalMethods": "提现方式",
+    "withdrawalMethodsDescription": "开启后，用户钱包提现表单将显示对应方式",
+    "withdrawalMinAmount": "最低提现金额",
+    "withdrawalMinAmountDescription": "用户提交提现申请时需要达到该金额门槛"
   },
   "logCleanup": {
     "autoClear": "启用自动清理",

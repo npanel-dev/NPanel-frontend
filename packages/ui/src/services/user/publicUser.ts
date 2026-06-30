@@ -169,6 +169,26 @@ export async function publicUserCommissionWithdraw(
   );
 }
 
+/** TransferCommissionToBalance 佣金划转到余额 POST /v1/public/user/commission/transfer_balance */
+export async function publicUserTransferCommissionToBalance(
+  body: { amount?: number | string },
+  options?: { [key: string]: any }
+) {
+  return request<any>(
+    `${
+      import.meta.env.VITE_API_PREFIX || ""
+    }/v1/public/user/commission/transfer_balance`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
 /** DeleteCurrentUserAccount 删除当前用户账号 DELETE /v1/public/user/current_user_account */
 export async function publicUserDeleteCurrentUserAccount(options?: {
   [key: string]: any;

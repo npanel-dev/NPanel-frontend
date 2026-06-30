@@ -17,6 +17,7 @@ import {
   publicUserQueryUserSubscribe,
   publicUserQueryWithdrawalLog,
   publicUserResetUserSubscribeToken,
+  publicUserTransferCommissionToBalance,
   publicUserUnbindDevice,
   publicUserUnbindOAuth,
   publicUserUnbindTelegram,
@@ -51,6 +52,8 @@ export const queryUserCommissionLog: (...args: any[]) => Promise<any> =
   publicUserQueryUserCommissionLog as any;
 export const commissionWithdraw: (...args: any[]) => Promise<any> =
   publicUserCommissionWithdraw as any;
+export const transferCommissionToBalance: (...args: any[]) => Promise<any> =
+  publicUserTransferCommissionToBalance as any;
 export const getDeviceList: (...args: any[]) => Promise<any> =
   publicUserGetDeviceList as any;
 export const queryUserInfo: (...args: any[]) => Promise<any> =

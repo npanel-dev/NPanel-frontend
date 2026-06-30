@@ -1,0 +1,31 @@
+{
+  "approve": "通过",
+  "approveDescription": "通过后，该提现申请会被标记为已完成。",
+  "approveSuccess": "提现已通过",
+  "approveTitle": "通过这笔提现吗？",
+  "cancel": "取消",
+  "column": {
+    "account": "收款账号",
+    "amount": "金额",
+    "createdAt": "创建时间",
+    "method": "方式",
+    "processedAt": "处理时间",
+    "reason": "原因",
+    "status": "状态",
+    "user": "用户",
+    "userId": "用户 ID"
+  },
+  "reasonPlaceholder": "请输入拒绝原因",
+  "reasonRequired": "请输入拒绝原因",
+  "reject": "拒绝",
+  "rejectDescription": "拒绝后，金额会退回到用户佣金。",
+  "rejectSuccess": "提现已拒绝",
+  "rejectTitle": "拒绝提现",
+  "status": {
+    "approved": "已通过",
+    "pending": "待处理",
+    "rejected": "已拒绝",
+    "unknown": "未知"
+  },
+  "title": "提现管理"
+}

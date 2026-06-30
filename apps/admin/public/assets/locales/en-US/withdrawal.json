@@ -1,0 +1,31 @@
+{
+  "approve": "Approve",
+  "approveDescription": "Approving will mark this withdrawal request as completed.",
+  "approveSuccess": "Withdrawal approved",
+  "approveTitle": "Approve this withdrawal?",
+  "cancel": "Cancel",
+  "column": {
+    "account": "Receiving Account",
+    "amount": "Amount",
+    "createdAt": "Created At",
+    "method": "Method",
+    "processedAt": "Processed At",
+    "reason": "Reason",
+    "status": "Status",
+    "user": "User",
+    "userId": "User ID"
+  },
+  "reasonPlaceholder": "Enter rejection reason",
+  "reasonRequired": "Please enter a rejection reason",
+  "reject": "Reject",
+  "rejectDescription": "Rejected requests will refund the amount back to the user's commission.",
+  "rejectSuccess": "Withdrawal rejected",
+  "rejectTitle": "Reject withdrawal",
+  "status": {
+    "approved": "Approved",
+    "pending": "Pending",
+    "rejected": "Rejected",
+    "unknown": "Unknown"
+  },
+  "title": "Withdrawal Management"
+}
