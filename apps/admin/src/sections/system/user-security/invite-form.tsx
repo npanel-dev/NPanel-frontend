@@ -26,6 +26,7 @@ import {
   getInviteConfig,
   updateInviteConfig,
 } from "@workspace/ui/services/admin/system";
+import { unitConversion } from "@workspace/ui/utils/unit-conversions";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -355,12 +356,20 @@ export default function InviteConfig() {
                     </FormLabel>
                     <FormControl>
                       <EnhancedInput
+                        formatInput={(value) =>
+                          unitConversion("centsToDollars", value)
+                        }
+                        formatOutput={(value) =>
+                          unitConversion("dollarsToCents", value)
+                        }
+                        inputMode="decimal"
                         min={0}
-                        onValueBlur={(value) => field.onChange(Number(value))}
+                        onValueBlur={(value) => field.onChange(value)}
                         placeholder={t(
                           "invite.inputPlaceholder",
                           "Please enter"
                         )}
+                        step="0.01"
                         type="number"
                         value={field.value}
                       />
