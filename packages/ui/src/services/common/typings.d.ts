@@ -258,6 +258,7 @@ declare namespace API {
   type GetServerProtocolsReply = any;
   type GetServerUserListReply = any;
   type GetSiteConfigReply = any;
+  type GetTawkConfigReply = any;
   type GetStatReply = any;
   type GetSubscribeApplicationListData = any;
   type GetSubscribeApplicationListReply = any;
@@ -519,6 +520,8 @@ declare namespace API {
   type SettingTelegramBotReply = any;
   type SettingTelegramBotRequest = any;
   type SiteConfig = any;
+  type PublicTawkConfig = any;
+  type TawkIdentityReply = any;
   type SortItem = any;
   type StopBatchSendEmailTaskData = any;
   type StopBatchSendEmailTaskReply = any;

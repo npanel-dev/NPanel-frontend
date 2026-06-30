@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import CurrencyForm from "./basic-settings/currency-form";
 import PrivacyPolicyForm from "./basic-settings/privacy-policy-form";
 import SiteForm from "./basic-settings/site-form";
+import TawkForm from "./basic-settings/tawk-form";
 import TosForm from "./basic-settings/tos-form";
 import LogCleanupForm from "./log-cleanup/log-cleanup-form";
 import DeviceAdmissionToggle from "./user-security/device-admission-toggle";
@@ -25,6 +26,7 @@ export default function System() {
       title: t("basicSettings", "Basic Settings"),
       forms: [
         { component: SiteForm },
+        { component: TawkForm },
         { component: CurrencyForm },
         { component: TosForm },
         { component: PrivacyPolicyForm },

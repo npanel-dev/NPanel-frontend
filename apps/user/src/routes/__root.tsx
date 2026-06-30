@@ -9,6 +9,7 @@ import { getGlobalConfig } from "@workspace/ui/services/common/common";
 import { isBrowser } from "@workspace/ui/utils/index";
 import { useEffect } from "react";
 import { Helmet, HelmetProvider } from "react-helmet-async";
+import { TawkWidget } from "@/components/tawk-widget";
 import { useGlobalStore } from "@/stores/global";
 
 export const Route = createRootRouteWithContext()({
@@ -56,6 +57,7 @@ export const Route = createRootRouteWithContext()({
         </Helmet>
         <NavigationProgress />
         <Outlet />
+        <TawkWidget />
         <Toaster closeButton position="top-center" richColors />
         <div
           dangerouslySetInnerHTML={{ __html: common?.site.custom_html || "" }}

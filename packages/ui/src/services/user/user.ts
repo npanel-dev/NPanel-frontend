@@ -7,6 +7,7 @@ import {
   publicUserGetLoginLog,
   publicUserGetOAuthMethods,
   publicUserGetSubscribeLog,
+  publicUserGetTawkIdentity,
   publicUserPreUnsubscribe,
   publicUserQueryUserAffiliate,
   publicUserQueryUserAffiliateList,
@@ -54,6 +55,8 @@ export const getDeviceList: (...args: any[]) => Promise<any> =
   publicUserGetDeviceList as any;
 export const queryUserInfo: (...args: any[]) => Promise<any> =
   publicUserQueryUserInfo as any;
+export const getTawkIdentity: (...args: any[]) => Promise<any> =
+  publicUserGetTawkIdentity as any;
 export const getLoginLog: (...args: any[]) => Promise<any> =
   publicUserGetLoginLog as any;
 export const updateUserNotify: (...args: any[]) => Promise<any> =

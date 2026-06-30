@@ -100,6 +100,13 @@ export const useGlobalStore = create<GlobalStore>((set, get) => ({
       user_agent_limit: false,
       user_agent_list: "",
     },
+    tawk: {
+      enabled: false,
+      property_id: "",
+      widget_id: "",
+      identify_user: false,
+      secure_mode: false,
+    },
     verify_code: {
       verify_code_expire_time: 5,
       verify_code_limit: 15,

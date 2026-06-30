@@ -4937,6 +4937,2039 @@
           }
         }
       },
+      "api.admin.routing.v1.ActRoutingGrayReleaseRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.ConfirmRoutingReleaseEnforceReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseApproval"
+          }
+        }
+      },
+      "api.admin.routing.v1.ConfirmRoutingReleaseEnforceRequest": {
+        "type": "object",
+        "properties": {
+          "releaseId": {
+            "type": "string"
+          },
+          "snapshotId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.CreateDnsResolverRequest": {
+        "type": "object",
+        "properties": {
+          "resolver": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.DnsResolver"
+          }
+        }
+      },
+      "api.admin.routing.v1.CreateRouteOutboundRequest": {
+        "type": "object",
+        "properties": {
+          "outbound": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteOutbound"
+          }
+        }
+      },
+      "api.admin.routing.v1.CreateRouteProfileRequest": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteProfile"
+          }
+        }
+      },
+      "api.admin.routing.v1.CreateRouteRuleRequest": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteRule"
+          }
+        }
+      },
+      "api.admin.routing.v1.CreateRoutingGrayReleaseRequest": {
+        "type": "object",
+        "properties": {
+          "release": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingGrayRelease"
+          }
+        }
+      },
+      "api.admin.routing.v1.CreateUnlockServiceRequest": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.UnlockService"
+          }
+        }
+      },
+      "api.admin.routing.v1.DeleteRouteItemData": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "api.admin.routing.v1.DeleteRouteItemReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.DeleteRouteItemData"
+          }
+        }
+      },
+      "api.admin.routing.v1.DnsResolver": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "proto": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "resolverJson": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.DnsResolverData": {
+        "type": "object",
+        "properties": {
+          "resolver": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.DnsResolver"
+          }
+        }
+      },
+      "api.admin.routing.v1.DnsResolverListData": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.DnsResolver"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.DnsResolverReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.DnsResolverData"
+          }
+        }
+      },
+      "api.admin.routing.v1.GetRoutingAnalyticsReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingAnalyticsData"
+          }
+        }
+      },
+      "api.admin.routing.v1.GetRoutingCapabilityMatrixReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingCapabilityMatrixData"
+          }
+        }
+      },
+      "api.admin.routing.v1.GetRoutingDrilldownReportReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingDrilldownReport"
+          }
+        }
+      },
+      "api.admin.routing.v1.GetRoutingE2EChecklistReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingE2EChecklistData"
+          }
+        }
+      },
+      "api.admin.routing.v1.GetRoutingOverviewReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingOverview"
+          }
+        }
+      },
+      "api.admin.routing.v1.GetRoutingReleaseGateReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseGate"
+          }
+        }
+      },
+      "api.admin.routing.v1.GetRoutingReleaseReportReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseReport"
+          }
+        }
+      },
+      "api.admin.routing.v1.GetRoutingTrendReportReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingTrendReport"
+          }
+        }
+      },
+      "api.admin.routing.v1.ListDnsResolversReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.DnsResolverListData"
+          }
+        }
+      },
+      "api.admin.routing.v1.ListRouteOutboundsReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteOutboundListData"
+          }
+        }
+      },
+      "api.admin.routing.v1.ListRouteProfilesReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteProfileListData"
+          }
+        }
+      },
+      "api.admin.routing.v1.ListRouteRulesReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteRuleListData"
+          }
+        }
+      },
+      "api.admin.routing.v1.ListRoutingGrayReleasesReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingGrayReleaseListData"
+          }
+        }
+      },
+      "api.admin.routing.v1.ListRoutingHealthReportsReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingHealthReportListData"
+          }
+        }
+      },
+      "api.admin.routing.v1.ListRoutingNotificationsReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingNotificationListData"
+          }
+        }
+      },
+      "api.admin.routing.v1.ListRoutingRouteEventsReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingRouteEventListData"
+          }
+        }
+      },
+      "api.admin.routing.v1.ListUnlockServicesReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.UnlockServiceListData"
+          }
+        }
+      },
+      "api.admin.routing.v1.PreviewRouteConfigReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.PreviewRouteResult"
+          }
+        }
+      },
+      "api.admin.routing.v1.PreviewRouteConfigRequest": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "nodeId": {
+            "type": "string"
+          },
+          "supportedFeatures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "subscribeId": {
+            "type": "string"
+          },
+          "userSubscribeId": {
+            "type": "string"
+          },
+          "subscribeToken": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.PreviewRouteResult": {
+        "type": "object",
+        "properties": {
+          "routingHash": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "profileName": {
+            "type": "string"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "ruleId": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "actionType": {
+            "type": "string"
+          },
+          "dnsResolverTag": {
+            "type": "string"
+          },
+          "outboundTag": {
+            "type": "string"
+          },
+          "fallbackPolicy": {
+            "type": "string"
+          },
+          "unsupportedFeatures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "effectiveMode": {
+            "type": "string"
+          },
+          "executionEnabled": {
+            "type": "boolean"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RollbackRoutingReleaseAuditReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingRollbackAudit"
+          }
+        }
+      },
+      "api.admin.routing.v1.RollbackRoutingReleaseAuditRequest": {
+        "type": "object",
+        "properties": {
+          "releaseId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "windowMinutes": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteOutbound": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "outboundJson": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteOutboundData": {
+        "type": "object",
+        "properties": {
+          "outbound": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteOutbound"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteOutboundListData": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RouteOutbound"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteOutboundReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteOutboundData"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "profileJson": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteProfileData": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteProfile"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteProfileListData": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RouteProfile"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteProfileReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteProfileData"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "profileId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "serviceCode": {
+            "type": "string"
+          },
+          "matcherJson": {
+            "type": "string"
+          },
+          "actionJson": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteRuleData": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteRule"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteRuleListData": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RouteRule"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.RouteRuleReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteRuleData"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingAnalyticsData": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingAnalyticsItem"
+            }
+          },
+          "topErrors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingAnalyticsError"
+            }
+          },
+          "totalRouteEvents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalHealthReports": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "affectedReporters": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fallbackRateBp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dnsFailRateBp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outboundFailRateBp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "windowStartedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingAnalyticsError": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingAnalyticsItem": {
+        "type": "object",
+        "properties": {
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "reporterId": {
+            "type": "string"
+          },
+          "routeEvents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "routeDecisions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "routeFallbacks": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fallbackRateBp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dnsFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outboundFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "affectedReporters": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastEventType": {
+            "type": "string"
+          },
+          "lastStatus": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "lastSeenAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingAuditEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "resourceName": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingCapabilityMatrixData": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingCapabilityMatrixItem"
+            }
+          },
+          "generatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingCapabilityMatrixItem": {
+        "type": "object",
+        "properties": {
+          "client": {
+            "type": "string"
+          },
+          "panel": {
+            "type": "string"
+          },
+          "minVersion": {
+            "type": "string"
+          },
+          "supportedFeatures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "missingFeatures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "executionMode": {
+            "type": "string"
+          },
+          "enforceCandidate": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingDrilldownItem": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "routeEvents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "routeFallbacks": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fallbackRateBp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dnsFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outboundFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "healthReports": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "affectedReporters": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "lastSeenAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingDrilldownReport": {
+        "type": "object",
+        "properties": {
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "groupBy": {
+            "type": "string"
+          },
+          "windowMinutes": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingDrilldownItem"
+            }
+          },
+          "generatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingE2EChecklistData": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingE2EChecklistItem"
+            }
+          },
+          "ready": {
+            "type": "boolean"
+          },
+          "generatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingE2EChecklistItem": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingEnforceGuard": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingGrayRelease": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "targetIdsJson": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "rollbackReason": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "endedAt": {
+            "type": "string"
+          },
+          "releaseJson": {
+            "type": "string"
+          },
+          "targetCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingGrayReleaseData": {
+        "type": "object",
+        "properties": {
+          "release": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingGrayRelease"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingGrayReleaseListData": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingGrayRelease"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingGrayReleaseReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingGrayReleaseData"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingHealthItem": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "checkedAt": {
+            "type": "string"
+          },
+          "rttMs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "consecutiveFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "outboundTag": {
+            "type": "string"
+          },
+          "dnsResolverTag": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingHealthReport": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "reporterType": {
+            "type": "string"
+          },
+          "reporterId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectKey": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "rttMs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "consecutiveFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "outboundTag": {
+            "type": "string"
+          },
+          "dnsResolverTag": {
+            "type": "string"
+          },
+          "checkedAt": {
+            "type": "string"
+          },
+          "reportJson": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingHealthReportListData": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingHealthReport"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingNotification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingNotificationListData": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingNotification"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "generatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingOverview": {
+        "type": "object",
+        "properties": {
+          "routingHash": {
+            "type": "string"
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "profileName": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "profileEnabled": {
+            "type": "boolean"
+          },
+          "enforceReady": {
+            "type": "boolean"
+          },
+          "executionEnabled": {
+            "type": "boolean"
+          },
+          "rollbackAction": {
+            "type": "string"
+          },
+          "compileError": {
+            "type": "string"
+          },
+          "health": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingHealthItem"
+            }
+          },
+          "guards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingEnforceGuard"
+            }
+          },
+          "auditEvents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingAuditEvent"
+            }
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingReleaseAlert": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingReleaseApproval": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "releaseId": {
+            "type": "string"
+          },
+          "snapshotId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "confirmedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingReleaseAuditSnapshot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "releaseId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseThresholds"
+          },
+          "gate": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseGate"
+          },
+          "alerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseAlert"
+            }
+          },
+          "reportJson": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingReleaseGate": {
+        "type": "object",
+        "properties": {
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "requiresConfirmation": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseGateCheck"
+            }
+          },
+          "analytics": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingAnalyticsData"
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseThresholds"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingReleaseGateCheck": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingReleaseReport": {
+        "type": "object",
+        "properties": {
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseThresholds"
+          },
+          "gate": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseGate"
+          },
+          "alerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseAlert"
+            }
+          },
+          "snapshots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseAuditSnapshot"
+            }
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "approvals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseApproval"
+            }
+          },
+          "rollbackAudits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingRollbackAudit"
+            }
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingReleaseThresholds": {
+        "type": "object",
+        "properties": {
+          "fallbackRateBp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dnsFailRateBp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outboundFailRateBp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "topErrorsMax": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minRouteEvents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minHealthReports": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingRollbackAudit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "releaseId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "beforeMode": {
+            "type": "string"
+          },
+          "afterMode": {
+            "type": "string"
+          },
+          "beforeReleaseStatus": {
+            "type": "string"
+          },
+          "afterReleaseStatus": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "alerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseAlert"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingRouteEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "reporterType": {
+            "type": "string"
+          },
+          "reporterId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "actionType": {
+            "type": "string"
+          },
+          "outboundTag": {
+            "type": "string"
+          },
+          "dnsResolverTag": {
+            "type": "string"
+          },
+          "fallbackTarget": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "latencyMs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "error": {
+            "type": "string"
+          },
+          "eventAt": {
+            "type": "string"
+          },
+          "eventJson": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingRouteEventListData": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingRouteEvent"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingTrendMarker": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingTrendPoint": {
+        "type": "object",
+        "properties": {
+          "bucketStart": {
+            "type": "string"
+          },
+          "routeEvents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "routeFallbacks": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fallbackRateBp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dnsFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outboundFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "healthReports": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "affectedReporters": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.RoutingTrendReport": {
+        "type": "object",
+        "properties": {
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "windowMinutes": {
+            "type": "string"
+          },
+          "bucketMinutes": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingTrendPoint"
+            }
+          },
+          "markers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.RoutingTrendMarker"
+            }
+          },
+          "generatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.SnapshotRoutingReleaseAuditReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseAuditSnapshot"
+          }
+        }
+      },
+      "api.admin.routing.v1.SnapshotRoutingReleaseAuditRequest": {
+        "type": "object",
+        "properties": {
+          "releaseId": {
+            "type": "string"
+          },
+          "profileCode": {
+            "type": "string"
+          },
+          "routingHash": {
+            "type": "string"
+          },
+          "windowMinutes": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingReleaseThresholds"
+          }
+        }
+      },
+      "api.admin.routing.v1.UnlockService": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "serviceJson": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "api.admin.routing.v1.UnlockServiceData": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.UnlockService"
+          }
+        }
+      },
+      "api.admin.routing.v1.UnlockServiceListData": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.admin.routing.v1.UnlockService"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "api.admin.routing.v1.UnlockServiceReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.UnlockServiceData"
+          }
+        }
+      },
+      "api.admin.routing.v1.UpdateDnsResolverRequest": {
+        "type": "object",
+        "properties": {
+          "resolver": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.DnsResolver"
+          }
+        }
+      },
+      "api.admin.routing.v1.UpdateRouteOutboundRequest": {
+        "type": "object",
+        "properties": {
+          "outbound": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteOutbound"
+          }
+        }
+      },
+      "api.admin.routing.v1.UpdateRouteProfileRequest": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteProfile"
+          }
+        }
+      },
+      "api.admin.routing.v1.UpdateRouteRuleRequest": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RouteRule"
+          }
+        }
+      },
+      "api.admin.routing.v1.UpdateRoutingGrayReleaseRequest": {
+        "type": "object",
+        "properties": {
+          "release": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.RoutingGrayRelease"
+          }
+        }
+      },
+      "api.admin.routing.v1.UpdateUnlockServiceRequest": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "$ref": "#/components/schemas/api.admin.routing.v1.UnlockService"
+          }
+        }
+      },
       "api.admin.server.v1.CreateNodeData": {
         "type": "object",
         "properties": {
@@ -5618,6 +7651,9 @@
           "simnetClientMaxUdpSessions": {
             "type": "integer",
             "format": "int32"
+          },
+          "proxyProtocol": {
+            "type": "boolean"
           },
           "omniflowCarrier": {
             "type": "string",
@@ -6464,6 +8500,18 @@
             "items": {
               "$ref": "#/components/schemas/api.admin.subscribe.v1.SubscribePriceOption"
             }
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "features": {
+            "type": "string"
+          },
+          "detailFormat": {
+            "type": "string"
+          },
+          "detailContent": {
+            "type": "string"
           }
         },
         "description": "CreateSubscribeRequest 创建订阅套餐请求"
@@ -6931,6 +8979,18 @@
             "items": {
               "$ref": "#/components/schemas/api.admin.subscribe.v1.SubscribePriceOption"
             }
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "features": {
+            "type": "string"
+          },
+          "detailFormat": {
+            "type": "string"
+          },
+          "detailContent": {
+            "type": "string"
           }
         },
         "description": "SubscribeInfo 订阅套餐信息"
@@ -7058,6 +9118,18 @@
             "items": {
               "$ref": "#/components/schemas/api.admin.subscribe.v1.SubscribePriceOption"
             }
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "features": {
+            "type": "string"
+          },
+          "detailFormat": {
+            "type": "string"
+          },
+          "detailContent": {
+            "type": "string"
           }
         },
         "description": "SubscribeItem 订阅套餐列表项（包含销量）"
@@ -7108,6 +9180,16 @@
           },
           "updatedAt": {
             "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "description": "SubscribePriceOption 商品价格档位"
@@ -7408,9 +9490,45 @@
             "items": {
               "$ref": "#/components/schemas/api.admin.subscribe.v1.SubscribePriceOption"
             }
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "features": {
+            "type": "string"
+          },
+          "detailFormat": {
+            "type": "string"
+          },
+          "detailContent": {
+            "type": "string"
           }
         },
         "description": "UpdateSubscribeRequest 更新订阅套餐请求"
+      },
+      "api.admin.system.v1.AdminTawkConfig": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "propertyId": {
+            "type": "string"
+          },
+          "widgetId": {
+            "type": "string"
+          },
+          "identifyUser": {
+            "type": "boolean"
+          },
+          "secureMode": {
+            "type": "boolean"
+          },
+          "secretKey": {
+            "type": "string"
+          }
+        },
+        "description": "AdminTawkConfig Tawk客服配置"
       },
       "api.admin.system.v1.CurrencyConfig": {
         "type": "object",
@@ -7570,6 +9688,21 @@
           },
           "data": {
             "$ref": "#/components/schemas/api.admin.system.v1.SystemModule"
+          }
+        }
+      },
+      "api.admin.system.v1.GetTawkConfigReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.system.v1.AdminTawkConfig"
           }
         }
       },
@@ -8273,6 +10406,53 @@
           }
         },
         "description": "UpdateSubscribeConfig"
+      },
+      "api.admin.system.v1.UpdateTawkConfigData": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "api.admin.system.v1.UpdateTawkConfigReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.system.v1.UpdateTawkConfigData"
+          }
+        }
+      },
+      "api.admin.system.v1.UpdateTawkConfigRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "propertyId": {
+            "type": "string"
+          },
+          "widgetId": {
+            "type": "string"
+          },
+          "identifyUser": {
+            "type": "boolean"
+          },
+          "secureMode": {
+            "type": "boolean"
+          },
+          "secretKey": {
+            "type": "string"
+          }
+        },
+        "description": "UpdateTawkConfig"
       },
       "api.admin.system.v1.UpdateTosConfigData": {
         "type": "object",
@@ -11160,6 +13340,9 @@
           },
           "webAd": {
             "type": "boolean"
+          },
+          "tawk": {
+            "$ref": "#/components/schemas/api.public.common.v1.PublicTawkConfig"
           }
         },
         "description": "GetGlobalConfig Reply"
@@ -11250,6 +13433,27 @@
           }
         },
         "description": "Mobile auth configuration"
+      },
+      "api.public.common.v1.PublicTawkConfig": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "propertyId": {
+            "type": "string"
+          },
+          "widgetId": {
+            "type": "string"
+          },
+          "identifyUser": {
+            "type": "boolean"
+          },
+          "secureMode": {
+            "type": "boolean"
+          }
+        },
+        "description": "Public tawk customer service configuration"
       },
       "api.public.common.v1.PublicVerifyCodeConfig": {
         "type": "object",
@@ -11956,6 +14160,12 @@
           },
           "updatedAt": {
             "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
           }
         }
       },
@@ -12479,6 +14689,18 @@
             "items": {
               "$ref": "#/components/schemas/api.public.portal.v1.SubscribePriceOption"
             }
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "features": {
+            "type": "string"
+          },
+          "detailFormat": {
+            "type": "string"
+          },
+          "detailContent": {
+            "type": "string"
           }
         }
       },
@@ -12527,6 +14749,12 @@
             "type": "string"
           },
           "updatedAt": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "type": {
             "type": "string"
           }
         }
@@ -12734,6 +14962,18 @@
             "items": {
               "$ref": "#/components/schemas/api.public.subscribe.v1.SubscribePriceOption"
             }
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "features": {
+            "type": "string"
+          },
+          "detailFormat": {
+            "type": "string"
+          },
+          "detailContent": {
+            "type": "string"
           }
         }
       },
@@ -12833,6 +15073,12 @@
             "type": "string"
           },
           "updatedAt": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "type": {
             "type": "string"
           }
         }
@@ -13604,6 +15850,12 @@
           },
           "updatedAt": {
             "type": "string"
+          },
+          "priceOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/api.public.user.v1.SubscribePriceOption"
+            }
           }
         },
         "description": "Subscribe 订阅套餐信息"
@@ -13617,6 +15869,78 @@
           "discount": {
             "type": "number",
             "format": "double"
+          }
+        }
+      },
+      "api.public.user.v1.SubscribePriceOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "subscribeId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "durationUnit": {
+            "type": "string"
+          },
+          "durationValue": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          },
+          "originalPrice": {
+            "type": "string"
+          },
+          "inventory": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "show": {
+            "type": "boolean"
+          },
+          "sell": {
+            "type": "boolean"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "sort": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "api.public.user.v1.TawkIdentityReply": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string"
           }
         }
       },
@@ -14430,6 +16754,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "proxyProtocol": {
+            "type": "boolean"
+          },
           "omniflowCarrier": {
             "type": "string",
             "description": "OmniFlow 基础配置"
@@ -14980,6 +17307,9 @@
     {
       "name": "RedemptionService",
       "description": "RedemptionService 兑换码服务"
+    },
+    {
+      "name": "RoutingService"
     },
     {
       "name": "Server",

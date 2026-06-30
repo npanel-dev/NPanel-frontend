@@ -4,6 +4,15 @@ declare namespace API {
     msg?: string;
   };
 
+  type AdminTawkConfig = {
+    enabled?: boolean;
+    property_id?: string;
+    widget_id?: string;
+    identify_user?: boolean;
+    secure_mode?: boolean;
+    secret_key?: string;
+  };
+
   type Ads = {
     id?: string;
     title?: string;
@@ -1661,6 +1670,12 @@ declare namespace API {
     code?: number;
     message?: string;
     data?: SiteConfig;
+  };
+
+  type GetTawkConfigReply = {
+    code?: number;
+    message?: string;
+    data?: AdminTawkConfig;
   };
 
   type GetStatReply = {
@@ -5668,6 +5683,25 @@ declare namespace API {
     keywords?: string;
     customHtml?: string;
     customData?: string;
+  };
+
+  type UpdateTawkConfigData = {
+    success?: boolean;
+  };
+
+  type UpdateTawkConfigReply = {
+    code?: number;
+    message?: string;
+    data?: UpdateTawkConfigData;
+  };
+
+  type UpdateTawkConfigRequest = {
+    enabled?: boolean;
+    property_id?: string;
+    widget_id?: string;
+    identify_user?: boolean;
+    secure_mode?: boolean;
+    secret_key?: string;
   };
 
   type UpdateSubscribeApplicationRequest = {

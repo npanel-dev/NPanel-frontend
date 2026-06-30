@@ -302,6 +302,37 @@ export async function systemServiceUpdateSubscribeConfig(
   );
 }
 
+/** GetTawkConfig 获取Tawk客服配置 GET /v1/admin/system/tawk_config */
+export async function systemServiceGetTawkConfig(options?: {
+  [key: string]: any;
+}) {
+  return request<API.GetTawkConfigReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/system/tawk_config`,
+    {
+      method: "GET",
+      ...(options || {}),
+    }
+  );
+}
+
+/** UpdateTawkConfig 更新Tawk客服配置 PUT /v1/admin/system/tawk_config */
+export async function systemServiceUpdateTawkConfig(
+  body: API.UpdateTawkConfigRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.UpdateTawkConfigReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/system/tawk_config`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
 /** GetTosConfig 获取服务条款配置 GET /v1/admin/system/tos_config */
 export async function systemServiceGetTosConfig(options?: {
   [key: string]: any;

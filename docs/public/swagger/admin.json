@@ -6387,6 +6387,56 @@
         }
       }
     },
+    "/v1/admin/system/tawk_config": {
+      "get": {
+        "tags": [
+          "SystemService"
+        ],
+        "description": "GetTawkConfig 获取Tawk客服配置",
+        "operationId": "SystemService_GetTawkConfig",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/api.admin.system.v1.GetTawkConfigReply"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "SystemService"
+        ],
+        "description": "UpdateTawkConfig 更新Tawk客服配置",
+        "operationId": "SystemService_UpdateTawkConfig",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/api.admin.system.v1.UpdateTawkConfigRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/api.admin.system.v1.UpdateTawkConfigReply"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/admin/system/tos_config": {
       "get": {
         "tags": [
@@ -14646,6 +14696,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "proxyProtocol": {
+            "type": "boolean"
+          },
           "omniflowCarrier": {
             "type": "string",
             "description": "OmniFlow 基础配置"
@@ -16497,6 +16550,30 @@
         },
         "description": "UpdateSubscribeRequest 更新订阅套餐请求"
       },
+      "api.admin.system.v1.AdminTawkConfig": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "propertyId": {
+            "type": "string"
+          },
+          "widgetId": {
+            "type": "string"
+          },
+          "identifyUser": {
+            "type": "boolean"
+          },
+          "secureMode": {
+            "type": "boolean"
+          },
+          "secretKey": {
+            "type": "string"
+          }
+        },
+        "description": "AdminTawkConfig Tawk客服配置"
+      },
       "api.admin.system.v1.CurrencyConfig": {
         "type": "object",
         "properties": {
@@ -16655,6 +16732,21 @@
           },
           "data": {
             "$ref": "#/components/schemas/api.admin.system.v1.SystemModule"
+          }
+        }
+      },
+      "api.admin.system.v1.GetTawkConfigReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.system.v1.AdminTawkConfig"
           }
         }
       },
@@ -17358,6 +17450,53 @@
           }
         },
         "description": "UpdateSubscribeConfig"
+      },
+      "api.admin.system.v1.UpdateTawkConfigData": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "api.admin.system.v1.UpdateTawkConfigReply": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/api.admin.system.v1.UpdateTawkConfigData"
+          }
+        }
+      },
+      "api.admin.system.v1.UpdateTawkConfigRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "propertyId": {
+            "type": "string"
+          },
+          "widgetId": {
+            "type": "string"
+          },
+          "identifyUser": {
+            "type": "boolean"
+          },
+          "secureMode": {
+            "type": "boolean"
+          },
+          "secretKey": {
+            "type": "string"
+          }
+        },
+        "description": "UpdateTawkConfig"
       },
       "api.admin.system.v1.UpdateTosConfigData": {
         "type": "object",
@@ -20245,6 +20384,9 @@
           },
           "webAd": {
             "type": "boolean"
+          },
+          "tawk": {
+            "$ref": "#/components/schemas/api.public.common.v1.PublicTawkConfig"
           }
         },
         "description": "GetGlobalConfig Reply"
@@ -20335,6 +20477,27 @@
           }
         },
         "description": "Mobile auth configuration"
+      },
+      "api.public.common.v1.PublicTawkConfig": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "propertyId": {
+            "type": "string"
+          },
+          "widgetId": {
+            "type": "string"
+          },
+          "identifyUser": {
+            "type": "boolean"
+          },
+          "secureMode": {
+            "type": "boolean"
+          }
+        },
+        "description": "Public tawk customer service configuration"
       },
       "api.public.common.v1.PublicVerifyCodeConfig": {
         "type": "object",
@@ -21570,6 +21733,18 @@
             "items": {
               "$ref": "#/components/schemas/api.public.portal.v1.SubscribePriceOption"
             }
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "features": {
+            "type": "string"
+          },
+          "detailFormat": {
+            "type": "string"
+          },
+          "detailContent": {
+            "type": "string"
           }
         }
       },
@@ -22796,6 +22971,23 @@
           }
         }
       },
+      "api.public.user.v1.TawkIdentityReply": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string"
+          }
+        }
+      },
       "api.public.user.v1.TrafficLimit": {
         "type": "object",
         "properties": {
@@ -23605,6 +23797,9 @@
           "simnetClientMaxUdpSessions": {
             "type": "integer",
             "format": "int32"
+          },
+          "proxyProtocol": {
+            "type": "boolean"
           },
           "omniflowCarrier": {
             "type": "string",

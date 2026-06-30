@@ -390,6 +390,19 @@ export async function publicUserResetUserSubscribeToken(
   );
 }
 
+/** GetTawkIdentity 获取Tawk访客身份签名 GET /v1/public/user/tawk_identity */
+export async function publicUserGetTawkIdentity(options?: {
+  [key: string]: any;
+}) {
+  return request<API.TawkIdentityReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/public/user/tawk_identity`,
+    {
+      method: "GET",
+      ...(options || {}),
+    }
+  );
+}
+
 /** GetUserTrafficStats 获取用户流量统计 GET /v1/public/user/traffic_stats */
 export async function publicUserGetUserTrafficStats(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
