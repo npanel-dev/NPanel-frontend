@@ -21,7 +21,7 @@ import {
   toggleNodeStatus,
   updateNode,
 } from "@workspace/ui/services/admin/server";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useNode } from "@/stores/node";
@@ -35,7 +35,7 @@ export default function Nodes() {
 
   // Use our zustand store for server data
   const { getServerName, getServerAddress } = useServer();
-  const { fetchNodes, fetchTags } = useNode();
+  const { fetchNodes, fetchTags, getNodeById } = useNode();
 
   // Fetch node groups for display
   const { data: nodeGroupsData } = useQuery({
@@ -76,13 +76,23 @@ export default function Nodes() {
         server_id: _serverID,
         ...frontPayload
       } = payload;
+      frontPayload.target_node_id = values.target_node_id
+        ? Number(values.target_node_id)
+        : undefined;
       return frontPayload;
     }
 
-    payload.server_id = values.server_id;
+    payload.server_id = values.server_id ? Number(values.server_id) : undefined;
     payload.protocol = values.protocol;
+    payload.target_node_id = undefined;
     return payload;
   };
+
+  const getTargetNode = useCallback(
+    (node: API.Node) =>
+      node.target_node_id ? getNodeById(node.target_node_id) : undefined,
+    [getNodeById]
+  );
 
   // Dynamic columns based on group feature status
   const columns = useMemo(() => {
@@ -125,6 +135,18 @@ export default function Nodes() {
         },
       },
       {
+        id: "target_node",
+        header: t("target_node", "Landing Node"),
+        cell: ({ row }: { row: any }) => {
+          const nodeType = row.original.node_type || "landing";
+          if (nodeType !== "front") return "—";
+          const target = getTargetNode(row.original);
+          return target
+            ? `${target.name || target.id} (${target.address || "—"}:${target.port || "—"})`
+            : row.original.target_node_id || "—";
+        },
+      },
+      {
         id: "address_port",
         header: `${t("address", "Address")}:${t("port", "Port")}`,
         cell: ({ row }: { row: any }) =>
@@ -133,15 +155,19 @@ export default function Nodes() {
       {
         id: "server_id",
         header: t("server", "Server"),
-        cell: ({ row }: { row: any }) =>
-          `${getServerName(row.original.server_id)}:${getServerAddress(row.original.server_id)}`,
+        cell: ({ row }: { row: any }) => {
+          const target = getTargetNode(row.original);
+          const serverID = target?.server_id || row.original.server_id;
+          return `${getServerName(serverID)}:${getServerAddress(serverID)}`;
+        },
       },
       {
         id: "protocol",
         header: ` ${t("protocol", "Protocol")}:${t("port", "Port")}`,
         cell: ({ row }: { row: any }) => {
-          const protocol = row.original.protocol || "—";
-          const port = row.original.port || "—";
+          const target = getTargetNode(row.original);
+          const protocol = target?.protocol || row.original.protocol || "—";
+          const port = target?.port || row.original.port || "—";
           return `${protocol}:${port}`;
         },
       },
@@ -200,7 +226,14 @@ export default function Nodes() {
     }
 
     return baseColumns;
-  }, [isGroupEnabled, nodeGroupsData, t, getServerName, getServerAddress]);
+  }, [
+    isGroupEnabled,
+    nodeGroupsData,
+    t,
+    getServerName,
+    getServerAddress,
+    getTargetNode,
+  ]);
 
   return (
     <ProTable<API.Node, { search: string; node_group_id?: string }>

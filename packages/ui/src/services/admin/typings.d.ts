@@ -512,6 +512,8 @@ declare namespace API {
     protocol?: string;
     enabled?: boolean;
     nodeType?: string;
+    targetNodeId?: string;
+    target_node_id?: string | number;
     isHidden?: boolean;
     nodeGroupIds?: string[];
   };
@@ -2352,6 +2354,12 @@ declare namespace API {
     nodeGroupId?: string;
     nodeGroupIds?: string[];
     nodeType?: string;
+    targetNodeId?: string;
+    target_node_id?: string | number;
+    server_id?: string | number;
+    node_group_ids?: string[];
+    node_type?: string;
+    is_hidden?: boolean;
     isHidden?: boolean;
     createdAt?: string;
     updatedAt?: string;
@@ -5541,6 +5549,8 @@ declare namespace API {
     protocol?: string;
     enabled?: boolean;
     nodeType?: string;
+    targetNodeId?: string;
+    target_node_id?: string | number;
     isHidden?: boolean;
     nodeGroupIds?: string[];
   };

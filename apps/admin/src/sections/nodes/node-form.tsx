@@ -63,6 +63,7 @@ const buildSchema = (t: TFunction) =>
         .min(1, t("errors.nameRequired", "Please enter a name")),
       server_id: z.string().optional(),
       protocol: z.string().default(""),
+      target_node_id: z.string().optional(),
       address: z
         .string()
         .trim()
@@ -84,6 +85,16 @@ const buildSchema = (t: TFunction) =>
     })
     .superRefine((values, ctx) => {
       if (values.node_type === "front") {
+        if (!values.target_node_id?.trim()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t(
+              "errors.targetNodeRequired",
+              "Please select a landing node"
+            ),
+            path: ["target_node_id"],
+          });
+        }
         return;
       }
 
@@ -141,6 +152,7 @@ export default function NodeForm(props: {
       name: "",
       server_id: undefined,
       protocol: "",
+      target_node_id: undefined,
       address: "",
       port: 0,
       tags: [],
@@ -156,12 +168,28 @@ export default function NodeForm(props: {
   const nodeType = form.watch("node_type");
   const selectedProtocol = form.watch("protocol");
   const selectedPort = form.watch("port");
+  const currentNodeId = (initialValues as any)?.id;
   const isFrontNode = nodeType === "front";
 
   const { servers, getAvailableProtocols } = useServer();
-  const { tags } = useNode();
+  const { nodes, tags } = useNode();
 
   const existingTags: string[] = tags || [];
+  const landingNodeOptions = useMemo(
+    () =>
+      (nodes || [])
+        .filter(
+          (node) =>
+            (node.node_type || "landing") !== "front" &&
+            node.enabled !== false &&
+            String(node.id) !== String(currentNodeId || "")
+        )
+        .map((node) => ({
+          value: String(node.id),
+          label: `${node.name || node.address || node.id} (${node.protocol || "—"}:${node.port || "—"} / ${node.address || "—"})`,
+        })),
+    [currentNodeId, nodes]
+  );
 
   const availableProtocols = getAvailableProtocols(serverId);
   const selectedProtocolKey =
@@ -194,6 +222,8 @@ export default function NodeForm(props: {
 
   useEffect(() => {
     if (!isFrontNode) {
+      form.setValue("target_node_id", undefined, { shouldDirty: true });
+      form.clearErrors("target_node_id");
       return;
     }
 
@@ -209,6 +239,7 @@ export default function NodeForm(props: {
         name: "",
         server_id: undefined,
         protocol: "",
+        target_node_id: undefined,
         address: "",
         port: 0,
         tags: [],
@@ -222,6 +253,8 @@ export default function NodeForm(props: {
       if (initialValues.server_id)
         resetValues.server_id = initialValues.server_id;
       if (initialValues.protocol) resetValues.protocol = initialValues.protocol;
+      if (initialValues.target_node_id)
+        resetValues.target_node_id = String(initialValues.target_node_id);
       if (initialValues.address) resetValues.address = initialValues.address;
       if (initialValues.port) resetValues.port = initialValues.port;
       if (initialValues.tags) resetValues.tags = initialValues.tags;
@@ -341,7 +374,10 @@ export default function NodeForm(props: {
             server_id: undefined,
             protocol: "",
           }
-        : values;
+        : {
+            ...values,
+            target_node_id: undefined,
+          };
 
     const result = await onSubmit(normalizedValues);
     if (result) {
@@ -424,6 +460,40 @@ export default function NodeForm(props: {
                           value={field.value}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {isFrontNode && (
+                <FormField
+                  control={form.control}
+                  name="target_node_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("target_node", "Landing Node")}</FormLabel>
+                      <FormControl>
+                        <Combobox<string, false>
+                          onChange={(v) =>
+                            form.setValue("target_node_id", v || undefined, {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            })
+                          }
+                          options={landingNodeOptions}
+                          placeholder={t(
+                            "select_target_node",
+                            "Select landing node…"
+                          )}
+                          value={field.value}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t(
+                          "target_node_description",
+                          "The entry node uses its own address and port, while protocol configuration is inherited from this landing node."
+                        )}
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
