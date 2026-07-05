@@ -16,11 +16,12 @@ import {
   getOrderTypeLabel,
 } from "@/lib/format";
 import type { ActiveOrder, PaymentMethod, RechargeRecord } from "@/types";
+import type { RechargeAmount } from "@/config";
 
 interface RechargeScreenProps {
   currentLanguage: string;
   currency: string;
-  amounts: number[];
+  amounts: RechargeAmount[];
   minimumCustomAmount: number;
   methods: PaymentMethod[];
   records: RechargeRecord[];
@@ -171,9 +172,21 @@ export function RechargeScreen({
                       />
                     </SelectTrigger>
                     <SelectContent>
-                      {amounts.map((amount) => (
-                        <SelectItem key={amount} value={String(amount)}>
-                          {formatCurrency(amount, currentLanguage, currency)}
+                      {amounts.map((item) => (
+                        <SelectItem key={item.amount} value={String(item.amount)}>
+                          <span>
+                            {formatCurrency(item.amount, currentLanguage, currency)}
+                            {item.bonus && item.bonus > 0 ? (
+                              <span className="ml-2 text-xs text-green-600">
+                                +{formatCurrency(item.bonus, currentLanguage, currency)}
+                              </span>
+                            ) : null}
+                            {item.label ? (
+                              <span className="ml-2 rounded bg-slate-200 px-1 text-[10px] text-slate-700">
+                                {item.label}
+                              </span>
+                            ) : null}
+                          </span>
                         </SelectItem>
                       ))}
                       {epayCustomAmountEnabled ? (

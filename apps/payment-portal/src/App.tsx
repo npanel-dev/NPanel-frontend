@@ -38,7 +38,9 @@ import {
   getAvailablePaymentMethods,
   purchaseCheckout,
 } from "@workspace/ui/services/user/portal";
+import { listActiveRechargePromotion } from "@workspace/ui/services/user/promotion";
 import { queryUserInfo } from "@workspace/ui/services/user/user";
+import type { RechargeAmount } from "@/config";
 
 function toInt64Number(value: number | string | null | undefined) {
   if (value === undefined || value === null || value === "") return 0;
@@ -158,7 +160,11 @@ export default function App() {
   const [userEmail, setUserEmail] = useState("");
   const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
   const [selectedAmount, setSelectedAmount] = useState(
-    portalConfig.rechargeAmounts[0] || 10
+    portalConfig.rechargeAmounts[0]?.amount ?? 10
+  );
+  // 充值档位：默认用 env 兜底档位，登录后尝试拉取后端活动档位覆盖（后端有则用后端的）
+  const [rechargeAmounts, setRechargeAmounts] = useState<RechargeAmount[]>(
+    portalConfig.rechargeAmounts
   );
   const [customAmountEnabled, setCustomAmountEnabled] = useState(false);
   const [customAmountInput, setCustomAmountInput] = useState("");
@@ -208,10 +214,16 @@ export default function App() {
 
     setLoadingPortal(true);
     try {
-      const [userResponse, methodsResponse, ordersResponse] = await Promise.all([
+      const [
+        userResponse,
+        methodsResponse,
+        ordersResponse,
+        promotionResponse,
+      ] = await Promise.all([
         queryUserInfo(),
         getAvailablePaymentMethods(),
         queryOrderList({ page: 1, size: 20 }),
+        listActiveRechargePromotion().catch(() => null),
       ]);
 
       const userSummary = mapCurrentUser(userResponse.data?.data);
@@ -227,6 +239,29 @@ export default function App() {
         if (current && methods.some((item) => item.id === current)) return current;
         return methods[0]?.id ?? null;
       });
+
+      // 拉取后端充值促销档位：若有有效活动档位则覆盖 env 兜底档位
+      // 后端 amount/bonus 单位是「分」，前端要转「元」
+      const promotionList =
+        (promotionResponse?.data?.list as any[] | undefined) ?? [];
+      const tierAmounts: RechargeAmount[] = [];
+      for (const promo of promotionList) {
+        for (const tier of promo?.tiers ?? []) {
+          const amount = toInt64Number(tier?.amount) / 100;
+          if (amount > 0) {
+            tierAmounts.push({
+              amount,
+              bonus: toInt64Number(tier?.bonus) / 100 || undefined,
+              label: tier?.label || undefined,
+            });
+          }
+        }
+      }
+      if (tierAmounts.length > 0) {
+        setRechargeAmounts(tierAmounts);
+        const firstAmount = tierAmounts[0]?.amount;
+        if (firstAmount !== undefined) setSelectedAmount(firstAmount);
+      }
 
       const rechargeOrderItems = ((ordersResponse.data.data?.list || []) as any[])
         .filter((item) => Number(item?.type) === 4)
@@ -386,16 +421,17 @@ export default function App() {
 
   useEffect(() => {
     if (epayCustomAmountEnabled) return;
-    if (!customAmountEnabled && portalConfig.rechargeAmounts.includes(selectedAmount)) {
+    const amountValues = rechargeAmounts.map((item) => item.amount);
+    if (!customAmountEnabled && amountValues.includes(selectedAmount)) {
       return;
     }
 
     setCustomAmountEnabled(false);
     setCustomAmountInput("");
-    if (!portalConfig.rechargeAmounts.includes(selectedAmount)) {
-      setSelectedAmount(portalConfig.rechargeAmounts[0] || 10);
+    if (!amountValues.includes(selectedAmount)) {
+      setSelectedAmount(rechargeAmounts[0]?.amount ?? 10);
     }
-  }, [customAmountEnabled, epayCustomAmountEnabled, selectedAmount]);
+  }, [customAmountEnabled, epayCustomAmountEnabled, selectedAmount, rechargeAmounts]);
 
   const changeLanguage = async (language: string) => {
     await i18n.changeLanguage(language);
@@ -695,7 +731,7 @@ export default function App() {
     <>
       <RechargeScreen
         activeOrder={activeOrder}
-        amounts={portalConfig.rechargeAmounts}
+        amounts={rechargeAmounts}
         customAmountEnabled={customAmountEnabled}
         customAmountInput={customAmountInput}
         currency={portalConfig.currency}

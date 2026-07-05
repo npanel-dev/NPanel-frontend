@@ -29,6 +29,29 @@ const toNumber = (value: unknown): number => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+// pick 兼容 camelCase / snake_case（后端 proto JSON 序列化用 snake_case）
+const pick = <T,>(obj: any, camel: string, snake: string): T | undefined =>
+  obj?.[camel] ?? obj?.[snake];
+
+// normalizePromo 规整后端返回的活动数据（兼容 snake_case）
+const normalizePromo = (p: any) => ({
+  id: p?.id,
+  name: p?.name,
+  description: p?.description,
+  endTime: toNumber(pick(p, "endTime", "end_time")),
+  stackMode: toNumber(pick(p, "stackMode", "stack_mode")),
+  customBonusEnabled: !!pick(p, "customBonusEnabled", "custom_bonus_enabled"),
+  customBonusPercent: toNumber(
+    pick(p, "customBonusPercent", "custom_bonus_percent")
+  ),
+  tiers: (p?.tiers ?? []).map((tier: any) => ({
+    amount: toNumber(tier?.amount),
+    bonus: toNumber(tier?.bonus),
+    label: tier?.label ?? "",
+    sort: toNumber(tier?.sort),
+  })),
+});
+
 export default function Recharge(
   props: Readonly<
     React.ComponentProps<typeof Button> & {
@@ -61,7 +84,7 @@ export default function Recharge(
     staleTime: 30_000,
   });
 
-  const promotions = promoData?.list ?? [];
+  const promotions = (promoData?.list ?? []).map(normalizePromo);
 
   // 当前金额（分）
   const amountCents = Number(params.amount || 0);
