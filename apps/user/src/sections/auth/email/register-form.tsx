@@ -198,6 +198,14 @@ export default function RegisterForm({
   const composedEmail = form.watch("email");
 
   useEffect(() => {
+    // 当父组件显式把 invite 设为空字符串时（如邀请码错误后清空），同步清空表单字段
+    if (initialValues?.invite === "" && form.getValues("invite")) {
+      form.setValue("invite", "", {
+        shouldDirty: false,
+        shouldValidate: false,
+      });
+      return;
+    }
     const inviteCode = initialValues?.invite || localStorage.getItem("invite");
     if (inviteCode && form.getValues("invite") !== inviteCode) {
       form.setValue("invite", inviteCode, {
@@ -422,7 +430,11 @@ export default function RegisterForm({
                 <FormItem>
                   <FormControl>
                     <Input
-                      disabled={loading || !!localStorage.getItem("invite")}
+                      disabled={
+                        loading ||
+                        (!!localStorage.getItem("invite") &&
+                          !!initialValues?.invite)
+                      }
                       placeholder={t(
                         "register.invite",
                         "Invitation Code (Optional)"

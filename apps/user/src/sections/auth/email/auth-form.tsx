@@ -119,6 +119,20 @@ export default function EmailAuthForm({
             );
             return;
           }
+          // 邀请码错误（20009）：清空 localStorage 的 invite + 重置表单 invite 字段，
+          // 否则邀请码输入框会被 localStorage 锁定（disabled），用户无法修改。
+          if (getErrorCode(error) === 20009) {
+            localStorage.removeItem("invite");
+            setInitialValues((prev) => ({ ...prev, invite: "" }));
+            toast.error(
+              getErrorMessage(error) ||
+                t(
+                  "register.inviteError",
+                  "Invitation code is invalid. Please check or leave it empty."
+                )
+            );
+            return;
+          }
           toast.error(
             getErrorMessage(error) ||
               t(
