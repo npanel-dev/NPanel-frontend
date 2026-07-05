@@ -382,6 +382,27 @@ declare namespace API {
   type Platform = any;
   type PlatformListData = any;
   type PlatformListReply = any;
+  // ===== RechargePromotion 充值促销（用户端，只读） =====
+  type ActiveRechargePromotionTier = {
+    amount?: number;
+    bonus?: number;
+    label?: string;
+    sort?: number;
+  };
+  type ActiveRechargePromotion = {
+    id?: number;
+    name?: string;
+    description?: string;
+    endTime?: number;
+    stackMode?: number;
+    customBonusEnabled?: boolean;
+    customBonusPercent?: number;
+    tiers?: ActiveRechargePromotionTier[];
+  };
+  type ListActiveRechargePromotionReply = {
+    total?: number;
+    list?: ActiveRechargePromotion[];
+  };
   type GetSubscriptionCatalogReply = any;
   type GetSubscriptionCatalogRequest = any;
   type PortalGetSubscriptionParams = any;

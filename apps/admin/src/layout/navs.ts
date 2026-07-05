@@ -67,6 +67,11 @@ export function useNavs() {
             icon: "flat-color-icons:todo-list",
           },
           {
+            title: t("Recharge Promotion", "Recharge Promotion"),
+            url: "/dashboard/recharge-promotion",
+            icon: "flat-color-icons:gift",
+          },
+          {
             title: t("Coupon Management", "Coupon Management"),
             url: "/dashboard/coupon",
             icon: "flat-color-icons:bookmark",

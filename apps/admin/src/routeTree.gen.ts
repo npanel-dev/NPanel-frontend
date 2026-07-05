@@ -34,6 +34,9 @@ const DashboardRoutingIndexLazyRouteImport = createFileRoute(
 const DashboardRedemptionIndexLazyRouteImport = createFileRoute(
   '/dashboard/redemption/',
 )()
+const DashboardRechargePromotionIndexLazyRouteImport = createFileRoute(
+  '/dashboard/recharge-promotion/',
+)()
 const DashboardProductIndexLazyRouteImport = createFileRoute(
   '/dashboard/product/',
 )()
@@ -181,6 +184,16 @@ const DashboardRedemptionIndexLazyRoute =
     getParentRoute: () => DashboardRouteLazyRoute,
   } as any).lazy(() =>
     import('./routes/dashboard/redemption/index.lazy').then((d) => d.Route),
+  )
+const DashboardRechargePromotionIndexLazyRoute =
+  DashboardRechargePromotionIndexLazyRouteImport.update({
+    id: '/recharge-promotion/',
+    path: '/recharge-promotion/',
+    getParentRoute: () => DashboardRouteLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/dashboard/recharge-promotion/index.lazy').then(
+      (d) => d.Route,
+    ),
   )
 const DashboardProductIndexLazyRoute =
   DashboardProductIndexLazyRouteImport.update({
@@ -381,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/order': typeof DashboardOrderIndexLazyRoute
   '/dashboard/payment': typeof DashboardPaymentIndexLazyRoute
   '/dashboard/product': typeof DashboardProductIndexLazyRoute
+  '/dashboard/recharge-promotion': typeof DashboardRechargePromotionIndexLazyRoute
   '/dashboard/redemption': typeof DashboardRedemptionIndexLazyRoute
   '/dashboard/routing': typeof DashboardRoutingIndexLazyRoute
   '/dashboard/subscribe': typeof DashboardSubscribeIndexLazyRoute
@@ -416,6 +430,7 @@ export interface FileRoutesByTo {
   '/dashboard/order': typeof DashboardOrderIndexLazyRoute
   '/dashboard/payment': typeof DashboardPaymentIndexLazyRoute
   '/dashboard/product': typeof DashboardProductIndexLazyRoute
+  '/dashboard/recharge-promotion': typeof DashboardRechargePromotionIndexLazyRoute
   '/dashboard/redemption': typeof DashboardRedemptionIndexLazyRoute
   '/dashboard/routing': typeof DashboardRoutingIndexLazyRoute
   '/dashboard/subscribe': typeof DashboardSubscribeIndexLazyRoute
@@ -453,6 +468,7 @@ export interface FileRoutesById {
   '/dashboard/order/': typeof DashboardOrderIndexLazyRoute
   '/dashboard/payment/': typeof DashboardPaymentIndexLazyRoute
   '/dashboard/product/': typeof DashboardProductIndexLazyRoute
+  '/dashboard/recharge-promotion/': typeof DashboardRechargePromotionIndexLazyRoute
   '/dashboard/redemption/': typeof DashboardRedemptionIndexLazyRoute
   '/dashboard/routing/': typeof DashboardRoutingIndexLazyRoute
   '/dashboard/subscribe/': typeof DashboardSubscribeIndexLazyRoute
@@ -491,6 +507,7 @@ export interface FileRouteTypes {
     | '/dashboard/order'
     | '/dashboard/payment'
     | '/dashboard/product'
+    | '/dashboard/recharge-promotion'
     | '/dashboard/redemption'
     | '/dashboard/routing'
     | '/dashboard/subscribe'
@@ -526,6 +543,7 @@ export interface FileRouteTypes {
     | '/dashboard/order'
     | '/dashboard/payment'
     | '/dashboard/product'
+    | '/dashboard/recharge-promotion'
     | '/dashboard/redemption'
     | '/dashboard/routing'
     | '/dashboard/subscribe'
@@ -562,6 +580,7 @@ export interface FileRouteTypes {
     | '/dashboard/order/'
     | '/dashboard/payment/'
     | '/dashboard/product/'
+    | '/dashboard/recharge-promotion/'
     | '/dashboard/redemption/'
     | '/dashboard/routing/'
     | '/dashboard/subscribe/'
@@ -660,6 +679,13 @@ declare module '@tanstack/react-router' {
       path: '/redemption'
       fullPath: '/dashboard/redemption'
       preLoaderRoute: typeof DashboardRedemptionIndexLazyRouteImport
+      parentRoute: typeof DashboardRouteLazyRoute
+    }
+    '/dashboard/recharge-promotion/': {
+      id: '/dashboard/recharge-promotion/'
+      path: '/recharge-promotion'
+      fullPath: '/dashboard/recharge-promotion'
+      preLoaderRoute: typeof DashboardRechargePromotionIndexLazyRouteImport
       parentRoute: typeof DashboardRouteLazyRoute
     }
     '/dashboard/product/': {
@@ -845,6 +871,7 @@ interface DashboardRouteLazyRouteChildren {
   DashboardOrderIndexLazyRoute: typeof DashboardOrderIndexLazyRoute
   DashboardPaymentIndexLazyRoute: typeof DashboardPaymentIndexLazyRoute
   DashboardProductIndexLazyRoute: typeof DashboardProductIndexLazyRoute
+  DashboardRechargePromotionIndexLazyRoute: typeof DashboardRechargePromotionIndexLazyRoute
   DashboardRedemptionIndexLazyRoute: typeof DashboardRedemptionIndexLazyRoute
   DashboardRoutingIndexLazyRoute: typeof DashboardRoutingIndexLazyRoute
   DashboardSubscribeIndexLazyRoute: typeof DashboardSubscribeIndexLazyRoute
@@ -880,6 +907,8 @@ const DashboardRouteLazyRouteChildren: DashboardRouteLazyRouteChildren = {
   DashboardOrderIndexLazyRoute: DashboardOrderIndexLazyRoute,
   DashboardPaymentIndexLazyRoute: DashboardPaymentIndexLazyRoute,
   DashboardProductIndexLazyRoute: DashboardProductIndexLazyRoute,
+  DashboardRechargePromotionIndexLazyRoute:
+    DashboardRechargePromotionIndexLazyRoute,
   DashboardRedemptionIndexLazyRoute: DashboardRedemptionIndexLazyRoute,
   DashboardRoutingIndexLazyRoute: DashboardRoutingIndexLazyRoute,
   DashboardSubscribeIndexLazyRoute: DashboardSubscribeIndexLazyRoute,

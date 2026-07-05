@@ -2627,6 +2627,127 @@ declare namespace API {
     data?: PlatformListData;
   };
 
+  // ===== RechargePromotion 充值促销 =====
+  type RechargePromotionTier = {
+    amount?: number;
+    bonus?: number;
+    label?: string;
+    sort?: number;
+    enable?: boolean;
+  };
+
+  type RechargePromotion = {
+    id?: number;
+    name?: string;
+    description?: string;
+    startTime?: number;
+    endTime?: number;
+    status?: boolean;
+    priority?: number;
+    stackMode?: number;
+    customBonusEnabled?: boolean;
+    customBonusPercent?: number;
+    sort?: number;
+    tiers?: RechargePromotionTier[];
+    createdAt?: number;
+    updatedAt?: number;
+  };
+
+  type CreateRechargePromotionRequest = {
+    name: string;
+    description?: string;
+    startTime?: number;
+    endTime?: number;
+    priority?: number;
+    stackMode?: number;
+    customBonusEnabled?: boolean;
+    customBonusPercent?: number;
+    sort?: number;
+    tiers?: RechargePromotionTier[];
+  };
+
+  type CreateRechargePromotionData = {
+    promotion?: RechargePromotion;
+  };
+
+  type CreateRechargePromotionReply = {
+    code?: number;
+    message?: string;
+    data?: CreateRechargePromotionData;
+  };
+
+  type UpdateRechargePromotionRequest = {
+    id: number;
+    name: string;
+    description?: string;
+    startTime?: number;
+    endTime?: number;
+    priority?: number;
+    stackMode?: number;
+    customBonusEnabled?: boolean;
+    customBonusPercent?: number;
+    sort?: number;
+    tiers?: RechargePromotionTier[];
+  };
+
+  type UpdateRechargePromotionData = {
+    promotion?: RechargePromotion;
+  };
+
+  type UpdateRechargePromotionReply = {
+    code?: number;
+    message?: string;
+    data?: UpdateRechargePromotionData;
+  };
+
+  type DeleteRechargePromotionRequest = {
+    id: number;
+  };
+
+  type DeleteRechargePromotionReply = {
+    code?: number;
+    message?: string;
+  };
+
+  type RechargePromotionServiceDeleteRechargePromotionParams = {
+    id: number;
+  };
+
+  type GetRechargePromotionListRequest = {
+    page?: number;
+    size?: number;
+    status?: boolean;
+    search?: string;
+  };
+
+  type RechargePromotionServiceGetRechargePromotionListParams = {
+    page?: number;
+    size?: number;
+    status?: boolean;
+    search?: string;
+  };
+
+  type GetRechargePromotionListData = {
+    total?: number;
+    list?: RechargePromotion[];
+  };
+
+  type GetRechargePromotionListReply = {
+    code?: number;
+    message?: string;
+    data?: GetRechargePromotionListData;
+  };
+
+  type UpdateRechargePromotionStatusRequest = {
+    id: number;
+    status: boolean;
+  };
+
+  type UpdateRechargePromotionStatusReply = {
+    code?: number;
+    message?: string;
+  };
+
   type PreCreateOrderReply = {
     price?: string;
     amount?: string;
