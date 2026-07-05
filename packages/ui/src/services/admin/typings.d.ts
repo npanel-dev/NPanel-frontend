@@ -6477,8 +6477,12 @@ declare namespace API {
   };
 
   type SubscribeRebateConfigItem = {
+    // camelCase（前端内部使用 / 提交给后端）
     priceOptionId?: number;
     referralPercentage?: number;
+    // snake_case（后端 GET 返回的实际字段名，因 proto JSON tag）
+    price_option_id?: number;
+    referral_percentage?: number;
     enabled?: boolean;
   };
 

@@ -1500,7 +1500,11 @@ function buildRebateRows(
   rows.push({
     price_option_id: 0,
     label: "",
-    referral_percentage: defaultConfig?.referralPercentage ?? 0,
+    // 兼容 camelCase / snake_case
+    referral_percentage:
+      defaultConfig?.referralPercentage ??
+      defaultConfig?.referral_percentage ??
+      0,
     enabled: defaultConfig?.enabled ?? true,
   });
 
@@ -1524,7 +1528,9 @@ function buildRebateRows(
       price_option_id: id,
       label: String(option.name || ""),
       duration_hint: `${option.duration_value ?? 1}${unitLabel}`,
-      referral_percentage: config?.referralPercentage ?? 0,
+      // 兼容 camelCase / snake_case
+      referral_percentage:
+        config?.referralPercentage ?? config?.referral_percentage ?? 0,
       enabled: config?.enabled ?? true,
     });
   }
@@ -1546,7 +1552,11 @@ function RebateConfigEditor({
   const configMap = useMemo(() => {
     const map = new Map<number, API.SubscribeRebateConfigItem>();
     for (const item of value) {
-      const id = toNumber(item?.priceOptionId);
+      // 兼容 camelCase（前端内部）与 snake_case（后端 GET 返回的实际 JSON tag）
+      // 注意：套餐默认档 price_option_id=0 在后端因 proto omitempty 会被省略，
+      // 此时字段为 undefined，应视为 0（套餐默认）
+      const rawId = item?.priceOptionId ?? item?.price_option_id;
+      const id = rawId === undefined ? 0 : toNumber(rawId);
       if (id !== undefined) map.set(id, item);
     }
     return map;
