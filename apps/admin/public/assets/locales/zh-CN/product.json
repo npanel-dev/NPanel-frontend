@@ -220,7 +220,15 @@
     "unitTime": "时间单位",
     "unlimitedInventory": "不限库存",
     "Week": "周",
-    "Year": "年"
+    "Year": "年",
+    "rebateConfig": "返佣配置",
+    "rebateConfigDescription": "为每个价格档位（月卡/季卡/半年卡/年卡…）单独设置返佣比例。",
+    "rebateConfigDisabledHint": "保存套餐后，再次编辑即可为各价格档位设置返佣比例。",
+    "rebatePlanDefault": "套餐默认",
+    "rebateOption": "档位",
+    "rebateEnabled": "启用",
+    "rebateHint": "优先级：档位专属 → 套餐默认 → 推荐人比例 → 全局比例。关闭某档表示不返佣且不再兜底。",
+    "rebateSaveFailed": "返佣配置保存失败，可稍后在编辑中重新设置"
   },
   "groupMapping": "分组映射",
   "groupMappingTitle": "分组映射",

@@ -49,15 +49,26 @@ export default function Affiliate() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-baseline gap-2">
-            <span className="font-bold text-3xl">
-              <Display type="currency" value={data?.total_commission} />
-            </span>
-            <span className="text-muted-foreground text-sm">
-              ({t("commissionRate", "Commission Rate")}:{" "}
-              {user?.referral_percentage || common?.invite?.referral_percentage}
-              %)
-            </span>
+          <div className="flex flex-col gap-1">
+            <div className="flex items-baseline gap-2">
+              <span className="font-bold text-3xl">
+                <Display type="currency" value={data?.total_commission} />
+              </span>
+              {user?.referral_percentage || common?.invite?.referral_percentage ? (
+                <span className="text-muted-foreground text-sm">
+                  ({t("commissionRate", "Commission Rate")}:{" "}
+                  {user?.referral_percentage ||
+                    common?.invite?.referral_percentage}
+                  %)
+                </span>
+              ) : null}
+            </div>
+            <p className="text-muted-foreground text-xs">
+              {t(
+                "commissionRateByPlan",
+                "返佣比例因套餐与时长档位而异，下单结算时按对应档位自动计算。"
+              )}
+            </p>
           </div>
         </CardContent>
       </Card>

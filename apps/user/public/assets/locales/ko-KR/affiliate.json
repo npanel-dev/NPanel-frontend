@@ -7,5 +7,6 @@
   "inviteRecords": "기록 초대",
   "registrationTime": "등록시간",
   "totalCommission": "총 커미션",
-  "userIdentifier": "사용자 식별자"
+  "userIdentifier": "사용자 식별자",
+  "commissionRateByPlan": "리베이트 비율은 요금제 및 기간 옵션에 따라 다르며, 결제 시 해당 옵션 기준으로 자동 계산됩니다."
 }

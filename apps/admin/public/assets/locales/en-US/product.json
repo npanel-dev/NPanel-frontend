@@ -220,7 +220,15 @@
     "unitTime": "Unit Time",
     "unlimitedInventory": "Unlimited inventory",
     "Week": "Week",
-    "Year": "Year"
+    "Year": "Year",
+    "rebateConfig": "Rebate Config",
+    "rebateConfigDescription": "Set a referral rebate percentage per price option (monthly/quarterly/semi-annual/annual...).",
+    "rebateConfigDisabledHint": "Save the plan first, then reopen to set rebate percentages per price option.",
+    "rebatePlanDefault": "Plan Default",
+    "rebateOption": "Option",
+    "rebateEnabled": "Enabled",
+    "rebateHint": "Priority: option-specific → plan default → referrer rate → global. Disabling an option means no rebate (no fallback).",
+    "rebateSaveFailed": "Failed to save rebate config; you can retry by editing again later"
   },
   "groupMapping": "Group Mapping",
   "groupMappingTitle": "Group Mapping",

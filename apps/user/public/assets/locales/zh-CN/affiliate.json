@@ -7,5 +7,6 @@
   "inviteRecords": "邀请记录",
   "registrationTime": "注册时间",
   "totalCommission": "累计佣金",
-  "userIdentifier": "用户标识"
+  "userIdentifier": "用户标识",
+  "commissionRateByPlan": "返佣比例因套餐与时长档位而异，下单结算时按对应档位自动计算。"
 }

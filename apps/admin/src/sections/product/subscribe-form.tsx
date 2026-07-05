@@ -75,6 +75,10 @@ import {
   getNodeGroupList,
 } from "@workspace/ui/services/admin/group";
 import { getSubscribeCategoryList } from "@workspace/ui/services/admin/subscribe";
+import {
+  getSubscribeRebateConfig,
+  updateSubscribeRebateConfig,
+} from "@workspace/ui/services/admin/subscribe";
 import { unitConversion } from "@workspace/ui/utils/unit-conversions";
 import {
   CheckIcon,
@@ -97,7 +101,8 @@ import { useGlobalStore } from "@/stores/global";
 import { useNode } from "@/stores/node";
 
 interface SubscribeFormProps<T> {
-  onSubmit: (data: T) => Promise<boolean> | boolean;
+  // onSubmit 返回值：true/false 表示成功与否；若返回字符串/数字则视为成功且为套餐ID（用于保存返佣配置）
+  onSubmit: (data: T) => Promise<boolean | string | number> | boolean | string | number;
   initialValues?: T;
   loading?: boolean;
   trigger: string;
@@ -130,6 +135,7 @@ const defaultValues = {
   deduction_mode: "auto",
   traffic_limit: [],
   category_id: "",
+  rebate_config: [] as API.SubscribeRebateConfigItem[],
 };
 
 function toNumber(value: unknown): number | undefined {
@@ -1470,6 +1476,162 @@ function FeatureEditor({
   );
 }
 
+// ============================================================================
+// RebateConfigEditor - 返佣比例配置编辑器
+// 按"价格档位（月卡/季卡/半年卡/年卡...）"细化返佣比例，含套餐整体默认档。
+// 仅对已持久化的价格档位（带 id）展示行；新建套餐保存后再次编辑可配置。
+// ============================================================================
+
+type RebateConfigRow = {
+  price_option_id: number; // 0 = 套餐整体默认
+  label: string; // 显示名（套餐默认 / 月卡 ...）
+  duration_hint?: string; // 时长提示
+  referral_percentage: number;
+  enabled: boolean;
+};
+
+function buildRebateRows(
+  priceOptions: Partial<PriceOptionEditorItem>[] | undefined,
+  configMap: Map<number, API.SubscribeRebateConfigItem>
+): RebateConfigRow[] {
+  const rows: RebateConfigRow[] = [];
+  // 套餐整体默认（price_option_id = 0）
+  const defaultConfig = configMap.get(0);
+  rows.push({
+    price_option_id: 0,
+    label: "",
+    referral_percentage: defaultConfig?.referralPercentage ?? 0,
+    enabled: defaultConfig?.enabled ?? true,
+  });
+
+  const durationUnitLabel: Record<string, string> = {
+    Minute: "m",
+    Hour: "h",
+    Day: "d",
+    Week: "w",
+    Month: "M",
+    Year: "Y",
+    NoLimit: "∞",
+  };
+
+  for (const option of priceOptions || []) {
+    const id = toNumber(option.id);
+    if (id === undefined || id <= 0) continue; // 跳过未持久化档位
+    const config = configMap.get(id);
+    const unit = String(option.duration_unit || "Month");
+    const unitLabel = durationUnitLabel[unit] ?? unit;
+    rows.push({
+      price_option_id: id,
+      label: String(option.name || ""),
+      duration_hint: `${option.duration_value ?? 1}${unitLabel}`,
+      referral_percentage: config?.referralPercentage ?? 0,
+      enabled: config?.enabled ?? true,
+    });
+  }
+  return rows;
+}
+
+function RebateConfigEditor({
+  priceOptions,
+  value = [],
+  onChange,
+  disabled,
+}: {
+  priceOptions?: Partial<PriceOptionEditorItem>[];
+  value?: API.SubscribeRebateConfigItem[];
+  onChange: (value: API.SubscribeRebateConfigItem[]) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation("product");
+  const configMap = useMemo(() => {
+    const map = new Map<number, API.SubscribeRebateConfigItem>();
+    for (const item of value) {
+      const id = toNumber(item?.priceOptionId);
+      if (id !== undefined) map.set(id, item);
+    }
+    return map;
+  }, [value]);
+
+  const rows = useMemo(
+    () => buildRebateRows(priceOptions, configMap),
+    [priceOptions, configMap]
+  );
+
+  const updateRow = (priceOptionId: number, patch: Partial<RebateConfigRow>) => {
+    const next: API.SubscribeRebateConfigItem[] = rows.map((row) => {
+      const item: API.SubscribeRebateConfigItem = {
+        priceOptionId: row.price_option_id,
+        referralPercentage: row.referral_percentage,
+        enabled: row.enabled,
+      };
+      if (row.price_option_id === priceOptionId) {
+        if (patch.referral_percentage !== undefined)
+          item.referralPercentage = patch.referral_percentage;
+        if (patch.enabled !== undefined) item.enabled = patch.enabled;
+      }
+      return item;
+    });
+    onChange(next);
+  };
+
+  return (
+    <div className="space-y-2">
+      {rows.map((row) => (
+        <div
+          key={String(row.price_option_id)}
+          className="flex flex-wrap items-center gap-3 rounded-md border p-2"
+        >
+          <div className="min-w-[8rem] flex-1">
+            <div className="font-medium text-sm">
+              {row.price_option_id === 0
+                ? t("form.rebatePlanDefault", "套餐默认")
+                : row.label || t("form.rebateOption", "档位")}
+            </div>
+            {row.duration_hint ? (
+              <div className="text-muted-foreground text-xs">
+                {row.duration_hint}
+              </div>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-2">
+            <EnhancedInput
+              type="number"
+              max={100}
+              min={0}
+              disabled={disabled || !row.enabled}
+              onValueBlur={(val) => {
+                const num = toNumber(val) ?? 0;
+                updateRow(row.price_option_id, {
+                  referral_percentage: Math.max(0, Math.min(100, num)),
+                });
+              }}
+              placeholder="0"
+              suffix="%"
+              value={row.referral_percentage}
+            />
+            <span className="flex items-center gap-1.5 text-muted-foreground text-xs">
+              <Switch
+                checked={row.enabled}
+                disabled={disabled}
+                onCheckedChange={(checked) =>
+                  updateRow(row.price_option_id, { enabled: checked })
+                }
+              />
+              {t("form.rebateEnabled", "启用")}
+            </span>
+          </div>
+        </div>
+      ))}
+      <p className="text-muted-foreground text-xs">
+        {t(
+          "form.rebateHint",
+          "优先级：档位专属 → 套餐默认 → 推荐人比例 → 全局比例。关闭某档表示不返佣且不再兜底。"
+        )}
+      </p>
+    </div>
+  );
+}
+
 export default function SubscribeForm<T extends Record<string, any>>({
   onSubmit,
   initialValues,
@@ -1567,6 +1729,15 @@ export default function SubscribeForm<T extends Record<string, any>>({
         })
       )
       .optional(),
+    rebate_config: z
+      .array(
+        z.object({
+          priceOptionId: z.number().optional(),
+          referralPercentage: z.number().optional(),
+          enabled: z.boolean().optional(),
+        })
+      )
+      .optional(),
   });
 
   const form = useForm<Record<string, any>>({
@@ -1578,6 +1749,30 @@ export default function SubscribeForm<T extends Record<string, any>>({
     const processedValues = normalizeSubscribeValues(initialValues);
     form?.reset(processedValues);
   }, [form, initialValues, open]);
+
+  // 编辑模式下，加载该套餐已有的返佣配置并同步到表单
+  const subscribeIdForRebate = useMemo(() => {
+    const raw = (initialValues as any)?.id;
+    const num = toNumber(raw);
+    return num && num > 0 ? num : undefined;
+  }, [initialValues]);
+
+  const { data: rebateConfigData } = useQuery({
+    queryKey: ["getSubscribeRebateConfig", subscribeIdForRebate],
+    queryFn: async () => {
+      const { data } = await getSubscribeRebateConfig({
+        subscribe_id: subscribeIdForRebate!,
+      });
+      return data.data?.items || [];
+    },
+    enabled: open && !!subscribeIdForRebate,
+  });
+
+  useEffect(() => {
+    if (rebateConfigData && rebateConfigData.length >= 0) {
+      form.setValue("rebate_config", rebateConfigData, { shouldDirty: false });
+    }
+  }, [rebateConfigData, form]);
 
   async function handleSubmit(data: { [x: string]: any }) {
     const priceOptions = normalizePriceOptionsForSubmit(
@@ -1602,9 +1797,32 @@ export default function SubscribeForm<T extends Record<string, any>>({
       unit_price: defaultOption?.price ?? data.unit_price,
       unit_time: defaultOption?.duration_unit ?? data.unit_time,
     };
+    // 返佣配置单独保存，不随套餐 create/update 一起提交
+    const rebateConfig: API.SubscribeRebateConfigItem[] =
+      data.rebate_config || [];
+    submitData.rebate_config = undefined;
 
-    const bool = await onSubmit(submitData as unknown as T);
-    if (bool) setOpen(false);
+    const submitResult = await onSubmit(submitData as unknown as T);
+
+    // 保存返佣配置：仅当 onSubmit 返回了有效的套餐ID（编辑已有ID 或 创建后返回新ID）
+    const resolvedSubscribeId =
+      typeof submitResult === "string" || typeof submitResult === "number"
+        ? toNumber(submitResult)
+        : subscribeIdForRebate;
+    if (resolvedSubscribeId && resolvedSubscribeId > 0 && rebateConfig.length > 0) {
+      try {
+        await updateSubscribeRebateConfig({
+          subscribe_id: resolvedSubscribeId,
+          items: rebateConfig,
+        });
+      } catch {
+        // 返佣配置保存失败不应阻断套餐保存成功的事实
+        toast.error(t("form.rebateSaveFailed", "返佣配置保存失败，可稍后在编辑中重新设置"));
+      }
+    }
+
+    const success = submitResult !== false && submitResult !== undefined;
+    if (success) setOpen(false);
   }
 
   const {
@@ -2272,6 +2490,41 @@ export default function SubscribeForm<T extends Record<string, any>>({
                               "form.priceOptionsDescription",
                               "Create one product and add multiple sellable duration and price options."
                             )}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="rebate_config"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t("form.rebateConfig", "返佣配置")}
+                          </FormLabel>
+                          <FormControl>
+                            <RebateConfigEditor
+                              priceOptions={form.watch("price_options")}
+                              value={field.value || []}
+                              onChange={(newValues) => {
+                                form.setValue(field.name, newValues, {
+                                  shouldDirty: true,
+                                });
+                              }}
+                              disabled={!subscribeIdForRebate}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            {subscribeIdForRebate
+                              ? t(
+                                  "form.rebateConfigDescription",
+                                  "为每个价格档位（月卡/季卡/半年卡/年卡…）单独设置返佣比例。"
+                                )
+                              : t(
+                                  "form.rebateConfigDisabledHint",
+                                  "保存套餐后，再次编辑即可为各价格档位设置返佣比例。"
+                                )}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>

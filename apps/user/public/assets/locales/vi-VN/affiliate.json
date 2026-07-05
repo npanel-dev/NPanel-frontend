@@ -7,5 +7,6 @@
   "inviteRecords": "Hồ sơ mời",
   "registrationTime": "Thời gian đăng ký",
   "totalCommission": "Tổng hoa hồng",
-  "userIdentifier": "Mã định danh người dùng"
+  "userIdentifier": "Mã định danh người dùng",
+  "commissionRateByPlan": "Tỷ lệ hoa hồng khác nhau theo gói và mức thời hạn, được tính tự động theo mức tương ứng khi thanh toán."
 }

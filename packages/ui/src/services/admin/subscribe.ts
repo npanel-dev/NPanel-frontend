@@ -39,6 +39,8 @@ export {
   subscribeGetSubscribeList as getSubscribeList,
   subscribeResetAllSubscribeToken as resetAllSubscribeToken,
   subscribeSubscribeSort as subscribeSort,
+  subscribeGetSubscribeRebateConfig as getSubscribeRebateConfig,
+  subscribeUpdateSubscribeRebateConfig as updateSubscribeRebateConfig,
 };
 
 /** CreateSubscribe 创建订阅套餐 POST /v1/admin/subscribe */
@@ -336,6 +338,42 @@ export async function subscribeSubscribeSort(
     `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/subscribe/sort`,
     {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** GetSubscribeRebateConfig 获取订阅套餐返佣配置 GET /v1/admin/subscribe/rebate_config */
+export async function subscribeGetSubscribeRebateConfig(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.SubscribeGetSubscribeRebateConfigParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.GetSubscribeRebateConfigReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/subscribe/rebate_config`,
+    {
+      method: "GET",
+      params: {
+        ...params,
+      },
+      ...(options || {}),
+    }
+  );
+}
+
+/** UpdateSubscribeRebateConfig 更新订阅套餐返佣配置 PUT /v1/admin/subscribe/rebate_config */
+export async function subscribeUpdateSubscribeRebateConfig(
+  body: API.UpdateSubscribeRebateConfigRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.UpdateSubscribeRebateConfigReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/subscribe/rebate_config`,
+    {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },

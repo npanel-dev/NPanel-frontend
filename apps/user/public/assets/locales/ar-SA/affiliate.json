@@ -7,5 +7,6 @@
   "inviteRecords": "دعوة السجلات",
   "registrationTime": "وقت التسجيل",
   "totalCommission": "إجمالي العمولة",
-  "userIdentifier": "معرف المستخدم"
+  "userIdentifier": "معرف المستخدم",
+  "commissionRateByPlan": "تختلف نسبة العمولة حسب الباقة وفئة المدة، ويتم حسابها تلقائيًا عند الدفع."
 }

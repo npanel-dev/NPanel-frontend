@@ -7,5 +7,6 @@
   "inviteRecords": "سوابق را دعوت کنید",
   "registrationTime": "زمان ثبت نام",
   "totalCommission": "کمیسیون کل",
-  "userIdentifier": "شناسه کاربر"
+  "userIdentifier": "شناسه کاربر",
+  "commissionRateByPlan": "نرخ کمیسیون بسته به طرح و گزینه مدت زمان متفاوت است و هنگام پرداخت به‌طور خودکار محاسبه می‌شود."
 }

@@ -7,5 +7,6 @@
   "inviteRecords": "Invite Records",
   "registrationTime": "Registration Time",
   "totalCommission": "Total Commission",
-  "userIdentifier": "User Identifier"
+  "userIdentifier": "User Identifier",
+  "commissionRateByPlan": "Rebate rates vary by plan and duration tier; calculated automatically at checkout."
 }

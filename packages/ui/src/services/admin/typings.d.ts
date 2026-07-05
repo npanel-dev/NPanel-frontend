@@ -6475,4 +6475,39 @@ declare namespace API {
     createdAt?: string;
     updatedAt?: string;
   };
+
+  type SubscribeRebateConfigItem = {
+    priceOptionId?: number;
+    referralPercentage?: number;
+    enabled?: boolean;
+  };
+
+  type SubscribeGetSubscribeRebateConfigParams = {
+    subscribe_id: number;
+  };
+
+  type GetSubscribeRebateConfigData = {
+    items?: SubscribeRebateConfigItem[];
+  };
+
+  type GetSubscribeRebateConfigReply = {
+    code?: number;
+    message?: string;
+    data?: GetSubscribeRebateConfigData;
+  };
+
+  type UpdateSubscribeRebateConfigRequest = {
+    subscribe_id: number;
+    items?: SubscribeRebateConfigItem[];
+  };
+
+  type UpdateSubscribeRebateConfigData = {
+    success?: boolean;
+  };
+
+  type UpdateSubscribeRebateConfigReply = {
+    code?: number;
+    message?: string;
+    data?: UpdateSubscribeRebateConfigData;
+  };
 }

@@ -7,5 +7,6 @@
   "inviteRecords": "レコードの招待",
   "registrationTime": "登録時間",
   "totalCommission": "合計手数料",
-  "userIdentifier": "ユーザー識別子"
+  "userIdentifier": "ユーザー識別子",
+  "commissionRateByPlan": "還元率はプランと期間枠によって異なり、決済時に該当枠で自動計算されます。"
 }
