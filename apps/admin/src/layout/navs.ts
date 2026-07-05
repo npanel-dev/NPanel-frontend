@@ -69,7 +69,7 @@ export function useNavs() {
           {
             title: t("Recharge Promotion", "Recharge Promotion"),
             url: "/dashboard/recharge-promotion",
-            icon: "flat-color-icons:gift",
+            icon: "flat-color-icons:charge-battery",
           },
           {
             title: t("Coupon Management", "Coupon Management"),
