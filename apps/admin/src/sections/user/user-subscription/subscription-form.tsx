@@ -27,22 +27,15 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { useSubscribe } from "@/stores/subscribe";
+import {
+  toExpiryEndOfDay,
+  toUnixMilliseconds,
+  toUnixSeconds,
+} from "./subscription-expiry";
 
 function toNumber(value: number | string | null | undefined) {
   const parsed = Number(value ?? 0);
   return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function toMilliseconds(value: number | string | null | undefined) {
-  const parsed = toNumber(value);
-  if (!parsed) return 0;
-  return parsed < 10_000_000_000 ? parsed * 1000 : parsed;
-}
-
-function toSeconds(value: number | null | undefined) {
-  const parsed = toNumber(value);
-  if (!parsed) return 0;
-  return parsed >= 10_000_000_000 ? Math.floor(parsed / 1000) : parsed;
 }
 
 interface Props {
@@ -81,7 +74,7 @@ export function SubscriptionForm({
       traffic: toNumber(initialData?.traffic),
       upload: toNumber(initialData?.upload),
       download: toNumber(initialData?.download),
-      expired_at: toMilliseconds(initialData?.expire_time),
+      expired_at: toUnixMilliseconds(initialData?.expire_time),
       ...(initialData && { id: initialData.id }),
     }),
     [initialData]
@@ -99,7 +92,7 @@ export function SubscriptionForm({
   const handleSubmit = async (values: SubscriptionFormValues) => {
     const success = await onSubmit({
       ...values,
-      expired_at: toSeconds(values.expired_at),
+      expired_at: toUnixSeconds(values.expired_at),
     });
     if (success) {
       setOpen(false);
@@ -251,7 +244,7 @@ export function SubscriptionForm({
                       <FormControl>
                         <DatePicker
                           onChange={(value: number | null | undefined) => {
-                            form.setValue(field.name, value || 0);
+                            form.setValue(field.name, toExpiryEndOfDay(value));
                           }}
                           placeholder={t("permanent", "Permanent")}
                           value={
