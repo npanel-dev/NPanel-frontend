@@ -28,7 +28,7 @@ export default function RegisterForm({
   onSwitchForm,
 }: {
   loading?: boolean;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => Promise<boolean>;
   initialValues: any;
   setInitialValues: Dispatch<SetStateAction<any>>;
   onSwitchForm: Dispatch<SetStateAction<"register" | "reset" | "login">>;
@@ -88,10 +88,12 @@ export default function RegisterForm({
   });
 
   const turnstile = useRef<TurnstileRef>(null);
-  const handleSubmit = form.handleSubmit((data) => {
-    try {
-      onSubmit(data);
-    } catch (_error) {
+  const handleSubmit = form.handleSubmit(async (data) => {
+    const success = await onSubmit(data);
+    if (!success) {
+      // Captcha tokens (e.g. Turnstile) are single-use and are consumed by
+      // the backend on every attempt: reset the captcha after a failed
+      // submit so the next attempt starts with a fresh one.
       turnstile.current?.reset();
     }
   });

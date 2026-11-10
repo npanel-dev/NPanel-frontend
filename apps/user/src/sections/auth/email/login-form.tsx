@@ -29,7 +29,7 @@ export default function LoginForm({
   onSwitchForm,
 }: {
   loading?: boolean;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => Promise<boolean>;
   initialValues: any;
   setInitialValues: Dispatch<SetStateAction<any>>;
   onSwitchForm: Dispatch<SetStateAction<"register" | "reset" | "login">>;
@@ -75,14 +75,16 @@ export default function LoginForm({
   const turnstile = useRef<TurnstileRef>(null);
   const localCaptcha = useRef<LocalCaptchaRef>(null);
   const sliderCaptcha = useRef<SliderCaptchaRef>(null);
-  const handleSubmit = form.handleSubmit((data) => {
-    try {
-      // Add captcha_id for local captcha
-      if (isLocal && captchaEnabled) {
-        (data as any).captcha_id = captchaId;
-      }
-      onSubmit(data);
-    } catch (_error) {
+  const handleSubmit = form.handleSubmit(async (data) => {
+    // Add captcha_id for local captcha
+    if (isLocal && captchaEnabled) {
+      (data as any).captcha_id = captchaId;
+    }
+    const success = await onSubmit(data);
+    if (!success) {
+      // Captcha tokens (e.g. Turnstile) are single-use and are consumed by
+      // the backend on every attempt: reset all captchas after a failed
+      // submit so the next attempt starts with a fresh one.
       turnstile.current?.reset();
       localCaptcha.current?.reset();
       sliderCaptcha.current?.reset();

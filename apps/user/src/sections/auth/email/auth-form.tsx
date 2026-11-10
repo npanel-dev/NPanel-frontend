@@ -78,70 +78,73 @@ export default function EmailAuthForm({
     }
   }, [searchParams.invite]);
 
-  const handleFormSubmit = async (params: any) => {
+  const handleFormSubmit = (params: any): Promise<boolean> => {
     const onLogin = async (token?: string) => {
       if (!token) return;
       setAuthorization(token);
       await getUserInfo();
       navigate({ to: getRedirectUrl() });
     };
-    startTransition(async () => {
-      try {
-        switch (formType) {
-          case "login": {
-            const login = await userLogin(params);
-            toast.success(t("login.success", "Login successful!"));
-            onLogin(login.data.data?.token);
-            break;
+    return new Promise((resolve) => {
+      startTransition(async () => {
+        try {
+          switch (formType) {
+            case "login": {
+              const login = await userLogin(params);
+              toast.success(t("login.success", "Login successful!"));
+              onLogin(login.data.data?.token);
+              break;
+            }
+            case "register": {
+              const create = await userRegister(params, {
+                skipErrorHandler: true,
+              });
+              toast.success(t("register.success", "Registration successful!"));
+              onLogin(create.data.data?.token);
+              break;
+            }
+            case "reset":
+              await resetPassword(params);
+              toast.success(t("reset.success", "Password reset successful!"));
+              setFormType("login");
+              break;
           }
-          case "register": {
-            const create = await userRegister(params, {
-              skipErrorHandler: true,
-            });
-            toast.success(t("register.success", "Registration successful!"));
-            onLogin(create.data.data?.token);
-            break;
-          }
-          case "reset":
-            await resetPassword(params);
-            toast.success(t("reset.success", "Password reset successful!"));
-            setFormType("login");
-            break;
-        }
-      } catch (error) {
-        if (formType === "register") {
-          if (getErrorCode(error) === 20001) {
-            toast.error(
-              t(
-                "register.emailExists",
-                "This email already exists, please try another email."
-              )
-            );
-            return;
-          }
-          // 邀请码错误（20009）：清空 localStorage 的 invite + 重置表单 invite 字段，
-          // 否则邀请码输入框会被 localStorage 锁定（disabled），用户无法修改。
-          if (getErrorCode(error) === 20009) {
-            localStorage.removeItem("invite");
-            setInitialValues((prev) => ({ ...prev, invite: "" }));
-            toast.error(
-              getErrorMessage(error) ||
+          resolve(true);
+        } catch (error) {
+          if (formType === "register") {
+            const code = getErrorCode(error);
+            if (code === 20_001) {
+              toast.error(
                 t(
-                  "register.inviteError",
-                  "Invitation code is invalid. Please check or leave it empty."
+                  "register.emailExists",
+                  "This email already exists, please try another email."
                 )
-            );
-            return;
+              );
+            } else if (code === 20_009) {
+              // 邀请码错误（20009）：清空 localStorage 的 invite + 重置表单 invite 字段，
+              // 否则邀请码输入框会被 localStorage 锁定（disabled），用户无法修改。
+              localStorage.removeItem("invite");
+              setInitialValues((prev) => ({ ...prev, invite: "" }));
+              toast.error(
+                getErrorMessage(error) ||
+                  t(
+                    "register.inviteError",
+                    "Invitation code is invalid. Please check or leave it empty."
+                  )
+              );
+            } else {
+              toast.error(
+                getErrorMessage(error) ||
+                  t(
+                    "register.failed",
+                    "Registration failed. Please try again later."
+                  )
+              );
+            }
           }
-          toast.error(
-            getErrorMessage(error) ||
-              t(
-                "register.failed",
-                "Registration failed. Please try again later."
-              )
-          );
+          resolve(false);
         }
-      }
+      });
     });
   };
 

@@ -31,37 +31,40 @@ export default function EmailAuthForm() {
     password: USER_PASSWORD,
   });
 
-  const handleFormSubmit = async (params: any) => {
+  const handleFormSubmit = (params: any): Promise<boolean> => {
     const onLogin = async (token?: string) => {
       if (!token) return;
       setAuthorization(token);
       await getUserInfo();
       navigate({ to: getRedirectUrl() });
     };
-    startTransition(async () => {
-      try {
-        switch (type) {
-          case "login": {
-            const login = await adminLogin(params);
-            toast.success(t("login.success", "Login successful!"));
-            onLogin(login.data.data?.token);
-            break;
+    return new Promise((resolve) => {
+      startTransition(async () => {
+        try {
+          switch (type) {
+            case "login": {
+              const login = await adminLogin(params);
+              toast.success(t("login.success", "Login successful!"));
+              onLogin(login.data.data?.token);
+              break;
+            }
+            case "register": {
+              const create = await userRegister(params);
+              toast.success(t("register.success", "Registration successful!"));
+              onLogin(create.data.data?.token);
+              break;
+            }
+            case "reset":
+              await adminResetPassword(params);
+              toast.success(t("reset.success", "Password reset successful!"));
+              setType("login");
+              break;
           }
-          case "register": {
-            const create = await userRegister(params);
-            toast.success(t("register.success", "Registration successful!"));
-            onLogin(create.data.data?.token);
-            break;
-          }
-          case "reset":
-            await adminResetPassword(params);
-            toast.success(t("reset.success", "Password reset successful!"));
-            setType("login");
-            break;
+          resolve(true);
+        } catch (_error) {
+          resolve(false);
         }
-      } catch (_error) {
-        /* empty */
-      }
+      });
     });
   };
 

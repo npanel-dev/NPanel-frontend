@@ -57,37 +57,40 @@ export default function PhoneAuthForm({
     }
   }, [searchParams.invite]);
 
-  const handleFormSubmit = async (params: any) => {
+  const handleFormSubmit = (params: any): Promise<boolean> => {
     const onLogin = async (token?: string) => {
       if (!token) return;
       setAuthorization(token);
       await getUserInfo();
       navigate({ to: getRedirectUrl() });
     };
-    startTransition(async () => {
-      try {
-        switch (formType) {
-          case "login": {
-            const login = await telephoneLogin(params);
-            toast.success(t("login.success", "Login successful!"));
-            onLogin(login.data.data?.token);
-            break;
+    return new Promise((resolve) => {
+      startTransition(async () => {
+        try {
+          switch (formType) {
+            case "login": {
+              const login = await telephoneLogin(params);
+              toast.success(t("login.success", "Login successful!"));
+              onLogin(login.data.data?.token);
+              break;
+            }
+            case "register": {
+              const create = await telephoneUserRegister(params);
+              toast.success(t("register.success", "Registration successful!"));
+              onLogin(create.data.data?.token);
+              break;
+            }
+            case "reset":
+              await telephoneResetPassword(params);
+              toast.success(t("reset.success", "Password reset successful!"));
+              setFormType("login");
+              break;
           }
-          case "register": {
-            const create = await telephoneUserRegister(params);
-            toast.success(t("register.success", "Registration successful!"));
-            onLogin(create.data.data?.token);
-            break;
-          }
-          case "reset":
-            await telephoneResetPassword(params);
-            toast.success(t("reset.success", "Password reset successful!"));
-            setFormType("login");
-            break;
+          resolve(true);
+        } catch (_error) {
+          resolve(false);
         }
-      } catch (_error) {
-        /* empty */
-      }
+      });
     });
   };
 
