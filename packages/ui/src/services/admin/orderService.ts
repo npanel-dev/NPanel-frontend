@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error
 /* eslint-disable */
 import request from "@workspace/ui/lib/request";
 
@@ -47,6 +47,24 @@ export async function orderServiceUpdateOrderStatus(
     `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/order/status`,
     {
       method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** DeleteOrder 删除订单（不影响用户套餐与流量） POST /v1/admin/order/delete */
+export async function orderServiceDeleteOrder(
+  body: API.DeleteOrderRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.DeleteOrderReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/order/delete`,
+    {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },

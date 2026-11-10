@@ -25,5 +25,15 @@
     "4": "充值"
   },
   "updateTime": "更新时间",
-  "user": "用户"
+  "user": "用户",
+  "deleteOrder": {
+    "trigger": "删除",
+    "title": "删除该订单？用户套餐与流量将保留。",
+    "batchTitle": "删除选中的 {{count}} 个订单？用户套餐与流量将保留。",
+    "batchTrigger": "删除选中",
+    "description": "删除订单不会影响用户套餐与流量；待支付订单会自动回滚（恢复库存、退回赠金）；营收统计将不再包含已删除的订单。",
+    "confirm": "删除",
+    "cancel": "取消",
+    "success": "订单已删除"
+  }
 }

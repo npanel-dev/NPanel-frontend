@@ -8,17 +8,20 @@ import {
 } from "@workspace/ui/components/hover-card";
 import { Separator } from "@workspace/ui/components/separator";
 import { Combobox } from "@workspace/ui/composed/combobox";
+import { ConfirmButton } from "@workspace/ui/composed/confirm-button";
 import {
   ProTable,
   type ProTableActions,
 } from "@workspace/ui/composed/pro-table/pro-table";
 import { cn } from "@workspace/ui/lib/utils";
 import {
+  deleteOrder,
   getOrderList,
   updateOrderStatus,
 } from "@workspace/ui/services/admin/order";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { Display } from "@/components/display";
 import { useSubscribe } from "@/stores/subscribe";
 import { formatDate } from "@/utils/common";
@@ -70,6 +73,63 @@ export default function Order() {
   return (
     <ProTable<API.Order, API.GetOrderListParams>
       action={ref}
+      actions={{
+        render: (row) => [
+          <ConfirmButton
+            cancelText={t("deleteOrder.cancel", "Cancel")}
+            confirmText={t("deleteOrder.confirm", "Delete")}
+            description={t(
+              "deleteOrder.description",
+              "Deleting the order does NOT affect the user's subscription or traffic. Pending orders are rolled back automatically (inventory/gift amount). Revenue statistics will no longer include deleted orders."
+            )}
+            key="delete"
+            onConfirm={async () => {
+              await deleteOrder({ ids: [row.id] } as API.DeleteOrderRequest);
+              toast.success(t("deleteOrder.success", "Order deleted"));
+              ref.current?.refresh();
+            }}
+            title={t(
+              "deleteOrder.title",
+              "Delete this order? Subscription and traffic are kept."
+            )}
+            trigger={
+              <Button variant="destructive">
+                {t("deleteOrder.trigger", "Delete")}
+              </Button>
+            }
+          />,
+        ],
+        batchRender(rows) {
+          return [
+            <ConfirmButton
+              cancelText={t("deleteOrder.cancel", "Cancel")}
+              confirmText={t("deleteOrder.confirm", "Delete")}
+              description={t(
+                "deleteOrder.description",
+                "Deleting the order does NOT affect the user's subscription or traffic. Pending orders are rolled back automatically (inventory/gift amount). Revenue statistics will no longer include deleted orders."
+              )}
+              key="batch-delete"
+              onConfirm={async () => {
+                await deleteOrder({
+                  ids: rows.map((r) => r.id),
+                } as API.DeleteOrderRequest);
+                toast.success(t("deleteOrder.success", "Order deleted"));
+                ref.current?.reset();
+              }}
+              title={t(
+                "deleteOrder.batchTitle",
+                "Delete {{count}} selected orders? Subscription and traffic are kept.",
+                { count: rows.length }
+              )}
+              trigger={
+                <Button variant="destructive">
+                  {t("deleteOrder.batchTrigger", "Delete Selected")}
+                </Button>
+              }
+            />,
+          ];
+        },
+      }}
       columns={[
         {
           accessorKey: "order_no",

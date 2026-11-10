@@ -25,5 +25,15 @@
     "4": "Recharge"
   },
   "updateTime": "Update Time",
-  "user": "User"
+  "user": "User",
+  "deleteOrder": {
+    "trigger": "Delete",
+    "title": "Delete this order? Subscription and traffic are kept.",
+    "batchTitle": "Delete {{count}} selected orders? Subscription and traffic are kept.",
+    "batchTrigger": "Delete Selected",
+    "description": "Deleting the order does NOT affect the user's subscription or traffic. Pending orders are rolled back automatically (inventory/gift amount). Revenue statistics will no longer include deleted orders.",
+    "confirm": "Delete",
+    "cancel": "Cancel",
+    "success": "Order deleted"
+  }
 }

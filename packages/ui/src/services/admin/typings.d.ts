@@ -5713,6 +5713,16 @@ declare namespace API {
     message?: string;
   };
 
+  type DeleteOrderRequest = {
+    ids?: (string | number)[];
+  };
+
+  type DeleteOrderReply = {
+    code?: number;
+    message?: string;
+    deleted_count?: number;
+  };
+
   type UpdateOrderStatusRequest = {
     id?: string;
     status?: number;
