@@ -43,5 +43,30 @@
   "tags_description": "Permission grouping tag (incl. plan binding and delivery policies).",
   "tags_groupMode_description": "Optional tags for display and filtering (node group name will be used as tag if empty).",
   "tags_placeholder": "Use Enter or comma (,) to add multiple tags",
-  "updated": "Updated"
+  "updated": "Updated",
+  "relay": {
+    "create": "Create Relay Entry",
+    "title": "Create Relay Entry",
+    "description": "Create a relay entry: users connect to the relay provider (address + connect port), traffic is forwarded to the landing VPS (service port) and billed at the specified ratio. A dedicated protocol instance is created automatically.",
+    "source_node": "Source Landing Node",
+    "select_source_node": "Select landing node…",
+    "source_node_description": "The protocol configuration is copied from this landing node.",
+    "relay_address": "Relay Address",
+    "connect_port": "Connect Port",
+    "connect_port_description": "The port users connect to.",
+    "service_port": "Service Port",
+    "service_port_description": "The port the relay forwards to on the landing VPS.",
+    "ratio": "Ratio",
+    "ratio_description": "Traffic on this entry is billed at this ratio.",
+    "created": "Relay entry created",
+    "updated": "Ratio updated",
+    "changeRatio": "Ratio",
+    "ratioDialogTitle": "Change link ratio",
+    "ratioDialogDescription": "Applies to the protocol instance of this link. Shared instances cannot be changed here.",
+    "errors": {
+      "relayAddrRequired": "Please enter the relay provider address",
+      "sourceNodeRequired": "Please select a landing node",
+      "ratioRequired": "Ratio must be greater than 0"
+    }
+  }
 }

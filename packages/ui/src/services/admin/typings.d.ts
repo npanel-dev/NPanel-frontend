@@ -518,6 +518,37 @@ declare namespace API {
     nodeGroupIds?: string[];
   };
 
+  type CreateRelayEntryRequest = {
+    name?: string;
+    address?: string;
+    port?: number;
+    source_node_id?: string | number;
+    service_port?: number;
+    ratio?: number;
+    tags?: string[];
+    node_group_ids?: (string | number)[];
+  };
+
+  type CreateRelayEntryData = {
+    node?: Node;
+  };
+
+  type CreateRelayEntryReply = {
+    code?: number;
+    message?: string;
+    data?: CreateRelayEntryData;
+  };
+
+  type UpdateNodeRatioRequest = {
+    node_id?: string | number;
+    ratio?: number;
+  };
+
+  type UpdateNodeRatioReply = {
+    code?: number;
+    message?: string;
+  };
+
   type CreateOrderReply = {
     code?: number;
     message?: string;
@@ -2363,6 +2394,7 @@ declare namespace API {
     isHidden?: boolean;
     createdAt?: string;
     updatedAt?: string;
+    ratio?: number;
   };
 
   type NodeConfig = {

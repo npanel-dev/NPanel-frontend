@@ -43,5 +43,30 @@
   "tags_description": "权限分组标签（包含计划绑定和投递策略）。",
   "tags_groupMode_description": "可选标签，用于显示和过滤（如果为空，节点组名称将作为标签使用）。",
   "tags_placeholder": "使用回车或逗号 (,) 添加多个标签",
-  "updated": "已更新"
+  "updated": "已更新",
+  "relay": {
+    "create": "创建中转入口",
+    "title": "创建中转入口",
+    "description": "创建中转入口：用户连接中转商（地址 + 连接端口），流量经中转转发到落地 VPS（服务端口），并按指定倍率计费。系统会自动创建独立的协议实例与中间落地节点。",
+    "source_node": "源落地节点",
+    "select_source_node": "选择落地节点…",
+    "source_node_description": "协议配置将从该落地节点复制。",
+    "relay_address": "中转商地址",
+    "connect_port": "连接端口",
+    "connect_port_description": "用户连接中转商的端口。",
+    "service_port": "服务端口",
+    "service_port_description": "中转商转发到落地 VPS 的端口。",
+    "ratio": "倍率",
+    "ratio_description": "该入口的流量按此倍率计费。",
+    "created": "中转入口创建成功",
+    "updated": "倍率已更新",
+    "changeRatio": "改倍率",
+    "ratioDialogTitle": "修改链路倍率",
+    "ratioDialogDescription": "作用于该链路的协议实例倍率；被共享的实例无法在此修改。",
+    "errors": {
+      "relayAddrRequired": "请输入中转商地址",
+      "sourceNodeRequired": "请选择源落地节点",
+      "ratioRequired": "倍率必须大于 0"
+    }
+  }
 }

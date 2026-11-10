@@ -263,3 +263,39 @@ export async function serverServiceUpdateServer(
     }
   );
 }
+
+/** 创建中转入口链路（复制落地协议实例：新服务端口+倍率） POST /v1/admin/server/node/relay-entry/create */
+export async function serverServiceCreateRelayEntry(
+  body: API.CreateRelayEntryRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.CreateRelayEntryReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/server/node/relay-entry/create`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** 修改节点链路倍率（front 沿落地解析到协议实例） POST /v1/admin/server/node/ratio/update */
+export async function serverServiceUpdateNodeRatio(
+  body: API.UpdateNodeRatioRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.UpdateNodeRatioReply>(
+    `${import.meta.env.VITE_API_PREFIX || ""}/v1/admin/server/node/ratio/update`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}

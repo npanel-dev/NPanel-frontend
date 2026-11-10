@@ -3,8 +3,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@workspace/ui/components/dialog";
 import { Switch } from "@workspace/ui/components/switch";
 import { ConfirmButton } from "@workspace/ui/composed/confirm-button";
+import { EnhancedInput } from "@workspace/ui/composed/enhanced-input";
 import {
   ProTable,
   type ProTableActions,
@@ -20,6 +28,7 @@ import {
   resetSortWithNode,
   toggleNodeStatus,
   updateNode,
+  updateNodeRatio,
 } from "@workspace/ui/services/admin/server";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -28,6 +37,7 @@ import { toast } from "sonner";
 import { useNode } from "@/stores/node";
 import { useServer } from "@/stores/server";
 import NodeForm, { type NodeFormValues } from "./node-form";
+import RelayForm from "./relay-form";
 
 type NodeTableRow = API.Node & {
   _nodeListRole?: "landing" | "front_child" | "orphan_front";
@@ -145,6 +155,89 @@ function toCopyPayload(row: API.Node) {
           target_node_id: undefined,
         }),
   };
+}
+
+// RatioButton 修改链路倍率的小对话框（front 沿落地目标解析到协议实例）
+function RatioButton({
+  row,
+  onDone,
+}: {
+  row: NodeTableRow;
+  onDone: () => void;
+}) {
+  const { t } = useTranslation("nodes");
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [ratio, setRatio] = useState<number>(
+    Number(row.ratio) > 0 ? Number(row.ratio) : 1
+  );
+
+  async function handleConfirm() {
+    if (!(ratio > 0)) {
+      toast.error(
+        t("relay.errors.ratioRequired", "Ratio must be greater than 0")
+      );
+      return;
+    }
+    setLoading(true);
+    try {
+      await updateNodeRatio({ node_id: row.id, ratio });
+      toast.success(t("relay.updated", "Ratio updated"));
+      setOpen(false);
+      onDone();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)} variant="outline">
+        {t("relay.changeRatio", "Ratio")}
+      </Button>
+      <Dialog onOpenChange={setOpen} open={open}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>
+              {t("relay.ratioDialogTitle", "Change link ratio")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-2 py-2">
+            <div className="text-muted-foreground text-sm">
+              {row.name} · {row.address}:{row.port}
+            </div>
+            <EnhancedInput
+              max={100}
+              min={0.01}
+              onValueChange={(v) => setRatio(Number(v))}
+              step={0.01}
+              suffix="x"
+              type="number"
+              value={ratio}
+            />
+            <div className="text-muted-foreground text-xs">
+              {t(
+                "relay.ratioDialogDescription",
+                "Applies to the protocol instance of this link. Shared instances cannot be changed here."
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              disabled={loading}
+              onClick={() => setOpen(false)}
+              variant="outline"
+            >
+              {t("cancel", "Cancel")}
+            </Button>
+            <Button disabled={loading} onClick={handleConfirm}>
+              {t("confirm", "Confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }
 
 export default function Nodes() {
@@ -335,6 +428,19 @@ export default function Nodes() {
         },
       },
       {
+        id: "ratio",
+        header: t("relay.ratio", "Ratio"),
+        cell: ({ row }: { row: any }) => {
+          const ratio = Number(row.original.ratio);
+          const value = ratio > 0 ? ratio : 1;
+          return (
+            <Badge variant={value === 1 ? "outline" : "secondary"}>
+              {value.toFixed(2)}x
+            </Badge>
+          );
+        },
+      },
+      {
         id: "tags",
         header: t("tags", "Tags"),
         cell: ({ row }: { row: any }) => (
@@ -464,6 +570,14 @@ export default function Nodes() {
           >
             {t("copy", "Copy")}
           </Button>,
+          <RatioButton
+            key="ratio"
+            onDone={() => {
+              ref.current?.refresh();
+              fetchNodes();
+            }}
+            row={row as NodeTableRow}
+          />,
         ],
         batchRender(rows) {
           return [
@@ -496,27 +610,35 @@ export default function Nodes() {
       header={{
         title: t("pageTitle", "Nodes"),
         toolbar: (
-          <NodeForm
-            loading={loading}
-            onSubmit={async (values) => {
-              setLoading(true);
-              try {
-                const body = toNodePayload(values) as API.CreateNodeRequest;
-                await createNode(body);
-                toast.success(t("created", "Created"));
+          <div className="flex gap-2">
+            <RelayForm
+              onCreated={() => {
                 ref.current?.refresh();
-                fetchNodes();
-                fetchTags();
-                setLoading(false);
-                return true;
-              } catch {
-                setLoading(false);
-                return false;
-              }
-            }}
-            title={t("drawerCreateTitle", "Create Landing Node")}
-            trigger={t("create", "Create Landing Node")}
-          />
+              }}
+              trigger={t("relay.create", "Create Relay Entry")}
+            />
+            <NodeForm
+              loading={loading}
+              onSubmit={async (values) => {
+                setLoading(true);
+                try {
+                  const body = toNodePayload(values) as API.CreateNodeRequest;
+                  await createNode(body);
+                  toast.success(t("created", "Created"));
+                  ref.current?.refresh();
+                  fetchNodes();
+                  fetchTags();
+                  setLoading(false);
+                  return true;
+                } catch {
+                  setLoading(false);
+                  return false;
+                }
+              }}
+              title={t("drawerCreateTitle", "Create Landing Node")}
+              trigger={t("create", "Create Landing Node")}
+            />
+          </div>
         ),
       }}
       onSort={async (source, target, items) => {

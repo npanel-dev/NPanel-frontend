@@ -87,6 +87,14 @@ function handleError(response: {
       "components:error.30005",
       "There is still content in the group, please clear it and try again."
     ),
+    30006: t(
+      "components:error.30006",
+      "This port is already used by a protocol instance on the server. Please choose another service port."
+    ),
+    30007: t(
+      "components:error.30007",
+      "This protocol instance is shared by multiple nodes. Change the ratio in the server editor instead."
+    ),
     400: t(
       "components:error.400",
       "The request parameters are incorrect, please check and resubmit."
