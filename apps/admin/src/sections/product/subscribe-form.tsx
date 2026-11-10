@@ -61,7 +61,7 @@ import {
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
 import { Combobox } from "@workspace/ui/composed/combobox";
-import { ArrayInput } from "@workspace/ui/composed/dynamic-inputs";
+import { ArrayInput } from "@workspace/ui/composed/dynamic-Inputs";
 import {
   HTMLEditor,
   MarkdownEditor,
