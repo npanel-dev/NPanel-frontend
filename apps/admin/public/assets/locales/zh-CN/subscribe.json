@@ -18,7 +18,9 @@
     "save": "保存",
     "saveFailed": "保存失败",
     "update": "更新",
-    "updateSuccess": "更新成功"
+    "updateSuccess": "更新成功",
+    "toggleEnabledFailed": "切换启用状态失败",
+    "toggleDefaultFailed": "切换默认状态失败"
   },
   "config": {
     "description": "管理订阅系统设置",
@@ -113,11 +115,7 @@
   },
   "table": {
     "columns": {
-      "default": "默认",
-      "description": "描述",
-      "name": "客户端名称",
-      "outputFormat": "输出格式",
-      "supportedPlatforms": "支持的平台"
+      "enabled": "启用"
     }
   },
   "templatePreview": {
@@ -130,5 +128,9 @@
     "loading": "加载中...",
     "preview": "预览",
     "title": "模板预览"
+  },
+  "columnsHint": {
+    "enabled": "启用后参与客户端 UA 匹配分发；禁用的模板完全不生效（UA 也不进白名单）",
+    "default": "默认模板：客户端 UA 无法识别任何模板时使用的兜底，全局仅一个"
   }
 }

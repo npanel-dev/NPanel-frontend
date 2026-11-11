@@ -156,17 +156,45 @@ export function ProtocolForm() {
 
   const columns: ColumnDef<API.SubscribeApplication, any>[] = [
     {
+      accessorKey: "enabled",
+      header: t("table.columns.enabled", "Enabled"),
+      cell: ({ row }) => (
+        <Switch
+          checked={row.original.enabled !== false}
+          onCheckedChange={async (checked) => {
+            try {
+              await updateSubscribeApplication({
+                ...row.original,
+                enabled: checked,
+              });
+              tableRef.current?.refresh();
+            } catch {
+              toast.error(
+                t("actions.toggleEnabledFailed", "Failed to toggle status")
+              );
+            }
+          }}
+        />
+      ),
+    },
+    {
       accessorKey: "is_default",
       header: t("table.columns.default", "Default"),
       cell: ({ row }) => (
         <Switch
           checked={row.original.is_default}
           onCheckedChange={async (checked) => {
-            await updateSubscribeApplication({
-              ...row.original,
-              is_default: checked,
-            });
-            tableRef.current?.refresh();
+            try {
+              await updateSubscribeApplication({
+                ...row.original,
+                is_default: checked,
+              });
+              tableRef.current?.refresh();
+            } catch {
+              toast.error(
+                t("actions.toggleDefaultFailed", "Failed to toggle default")
+              );
+            }
           }}
         />
       ),
@@ -329,6 +357,7 @@ export function ProtocolForm() {
         await updateSubscribeApplication({
           ...buildApplicationPayload(data),
           is_default: editingClient.is_default,
+          enabled: editingClient.enabled !== false,
           id: editingClient.id,
         });
         toast.success(t("actions.updateSuccess", "Updated successfully"));
@@ -336,6 +365,7 @@ export function ProtocolForm() {
         await createSubscribeApplication({
           ...buildApplicationPayload(data),
           is_default: false,
+          enabled: true,
         });
         toast.success(t("actions.createSuccess", "Created successfully"));
       }
@@ -492,10 +522,7 @@ export function ProtocolForm() {
                             />
                           </FormControl>
                           <FormDescription>
-                            {t(
-                              "form.descriptions.icon",
-                              "Icon URL"
-                            )}
+                            {t("form.descriptions.icon", "Icon URL")}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>

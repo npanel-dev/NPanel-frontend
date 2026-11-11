@@ -4798,6 +4798,7 @@ declare namespace API {
     description?: string;
     scheme?: string;
     userAgent?: string;
+    enabled?: boolean;
     isDefault?: boolean;
     template?: string;
     outputFormat?: string;

@@ -18,7 +18,9 @@
     "save": "Save",
     "saveFailed": "Save failed",
     "update": "Update",
-    "updateSuccess": "Updated successfully"
+    "updateSuccess": "Updated successfully",
+    "toggleEnabledFailed": "Failed to toggle status",
+    "toggleDefaultFailed": "Failed to toggle default"
   },
   "config": {
     "description": "Manage subscription system settings",
@@ -113,11 +115,7 @@
   },
   "table": {
     "columns": {
-      "default": "Default",
-      "description": "Description",
-      "name": "Client Name",
-      "outputFormat": "Output Format",
-      "supportedPlatforms": "Supported Platforms"
+      "enabled": "Enabled"
     }
   },
   "templatePreview": {
@@ -130,5 +128,9 @@
     "loading": "Loading...",
     "preview": "Preview",
     "title": "Template Preview"
+  },
+  "columnsHint": {
+    "enabled": "Enabled applications participate in client UA matching; disabled ones are fully excluded (UA not whitelisted)",
+    "default": "Default template: fallback when the client UA matches nothing. Only one default is allowed"
   }
 }
